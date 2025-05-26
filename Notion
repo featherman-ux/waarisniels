@@ -1,0 +1,16 @@
+const NOTION_PAGE = '1ff22e8412ef8081ae56f5a5fcfca4fe';
+
+export default {
+  async fetch(request) {
+    const notionURL = `https://www.notion.so/${NOTION_PAGE}`;
+    const response = await fetch(notionURL);
+    const html = await response.text();
+    return new Response(html, {
+      headers: {
+        'Content-Type': 'text/html',
+        'X-Frame-Options': 'ALLOWALL',
+        'Content-Security-Policy': "frame-ancestors *"
+      },
+    });
+  },
+};
