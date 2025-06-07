@@ -1,0 +1,47 @@
+[
+    {
+        "ID":1,
+        "Country":"Colombia",
+        "City":"Cartagena",
+        "Arrival_Date":"2024-07-01",
+        "Departure_Date":"2024-07-05",
+        "Rating":5,
+        "Notes":"Visited the Walled City and Castillo San Felipe."
+    },
+    {
+        "ID":2,
+        "Country":"Colombia",
+        "City":"Medell\u00edn",
+        "Arrival_Date":"2024-07-06",
+        "Departure_Date":"2024-07-12",
+        "Rating":4,
+        "Notes":"Explored Comuna 13 and the cable cars."
+    },
+    {
+        "ID":3,
+        "Country":"Ecuador",
+        "City":"Quito",
+        "Arrival_Date":"2024-07-13",
+        "Departure_Date":"2024-07-18",
+        "Rating":4,
+        "Notes":"Visited the Mitad del Mundo and Old Town."
+    },
+    {
+        "ID":4,
+        "Country":"Peru",
+        "City":"Lima",
+        "Arrival_Date":"2024-07-19",
+        "Departure_Date":"2024-07-23",
+        "Rating":3,
+        "Notes":"Sampled ceviche in Miraflores."
+    },
+    {
+        "ID":5,
+        "Country":"Peru",
+        "City":"Cusco",
+        "Arrival_Date":"2024-07-24",
+        "Departure_Date":"2024-07-29",
+        "Rating":5,
+        "Notes":"Gateway to Machu Picchu."
+    }
+]
