@@ -1,25 +1,50 @@
 ---
+// src/pages/index.astro
 import BaseLayout from '../layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+import BlogPostPreview from '../components/BlogPostPreview.astro'; // A new component for previews
+
+// Fetch latest 3 blog posts, sorted by date
+const latestPosts = (await getCollection('blog', ({ data }) => {
+  return data.draft!== true; // Filter out drafts
+}))
+.sort((a, b) => new Date(b.data.pubDate).valueOf() - new Date(a.data.pubDate).valueOf())
+.slice(0, 3);
 ---
 
-<BaseLayout title="Waar is Niels?">
-  <div class="intro">
-    Welkom op mijn digitale reisboek. Ik probeer onderweg een beetje bij te houden waar ik uithang, wat ik meemaak en wat voor biertjes ik drink. De nieuwste update lees je hieronder 👇
-  </div>
+<BaseLayout title="Ewa Drerries" description="Kijk hier dan">
+  <section class="text-center py-12 md:py-20 bg-gradient-to-r from-primary to-secondary text-white rounded-lg shadow-xl">
+    <h1 class="text-5xl md:text-6xl font-bold mb-4 font-">Adventure Awaits</h1>
+    <p class="text-xl md:text-2xl mb-8 max-w-2xl mx-auto">
+      Placeholder? wat zet ik hier
+    </p>
+    <a href="/blog/" class="bg-white text-primary font-semibold py-3 px-8 rounded-lg hover:bg-opacity-90 transition-colors text-lg">
+      Explore Blog Posts
+    </a>
+  </section>
 
-  <h2>Laatste locatie</h2>
-  <p>📍 Nog steeds in Nederland</p>
+  <section class="py-12 md:py-16">
+    <h2 class="text-3xl md:text-4xl font-bold text-center mb-10 text-gray-800 dark:text-gray-200 font-">Latest Updates</h2>
+    {latestPosts.length > 0? (
+      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+        {latestPosts.map(post => (
+          <BlogPostPreview post={post} />
+        ))}
+      </div>
+    ) : (
+      <p class="text-center text-gray-600 dark:text-gray-400">No recent posts yet. Check back soon!</p>
+    )}
+  </section>
 
-  <div class="update">
-    Laatste update: 26 mei 2025
-  </div>
-
-  <div class="foto-container">
-    <img src="/588a23ba-7e92-461f-92fa-a5c532dd4c03.jpg" alt="Vive les (g)ueux">
-    <p><em>Deze foto blijft totdat ik iets beters upload heb.</em></p>
-  </div>
-  <h2>Help me naar de 3.000.000 volgers</h2>
-  <p>
-    📸 <a href="https://instagram.com/n.veerman" target="_blank">Volg me op Instagram</a><br>
-  </p>
+  <section class="py-12 md:py-16 bg-gray-100 dark:bg-gray-800 rounded-lg shadow-md">
+    <div class="text-center">
+      <h2 class="text-3xl md:text-4xl font-bold mb-6 text-gray-800 dark:text-gray-200 font-">Track My Journey</h2>
+      <p class="text-lg text-gray-700 dark:text-gray-300 mb-8 max-w-xl mx-auto">
+        See all my visited locations on an interactive map and follow my adventures visually.
+      </p>
+      <a href="/map/" class="bg-primary text-white font-semibold py-3 px-8 rounded-lg hover:bg-primary-light transition-colors text-lg">
+        View Interactive Map
+      </a>
+    </div>
+  </section>
 </BaseLayout>

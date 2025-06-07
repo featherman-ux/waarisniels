@@ -1,0 +1,27 @@
+---
+// src/components/UpdateForm.astro
+// This component provides instructions or links to instructions for updating the blog from a phone.
+const instructionsVisible = false; // Could be toggled with a client-side script if desired
+---
+
+<div class="p-6 bg-blue-50 dark:bg-gray-800 border border-blue-200 dark:border-gray-700 rounded-lg shadow">
+  <h3 class="text-xl font-semibold text-blue-800 dark:text-blue-300 mb-3 font-">Updating Your Blog From Your Phone</h3>
+  <p class="text-blue-700 dark:text-blue-400 mb-4">
+    You can create new blog posts and upload photos directly from your phone using GitHub's web interface or a mobile Git client.
+  </p>
+  <a
+    href="/phone-upload-guide/"
+    class="inline-block bg-primary text-white font-medium py-2 px-4 rounded-md hover:bg-primary-light transition-colors"
+    title="Read the detailed phone upload guide"
+  >
+    View Detailed Phone Upload Guide
+  </a>
+  <p class="text-xs text-gray-500 dark:text-gray-400 mt-3">
+    This method ensures your content is version-controlled and leverages the automated deployment pipeline.
+  </p>
+
+  {/*
+    Alternatively, provide a brief summary of steps here directly.
+    Or, link to a more detailed INSTRUCTIONS_PHONE_UPLOAD.md file in the repo.
+  */}
+</div>

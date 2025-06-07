@@ -1,0 +1,103 @@
+---
+// src/components/Map.astro
+// This component will be client-side rendered.
+// It uses Leaflet.js for the interactive map.
+
+export interface Location {
+  id: string;
+  title: string;
+  description?: string;
+  lat: number;
+  lon: number;
+  url: string;
+  date?: string;
+}
+
+export interface Props {
+  locations: Location[]; // FIXED: Changed to array
+  // Optional: default center and zoom
+  defaultCenter?: [number, number];
+  defaultZoom?: number;
+}
+
+// FIXED: Provided default value for defaultCenter
+const { locations, defaultCenter = [0, 0], defaultZoom = 2 } = Astro.props;
+
+// Ensure MAPBOX_ACCESS_TOKEN is available if using Mapbox tiles
+// const mapboxAccessToken = import.meta.env.MAPBOX_ACCESS_TOKEN;
+---
+
+<div id="interactive-map" style="height: 600px; width: 100%; border-radius: 0.5rem; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);"></div>
+
+{/* Leaflet CSS - ensure this is loaded */}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+  integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+  crossorigin=""/>
+
+<script define:vars={{ locations, defaultCenter, defaultZoom /*, mapboxAccessToken */ }}>
+  // Ensure Leaflet is loaded before this script runs
+  // This can be done by placing the Leaflet JS script tag in BaseLayout.astro or here if using dynamic import.
+  // For simplicity here, we assume Leaflet will be globally available or loaded before this script.
+
+  async function initMap() {
+    // Dynamically import Leaflet to ensure it's loaded
+    const L = (await import('leaflet')).default;
+
+    if (!document.getElementById('interactive-map')) {
+      console.error('Map container not found');
+      return;
+    }
+
+    // Initialize the map
+    const map = L.map('interactive-map').setView(defaultCenter, defaultZoom);
+
+    // Add a tile layer (OpenStreetMap is free)
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(map);
+
+    // Alternative: Mapbox Streets tiles (requires an access token)
+    // if (mapboxAccessToken) {
+    //   L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}', {
+    //     attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery &copy; <a href="https://www.mapbox.com/">Mapbox</a>',
+    //     maxZoom: 18,
+    //     id: 'mapbox/streets-v11', // or 'mapbox/outdoors-v11', 'mapbox/satellite-streets-v11'
+    //     tileSize: 512,
+    //     zoomOffset: -1,
+    //     accessToken: mapboxAccessToken
+    //   }).addTo(map);
+    // } else {
+    //   console.warn('Mapbox access token not provided. Using default OSM tiles.');
+    //   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    //     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    //   }).addTo(map);
+    // }
+
+
+    // Add markers for each location
+    locations.forEach(location => {
+      const marker = L.marker([location.lat, location.lon]).addTo(map);
+      let popupContent = `
+        <div style="font-family: sans-serif; line-height: 1.5;">
+          <h3 style="margin-top: 0; margin-bottom: 5px; font-size: 1.1em;">${location.title}</h3>
+      `;
+      if (location.date) {
+        popupContent += `<p style="margin: 0 0 5px; font-size: 0.9em; color: #555;">${location.date}</p>`;
+      }
+      if (location.description) {
+        popupContent += `<p style="margin: 0 0 10px; font-size: 0.9em;">${location.description.substring(0, 100)}${location.description.length > 100? '...' : ''}</p>`;
+      }
+      popupContent += `<a href="${location.url}" target="_blank" rel="noopener noreferrer" style="color: #007bff; text-decoration: none;">Read post &rarr;</a>`;
+      popupContent += `</div>`;
+
+      marker.bindPopup(popupContent);
+    });
+  }
+
+  // Ensure the DOM is ready for map initialization
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initMap);
+  } else {
+    initMap();
+  }
+</script>

@@ -1,31 +1,85 @@
 ---
+// src/layouts/BaseLayout.astro
+import '../styles/global.css'; // Import global styles
+
+// Define props that this layout can accept
 export interface Props {
-  title?: string;
+  title: string;
+  description?: string; // Optional description for meta tags
+  // Add other common props like social media image, etc.
 }
-const { title = "Waar is Niels?" } = Astro.props;
+
+const {
+  title,
+  description = 'Waar de fock is Niels', // Default description
+} = Astro.props;
+
+const currentYear = new Date().getFullYear();
 ---
 
-<!DOCTYPE html>
-<html lang="nl">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>{title}</title>
-    <link rel="stylesheet" href="/styles/global.css" />
-  </head>
-  <body>
-    <header>
-      <h1>Waar is Niels?</h1>
-      <p>Gasten facking mooi</p>
-    </header>
+<!doctype html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <meta name="generator" content={Astro.generator} />
 
-    <main>
-      <slot /> <!-- This is where page content will appear -->
-    </main>
+  <title>{title} | TravelVentures</title>
+  <meta name="description" content={description} />
 
-    <footer>
-      © {new Date().getFullYear()} Niels Veerman · Wie dit leest trekt een bak ·
-      <a href="mailto:jouwmail@example.com">Contact</a>
-    </footer>
-  </body>
+  {/* OpenGraph and Twitter Card meta tags (optional but recommended) */}
+  <meta property="og:title" content={`${title} | TravelVentures`} />
+  <meta property="og:description" content={description} />
+  {/* <meta property="og:image" content={new URL(socialImage |
+| '/default-social.jpg', Astro.site).href} /> */}
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content={Astro.url.href} />
+
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content={`${title} | TravelVentures`} />
+  <meta name="twitter:description" content={description} />
+  {/* <meta name="twitter:image" content={new URL(socialImage |
+| '/default-social.jpg', Astro.site).href} /> */}
+
+  {/* Add any other global head elements, like font links if not handled by Tailwind/CSS */}
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+
+  {/* Slot for page-specific head elements */}
+  <slot name="head" />
+</head>
+<body class="bg-gray-50 text-gray-800 dark:bg-gray-900 dark:text-gray-200 antialiased">
+  <header class="bg-white dark:bg-gray-800 shadow-md sticky top-0 z-50">
+    <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+      <a href="/" class="text-2xl font-bold text-primary dark:text-primary-light">
+        TravelVentures
+      </a>
+      <div class="space-x-4">
+        <a href="/" class="text-gray-700 dark:text-gray-300 hover:text-primary dark:hover:text-primary-light transition-colors">Home</a>
+        <a href="/blog/" class="text-gray-700 dark:text-gray-300 hover:text-primary dark:hover:text-primary-light transition-colors">Blog</a>
+        <a href="/map/" class="text-gray-700 dark:text-gray-300 hover:text-primary dark:hover:text-primary-light transition-colors">Map</a>
+        <a href="/about/" class="text-gray-700 dark:text-gray-300 hover:text-primary dark:hover:text-primary-light transition-colors">About</a>
+        {/* Add more navigation links as needed */}
+      </div>
+    </nav>
+  </header>
+
+  <main class="container mx-auto px-6 py-8">
+    {/* Default slot for page content */}
+    <slot />
+  </main>
+
+  <footer class="bg-gray-100 dark:bg-gray-800 mt-12 py-8 text-center">
+    <p class="text-gray-600 dark:text-gray-400">
+      &copy; {currentYear} TravelVentures. All rights reserved.
+    </p>
+    <p class="text-sm text-gray-500 dark:text-gray-500 mt-1">
+      Powered by <a href="https://astro.build/" target="_blank" rel="noopener noreferrer" class="hover:text-primary dark:hover:text-primary-light">Astro</a>
+    </p>
+  </footer>
+
+  {/* Global scripts can be added here if necessary */}
+</body>
 </html>

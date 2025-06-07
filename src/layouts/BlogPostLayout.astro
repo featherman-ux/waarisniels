@@ -1,0 +1,17 @@
+---
+// src/layouts/BlogPostLayout.astro
+import BaseLayout from './BaseLayout.astro';
+import type { CollectionEntry } from 'astro:content';
+
+export interface Props {
+  post: CollectionEntry<'blog'>;
+}
+
+const { post } = Astro.props;
+const { title } = post.data;
+---
+
+<BaseLayout title={title} description="Temporary Description">
+    <h1>{title} - TEMPORARY LAYOUT</h1>
+    <slot />
+</BaseLayout>

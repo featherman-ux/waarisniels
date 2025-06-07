@@ -1,0 +1,68 @@
+---
+// src/components/PhotoGallery.astro
+import { Image } from 'astro:assets'; // Use Astro's Image component for optimization
+
+export interface Photo {
+  url: string;
+  alt: string;
+}
+
+export interface Props {
+  images: Photo;
+}
+
+const { images } = Astro.props;
+---
+
+{images && images.length > 0 && (
+  <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+    {images.map((image, index) => (
+      <div class="aspect-square overflow-hidden rounded-lg shadow-md group">
+        {/*
+          If images are local (in src/assets or referenced via import), use Astro's <Image />
+          Example for local images:
+          <Image
+            src={image.url} // This would be an import reference, e.g., import myImage from '../assets/my-image.jpg'
+            alt={image.alt |
+| `Gallery image ${index + 1}`}
+            widths={}
+            sizes="(max-width: 768px) 100vw, 50vw"
+            format="webp"
+            class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+            loading="lazy"
+          />
+        */}
+        {/* If images are remote URLs (e.g., from Cloudinary, GitHub raw content) */}
+        <img
+          src={image.url}
+          alt={image.alt |
+| `Gallery image ${index + 1}`}
+          class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+          loading="lazy"
+          decoding="async"
+        />
+        {/*
+          To use Astro <Image /> with remote URLs, ensure astro.config.mjs has `image.domains` or `image.remotePatterns` configured.
+          Then, you could use:
+          <Image
+            src={image.url}
+            alt={image.alt |
+| `Gallery image ${index + 1}`}
+            width={400} // Provide a base width for optimization
+            height={400} // Provide a base height for optimization
+            format="webp"
+            class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+            loading="lazy"
+          />
+        */}
+      </div>
+    ))}
+  </div>
+)}
+
+<style>
+  /* Optional: Add styles for a lightbox or modal if desired,
+     though this would likely require client-side JavaScript.
+     For a pure Astro/CSS solution, this grid is a good start.
+  */
+</style>
