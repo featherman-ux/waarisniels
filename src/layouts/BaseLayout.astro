@@ -29,7 +29,7 @@ const currentYear = new Date().getFullYear();
   <meta name="description" content={description} />
 
   {/* OpenGraph and Twitter Card meta tags (optional but recommended) */}
-  <meta property="og:title" content={`${title} | WaarIsNiels`} />
+  <meta property="og:title" content={`${title} | WaarIsNiels?`} />
   <meta property="og:description" content={description} />
   {/* <meta property="og:image" content={new URL(socialImage |
 | '/default-social.jpg', Astro.site).href} /> */}
@@ -37,7 +37,7 @@ const currentYear = new Date().getFullYear();
   <meta property="og:url" content={Astro.url.href} />
 
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content={`${title} | WaarIsNiels`} />
+  <meta name="twitter:title" content={`${title} | WaarIsNiels?`} />
   <meta name="twitter:description" content={description} />
   {/* <meta name="twitter:image" content={new URL(socialImage |
 | '/default-social.jpg', Astro.site).href} /> */}
@@ -51,20 +51,22 @@ const currentYear = new Date().getFullYear();
   <slot name="head" />
 </head>
 <body class="bg-gray-50 text-gray-800 dark:bg-gray-900 dark:text-gray-200 antialiased">
-  <header class="bg-white dark:bg-gray-800 shadow-md sticky top-0 z-50">
-    <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
-      <a href="/" class="text-2xl font-bold text-primary dark:text-primary-light">
-        WaarIsNiels
-      </a>
-      <div class="space-x-4">
-        <a href="/" class="text-gray-700 dark:text-gray-300 hover:text-primary dark:hover:text-primary-light transition-colors">Home</a>
-        <a href="/blog/" class="text-gray-700 dark:text-gray-300 hover:text-primary dark:hover:text-primary-light transition-colors">Blog</a>
-        <a href="/map/" class="text-gray-700 dark:text-gray-300 hover:text-primary dark:hover:text-primary-light transition-colors">Map</a>
-        <a href="/about/" class="text-gray-700 dark:text-gray-300 hover:text-primary dark:hover:text-primary-light transition-colors">About</a>
-        {/* Add more navigation links as needed */}
-      </div>
-    </nav>
-  </header>
+ <header class="bg-white dark:bg-gray-800 shadow-md sticky top-0 z-50">
+  <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+    <a href="/" class="text-2xl font-bold text-primary dark:text-primary-light">
+      TravelVentures
+    </a>
+    {/* Navigation Links */}
+    <div class="flex items-center space-x-2 sm:space-x-4"> {/* ADDED 'flex items-center' and adjusted 'space-x' */}
+      {/* <a href="/" class="text-gray-700 dark:text-gray-300 hover:text-primary dark:hover:text-primary-light transition-colors">Home</a> */}
+      {/* ^^^ DELETE OR COMMENT OUT THIS LINE ^^^ */}
+
+      <a href="/blog/" class="text-sm sm:text-base text-gray-700 dark:text-gray-300 hover:text-primary dark:hover:text-primary-light transition-colors px-2 py-1 rounded">Blog</a>
+      <a href="/map/" class="text-sm sm:text-base text-gray-700 dark:text-gray-300 hover:text-primary dark:hover:text-primary-light transition-colors px-2 py-1 rounded">Map</a>
+      <a href="/about/" class="text-sm sm:text-base text-gray-700 dark:text-gray-300 hover:text-primary dark:hover:text-primary-light transition-colors px-2 py-1 rounded">About</a>
+    </div>
+  </nav>
+ </header>
 
   <main class="container mx-auto px-6 py-8">
     {/* Default slot for page content */}
