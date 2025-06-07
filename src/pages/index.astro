@@ -14,7 +14,7 @@ const latestPosts = (await getCollection('blog', ({ data }) => {
 
 <BaseLayout title="Ewa Drerries" description="Kijk hier dan">
   <section class="text-center py-12 md:py-20 bg-gradient-to-r from-primary to-secondary text-white rounded-lg shadow-xl">
-    <h1 class="text-5xl md:text-6xl font-bold mb-4 font-">Adventure Awaits</h1>
+    <h1 class="text-5xl md:text-6xl font-bold mb-4">Mooie site he! Niks werkt nog hahahaha </h1> {/* Removed font- */}
     <p class="text-xl md:text-2xl mb-8 max-w-2xl mx-auto">
       Placeholder? wat zet ik hier
     </p>
@@ -23,8 +23,22 @@ const latestPosts = (await getCollection('blog', ({ data }) => {
     </a>
   </section>
 
+  {/* --- Image Section Added Here --- */}
+  <section class="py-12 md:py-16 flex flex-col items-center justify-center">
+    <h2 class="text-3xl md:text-4xl font-bold text-center mb-8 text-gray-800 dark:text-gray-200">My Latest Adventure</h2>
+    <img
+      src="/images/orange-car.jpg" {/* Path to your image in public/images/ */}
+      alt="Niels in an orange car, ready for adventure"
+      class="w-full max-w-lg md:max-w-xl lg:max-w-2xl h-auto rounded-xl shadow-2xl mb-6"
+    />
+    <p class="text-center text-lg text-gray-700 dark:text-gray-300 max-w-xl mx-auto">
+      Getting ready to hit the road in my trusty orange steed! Follow along for epic journeys and unforgettable moments.
+    </p>
+  </section>
+  {/* --- End Image Section --- */}
+
   <section class="py-12 md:py-16">
-    <h2 class="text-3xl md:text-4xl font-bold text-center mb-10 text-gray-800 dark:text-gray-200 font-">Latest Updates</h2>
+    <h2 class="text-3xl md:text-4xl font-bold text-center mb-10 text-gray-800 dark:text-gray-200">Latest Updates</h2> {/* Removed font- */}
     {latestPosts.length > 0? (
       <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
         {latestPosts.map(post => (
@@ -38,7 +52,7 @@ const latestPosts = (await getCollection('blog', ({ data }) => {
 
   <section class="py-12 md:py-16 bg-gray-100 dark:bg-gray-800 rounded-lg shadow-md">
     <div class="text-center">
-      <h2 class="text-3xl md:text-4xl font-bold mb-6 text-gray-800 dark:text-gray-200 font-">Track My Journey</h2>
+      <h2 class="text-3xl md:text-4xl font-bold mb-6 text-gray-800 dark:text-gray-200">Track My Journey</h2> {/* Removed font- */}
       <p class="text-lg text-gray-700 dark:text-gray-300 mb-8 max-w-xl mx-auto">
         See all my visited locations on an interactive map and follow my adventures visually.
       </p>
