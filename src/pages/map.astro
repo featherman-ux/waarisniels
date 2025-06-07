@@ -1,40 +1,29 @@
 ---
 // src/pages/map.astro
 import BaseLayout from '../layouts/BaseLayout.astro';
-import MapComponent from '../components/Map.astro'; // Renamed to avoid conflict with HTML <map>
-import { getCollection } from 'astro:content';
+// MapComponent import removed
+// getCollection import removed if not needed for other content on this page
 
-const pageTitle = "My Travel Map";
-const pageDescription = "Explore all the places I've visited on an interactive map.";
+const pageTitle = "My Travel Map (Temporarily Unavailable)";
+const pageDescription = "The map is currently under maintenance. Please check back later!";
 
-// Fetch all posts that have location data and are not drafts
-const postsWithLocation = (await getCollection('blog', ({ data }) => {
-  return data.location && data.draft!== true;
-}))
-.map(post => ({
-  id: post.slug,
-  title: post.data.title,
-  description: post.data.description, // Or a snippet
-  lat: post.data.location.lat,
-  lon: post.data.location.lon,
-  url: `/blog/${post.slug}/`, // Link to the blog post
-  date: new Date(post.data.pubDate).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }),
-}));
+// All map-related data fetching removed
+// const postsWithLocation = (await getCollection('blog', ({ data }) => { /* ... */ }));
 ---
 
 <BaseLayout title={pageTitle} description={pageDescription}>
   <div class="text-center mb-10">
-    <h1 class="text-4xl md:text-5xl font-bold text-gray-900 dark:text-gray-100 font-">{pageTitle}</h1>
+    <h1 class="text-4xl md:text-5xl font-bold text-gray-900 dark:text-gray-100">{pageTitle}</h1> {/* Removed font- here too */}
     <p class="mt-4 text-lg text-gray-600 dark:text-gray-400">{pageDescription}</p>
   </div>
 
   <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-xl">
-    {/* The MapComponent will be client-side rendered */}
-    <MapComponent locations={postsWithLocation} client:load />
-    {/* client:visible could also be used to load when the map enters the viewport */}
+    <p class="text-center text-lg text-gray-700 dark:text-gray-300">
+      We're working on bringing the interactive map back online soon!
+    </p>
   </div>
 
   <div class="mt-8 text-center text-sm text-gray-600 dark:text-gray-400">
-    <p>Click on a marker to see details about the trip and a link to the blog post.</p>
+    <p>In the meantime, you can explore my blog posts directly.</p>
   </div>
 </BaseLayout>
