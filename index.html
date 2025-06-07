@@ -45,6 +45,11 @@
       border: 2px solid #ccc;
       border-radius: 10px;
     }
+    .update {
+      margin-top: 1em;
+      font-style: italic;
+      color: #666;
+    }
     footer {
       background-color: #eee;
       padding: 1em;
@@ -54,10 +59,22 @@
       color: #219ebc;
       text-decoration: none;
     }
-    .update {
-      margin-top: 1em;
-      font-style: italic;
-      color: #666;
+    .trip-entry {
+      background-color: #fff;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      padding: 1em;
+      margin: 1.5em auto;
+      max-width: 600px;
+      text-align: left;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+    .trip-entry h3 {
+      margin: 0;
+      color: #333;
+    }
+    .trip-entry small {
+      color: #888;
     }
   </style>
 </head>
@@ -69,7 +86,7 @@
 
   <main>
     <div class="intro">
-      Welkom op mijn digitale reisboek. Ik probeer onderweg een beetje bij te houden waar ik uithang, wat ik meemaak en wat voor biertjes ik drink. De nieuwste update lees je hieronder 👇
+Welkom Welkom! ik ben druk bezig met testen en update dus wat er staat klopt allemaal nog niet! wannneer ik weg ga is dit gefixt!
     </div>
 
     <h2>Laatste locatie</h2>
@@ -94,10 +111,36 @@
     <p>
       📸 <a href="https://instagram.com/n.veerman" target="_blank">Volg me op Instagram</a><br>
     </p>
+
+    <h2>🌍 Alle bezochte plekken</h2>
+    <div id="travel-log">Laden...</div>
   </main>
 
   <footer>
     © 2025 Niels Veerman · Wie dit leest trekt een bak · <a href="mailto:jouwmail@example.com">Contact</a>
   </footer>
+
+  <script>
+    fetch("travel_data.json")
+      .then(response => response.json())
+      .then(data => {
+        const container = document.getElementById("travel-log");
+        container.innerHTML = "";
+        data.forEach(entry => {
+          const div = document.createElement("div");
+          div.className = "trip-entry";
+          div.innerHTML = `
+            <h3>${entry.City}, ${entry.Country}</h3>
+            <small>${entry.Arrival_Date} – ${entry.Departure_Date} · ${entry.Rating}⭐</small>
+            <p>${entry.Notes}</p>
+          `;
+          container.appendChild(div);
+        });
+      })
+      .catch(error => {
+        document.getElementById("travel-log").innerHTML = "<p>Kon reisgegevens niet laden.</p>";
+        console.error(error);
+      });
+  </script>
 </body>
 </html>
