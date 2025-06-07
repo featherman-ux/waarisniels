@@ -1,0 +1,31 @@
+---
+export interface Props {
+  title?: string;
+}
+const { title = "Waar is Niels?" } = Astro.props;
+---
+
+<!DOCTYPE html>
+<html lang="nl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{title}</title>
+    <link rel="stylesheet" href="/styles/global.css" />
+  </head>
+  <body>
+    <header>
+      <h1>Waar is Niels?</h1>
+      <p>Gasten facking mooi</p>
+    </header>
+
+    <main>
+      <slot /> <!-- This is where page content will appear -->
+    </main>
+
+    <footer>
+      © {new Date().getFullYear()} Niels Veerman · Wie dit leest trekt een bak ·
+      <a href="mailto:jouwmail@example.com">Contact</a>
+    </footer>
+  </body>
+</html>

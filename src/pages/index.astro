@@ -1,16 +1,25 @@
 ---
-
+import BaseLayout from '../layouts/BaseLayout.astro';
 ---
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
-</html>
+<BaseLayout title="Waar is Niels?">
+  <div class="intro">
+    Welkom op mijn digitale reisboek. Ik probeer onderweg een beetje bij te houden waar ik uithang, wat ik meemaak en wat voor biertjes ik drink. De nieuwste update lees je hieronder 👇
+  </div>
+
+  <h2>Laatste locatie</h2>
+  <p>📍 Nog steeds in Nederland</p>
+
+  <div class="update">
+    Laatste update: 26 mei 2025
+  </div>
+
+  <div class="foto-container">
+    <img src="/588a23ba-7e92-461f-92fa-a5c532dd4c03.jpg" alt="Vive les (g)ueux">
+    <p><em>Deze foto blijft totdat ik iets beters upload heb.</em></p>
+  </div>
+  <h2>Help me naar de 3.000.000 volgers</h2>
+  <p>
+    📸 <a href="https://instagram.com/n.veerman" target="_blank">Volg me op Instagram</a><br>
+  </p>
+</BaseLayout>
