@@ -1,0 +1,97 @@
+---
+// src/pages/about.astro
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+const pageTitle = "Over Niels";
+const pageDescription = "Leer meer over Niels en zijn avonturen.";
+---
+
+<BaseLayout title={pageTitle} description={pageDescription}>
+  <section class="container mx-auto px-6 py-8 md:py-12">
+    <div class="max-w-3xl mx-auto bg-white dark:bg-gray-800 p-6 md:p-10 rounded-lg shadow-xl">
+      <h1 class="text-4xl md:text-5xl font-bold text-center mb-6 text-gray-900 dark:text-gray-100">
+        {pageTitle}
+      </h1>
+
+      <div class="prose dark:prose-invert lg:prose-lg mx-auto">
+        <p>
+          Hoi! Ik ben Niels, de persoon achter "Waar is Niels?" – jouw plek voor reisverhalen en avonturen.  
+          Reizen is voor mij niet alleen een hobby, maar een manier om de wereld te ontdekken en mezelf uit te dagen.  
+          Mijn liefde voor verre bestemmingen begon tijdens mijn eerste backpackreis, en sindsdien probeer ik zoveel mogelijk culturen en landschappen te ervaren.
+        </p>
+        <p>
+          Dit jaar ga ik een half jaar naar Zuid-Amerika. Een grote uitdaging want ik weet dat ik er misschien ook ziek kan worden, maar het avontuur lonkt te hard om stil te blijven zitten.  
+          Ik wil zoveel mogelijk mooie plekken zien en verhalen verzamelen om te delen. Mocht het financieel niet lukken, dan ga ik natuurlijk terug naar huis.  
+          Dus als je mijn reis wilt steunen, of als je gewoon nieuwsgierig bent, stuur me gerust een mailtje!  
+        </p>
+        <p>
+          Ik woon nu in Utrecht, aan de Nieuwkijksgracht – een plek zonder echte gracht, maar met een naam die aan vroeger herinnert.  
+          Ik ben geboren in Wageningen en voel me daar nog steeds verbonden mee, ondanks dat ik nu in een bruisende studentenstad leef.
+        </p>
+
+        <hr class="my-8" />
+
+        <h3>En nu, een beetje minder serieus...</h3>
+
+        <p style="font-size:18px; line-height:1.5;">
+          Hoi, ik ben Niels. Ik verveelde me, ik wilde niet leren voor mijn tentamen.  
+          Dus toen ben ik maar bezig gegaan met het bouwen van deze website.  
+          Toen dacht ik: daar leer ik misschien iets van voor mijn tentamen.  
+          Maar natuurlijk ben ik nog steeds niet aan het leren, want het gaat over hele andere dingen.  
+          Ja, en ik ga dus een klein half jaar naar Zuid-Amerika toe. Word doodziek.  
+          Ga mooie dingen zien. Als er geld op is, moet ik naar huis.  
+          Dus als je er nog geld over hebt, dat mag altijd.  
+          Stuur me even een mailtje, DALL·E, stuur me een rekeningnummer.
+        </p>
+
+        <p style="font-size:16px; line-height:1.4;">
+          Verder wil ik graag allemaal dingen vertellen over mezelf.  
+          Ik ben dus Niels. Kom uit Wageningen.  
+          Woon in Utrecht, Nieuwkijksgracht. Er is daar geen gracht. Maar het heet wel zo.  
+          Vroeger was er wel een gracht.  
+          Verder ben ik mega super goed in waterpolo.  
+          Maar nog beter in volleybal. Uit het doodziek.
+        </p>
+
+        <p style="font-size:14px; line-height:1.3;">
+          Ik ben natuurlijk met zeren aan het kijken.  
+          Er zit nu een haai in.  
+          En, ja. Ja.
+        </p>
+
+        <p style="font-size:12px; line-height:1.2;">
+          Daarnaast ben ik dol op het uitpluizen van allerlei nutteloze details.  
+          Bijvoorbeeld: hoeveel stappen ik op een dag zet, of hoeveel koffie ik in een week drink.  
+          Ik schrijf het allemaal netjes op, want je weet maar nooit wanneer het handig kan zijn.  
+          Soms denk ik na over welke kleur sokken het beste bij mijn stemming past,  
+          en ja, dat is echt iets waar ik tijd aan besteed.
+        </p>
+
+        <p style="font-size:10px; line-height:1.1;">
+          Ook heb ik een uitgebreide collectie penselen, die ik categoriseer op hardheid, merk en haarsoort.  
+          Mijn bureau is zo georganiseerd dat alles binnen een straal van 2 millimeter precies ligt waar het moet liggen.  
+          Dit geeft me rust in mijn hoofd, ook al klinkt het misschien een beetje obsessief.  
+          Maar goed, ieder zijn ding.
+        </p>
+
+        <p style="font-size:8px; line-height:1.0;">
+          En dan nog iets: ik kan uren praten over de geschiedenis van nietszeggende voorwerpen, zoals paperclips en post-its.  
+          Er is zelfs een spreadsheet waarin ik elke keer noteer wanneer ik een nieuwe paperclip koop en waarom.  
+          Ik weet niet precies waarom, maar dit soort onzin geeft me blijkbaar voldoening.  
+          Misschien heb ik een verborgen nerd in me die niet naar buiten wil komen.
+        </p>
+
+        <p style="font-size:6px; line-height:0.9;">
+          Uiteindelijk draait het allemaal om kleine dingen, toch?  
+          Kleine details die het leven net iets interessanter maken, ook als niemand anders ze ziet of waardeert.  
+          Maar hé, als je dit nu nog leest, dan wil ik zeggen: respect voor je doorzettingsvermogen.  
+          Ik had er allang mee opgehouden.
+        </p>
+
+        <p class="mt-12 italic text-center text-gray-600 dark:text-gray-400" style="font-size:5px;">
+          Hoop dat je dit niet helemaal hebt gelezen, ik heb dit ook niet zelf geschreven. wilde er wel leukere fun facts in laten verwerken, maar chatgpt is niet zo creatief.
+        </p>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
