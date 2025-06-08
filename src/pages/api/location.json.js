@@ -1,38 +1,41 @@
-// src/pages/api/location.json.js
 
-// This is the public URL where your Nginx server is serving the location file.
-// Replace the IP address with your server's Public IPv4 address.
-const DATA_SOURCE_URL = 'http://56.228.30.107/location_history.json'; 
+// src/pages/api/location.json.js - ROBUST VERSION
+const DATA_SOURCE_URL = 'http://56.228.30.107/location_history.json';
 
-export async function GET({ params, request }) {
+export async function GET() {
   try {
-    const response = await fetch(DATA_SOURCE_URL, {
-      // Use 'no-cache' to ensure we always get the freshest data
-      cache: 'no-cache', 
-    });
+    const response = await fetch(DATA_SOURCE_URL, { cache: 'no-cache' });
 
+    // If the file is not found, return an empty array instead of an error
+    if (response.status === 404) {
+      return new Response(JSON.stringify([]), {
+        status: 200,
+        headers: { "Content-Type": "application/json" }
+      });
+    }
+
+    // If the response is anything else but not okay, throw an error
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
 
     const locationData = await response.json();
-
     return new Response(JSON.stringify(locationData), {
       status: 200,
       headers: {
         "Content-Type": "application/json",
-        // Set cache headers to prevent browsers and CDNs from storing the response
         "Cache-Control": "no-cache, no-store, must-revalidate",
         "Pragma": "no-cache",
         "Expires": "0",
       },
     });
+
   } catch (error) {
     console.error("Failed to fetch location data from source:", error);
-    // Return a server error response if we can't fetch the data
-    return new Response(JSON.stringify({ error: "Could not fetch location data." }), {
+    // If there's any other error, return an empty array to be safe
+    return new Response(JSON.stringify([]), {
       status: 500,
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json" }
     });
   }
 }
