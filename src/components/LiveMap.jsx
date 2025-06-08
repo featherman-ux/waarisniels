@@ -1,4 +1,4 @@
-// src/components/LiveMap.jsx - HISTORY TRACKING VERSION
+// src/components/LiveMap.jsx - HISTORY TRACKING VERSION (with bug fix)
 import { h } from 'preact';
 import { useEffect, useState, useRef } from 'preact/hooks';
 
@@ -21,7 +21,7 @@ export default function LiveMap() {
     const mapContainer = useRef(null);
     const mapInstance = useRef(null);
     const markerInstance = useRef(null);
-    const polylineInstance = useRef(null); // To hold the history line
+    const polylineInstance = useRef(null);
 
     const [error, setError] = useState(null);
     const [lastUpdated, setLastUpdated] = useState('');
@@ -36,29 +36,37 @@ export default function LiveMap() {
                 throw new Error("No location history found.");
             }
 
-            // The last point in the array is the most recent one
             const lastPoint = history[history.length - 1];
-            const latLngs = history.map(p => [p.lat, p.lon]); // Create array of coordinates for the line
+            const latLngs = history.map(p => [p.lat, p.lon]);
 
             if (L && mapContainer.current) {
                 if (!mapInstance.current) {
-                    // Create map, centering on the latest point
                     mapInstance.current = L.map(mapContainer.current).setView([lastPoint.lat, lastPoint.lon], 13);
-                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+                    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+                           attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
                     }).addTo(mapInstance.current);
-
-                    // Create the line and the marker
+                    
                     polylineInstance.current = L.polyline(latLngs, { color: 'blue' }).addTo(mapInstance.current);
                     markerInstance.current = L.marker([lastPoint.lat, lastPoint.lon]).addTo(mapInstance.current);
 
-                    // Zoom the map to fit the entire track
-                    mapInstance.current.fitBounds(polylineInstance.current.getBounds());
+                    // --- START OF THE FIX ---
+                    // Check if there's more than one point before trying to fit bounds
+                    if (latLngs.length > 1) {
+                        // If there is a path, zoom to fit the whole path
+                        mapInstance.current.fitBounds(polylineInstance.current.getBounds());
+                    } else {
+                        // If there is only one point, just center on it
+                        mapInstance.current.setView([lastPoint.lat, lastPoint.lon], 13);
+                    }
+                    // --- END OF THE FIX ---
+
                 } else {
-                    // If map exists, just update the data for the line and marker
                     polylineInstance.current.setLatLngs(latLngs);
                     markerInstance.current.setLatLng([lastPoint.lat, lastPoint.lon]);
-                    mapInstance.current.setView([lastPoint.lat, lastPoint.lon]); // Center on new point
+                    
+                    // --- MINOR IMPROVEMENT FOR UPDATES ---
+                    // This will smoothly pan to the new point instead of jumping
+                    mapInstance.current.panTo([lastPoint.lat, lastPoint.lon]); 
                 }
             }
 
