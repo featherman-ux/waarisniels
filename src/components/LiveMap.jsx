@@ -1,4 +1,4 @@
-// src/components/LiveMap.jsx - HISTORY TRACKING VERSION (with bug fix)
+// src/components/LiveMap.jsx - FINAL WORKING VERSION
 import { h } from 'preact';
 import { useEffect, useState, useRef } from 'preact/hooks';
 
@@ -28,7 +28,11 @@ export default function LiveMap() {
 
     const fetchAndUpdateMap = async () => {
         try {
-            const res = await fetch('/api/location.json');
+            // --- FINAL FIX IS HERE ---
+            // Fetch directly from the EC2 server, removing the Vercel API middleman.
+            const res = await fetch('http://56.228.30.107/location_history.json');
+            // --- END OF FIX ---
+
             if (!res.ok) throw new Error(`Failed to fetch location: ${res.statusText}`);
 
             const history = await res.json();
@@ -49,23 +53,15 @@ export default function LiveMap() {
                     polylineInstance.current = L.polyline(latLngs, { color: 'blue' }).addTo(mapInstance.current);
                     markerInstance.current = L.marker([lastPoint.lat, lastPoint.lon]).addTo(mapInstance.current);
 
-                    // --- START OF THE FIX ---
-                    // Check if there's more than one point before trying to fit bounds
                     if (latLngs.length > 1) {
-                        // If there is a path, zoom to fit the whole path
                         mapInstance.current.fitBounds(polylineInstance.current.getBounds());
                     } else {
-                        // If there is only one point, just center on it
                         mapInstance.current.setView([lastPoint.lat, lastPoint.lon], 13);
                     }
-                    // --- END OF THE FIX ---
 
                 } else {
                     polylineInstance.current.setLatLngs(latLngs);
                     markerInstance.current.setLatLng([lastPoint.lat, lastPoint.lon]);
-                    
-                    // --- MINOR IMPROVEMENT FOR UPDATES ---
-                    // This will smoothly pan to the new point instead of jumping
                     mapInstance.current.panTo([lastPoint.lat, lastPoint.lon]); 
                 }
             }

@@ -3,7 +3,7 @@ title: "Een Magisch Avontuur van Lepelaar en Aalscholver"
 description: "Een betoverende ontmoeting tussen twee onverwachte geliefden aan de waterkant."
 pubDate: 2025-06-08
 image:
-  src: "./test1.jpeg"
+  url: "./test1.jpeg"  # <-- This was changed from 'src' to 'url'
   alt: "Een magisch portret van de lepelaar in de avondzon"
 tags: ["reis", "natuur", "vogelspotten"]
 ---
