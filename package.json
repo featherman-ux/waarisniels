@@ -10,9 +10,15 @@
   },
   "dependencies": {
     "@astrojs/cloudflare": "^12.5.4",
+    "@astrojs/preact": "^4.1.0",
     "@astrojs/react": "^4.3.0",
     "@astrojs/tailwind": "^6.0.2",
     "@tailwindcss/typography": "^0.5.16",
-    "astro": "^5.9.1"
+    "astro": "^5.9.1",
+    "leaflet": "^1.9.4",
+    "preact": "^10.26.8"
+  },
+  "devDependencies": {
+    "@types/leaflet": "^1.9.18"
   }
 }
