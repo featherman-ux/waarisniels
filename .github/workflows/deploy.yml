@@ -21,7 +21,11 @@ jobs:
       - name: Install Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20' # Specify your Node.js version
+          node-version: '20'
+
+      # --- ADD THIS STEP ---
+      - name: Create CNAME file
+        run: echo "waarisniels.nl" > ./public/CNAME
 
       - name: Install dependencies
         run: npm install
