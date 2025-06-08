@@ -2,7 +2,7 @@
 
 // This is the public URL where your Nginx server is serving the location file.
 // Replace the IP address with your server's Public IPv4 address.
-const DATA_SOURCE_URL = 'http://56.228.30.107/latest_location.json';
+const DATA_SOURCE_URL = 'http://56.228.30.107/location_history.json'; 
 
 export async function GET({ params, request }) {
   try {

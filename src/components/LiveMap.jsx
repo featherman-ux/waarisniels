@@ -1,18 +1,14 @@
-// src/components/LiveMap.jsx
+// src/components/LiveMap.jsx - HISTORY TRACKING VERSION
 import { h } from 'preact';
 import { useEffect, useState, useRef } from 'preact/hooks';
 
-// We only want to import Leaflet on the client-side, not on the server
 let L;
 if (typeof window !== 'undefined') {
   L = await import('leaflet');
   await import('leaflet/dist/leaflet.css');
 }
 
-// Default icon fix for modern bundlers
 if (L) {
-    // This is a common fix to make sure Leaflet's default marker icons work correctly.
-    // You'll need to add the marker icon files to your `public/images/` directory.
     delete L.Icon.Default.prototype._getIconUrl;
     L.Icon.Default.mergeOptions({
         iconRetinaUrl: '/images/marker-icon-2x.png',
@@ -25,58 +21,64 @@ export default function LiveMap() {
     const mapContainer = useRef(null);
     const mapInstance = useRef(null);
     const markerInstance = useRef(null);
-    
+    const polylineInstance = useRef(null); // To hold the history line
+
     const [error, setError] = useState(null);
     const [lastUpdated, setLastUpdated] = useState('');
 
     const fetchAndUpdateMap = async () => {
         try {
             const res = await fetch('/api/location.json');
-            if (!res.ok) {
-                throw new Error(`Failed to fetch location: ${res.statusText}`);
-            }
-            const data = await res.json();
+            if (!res.ok) throw new Error(`Failed to fetch location: ${res.statusText}`);
 
-            // Ensure we have Leaflet and the container div ready
+            const history = await res.json();
+            if (!Array.isArray(history) || history.length === 0) {
+                throw new Error("No location history found.");
+            }
+
+            // The last point in the array is the most recent one
+            const lastPoint = history[history.length - 1];
+            const latLngs = history.map(p => [p.lat, p.lon]); // Create array of coordinates for the line
+
             if (L && mapContainer.current) {
-                // If the map hasn't been created yet, create it
                 if (!mapInstance.current) {
-                    mapInstance.current = L.map(mapContainer.current).setView([data.lat, data.lon], 13);
+                    // Create map, centering on the latest point
+                    mapInstance.current = L.map(mapContainer.current).setView([lastPoint.lat, lastPoint.lon], 13);
                     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
                     }).addTo(mapInstance.current);
-                    markerInstance.current = L.marker([data.lat, data.lon]).addTo(mapInstance.current);
+
+                    // Create the line and the marker
+                    polylineInstance.current = L.polyline(latLngs, { color: 'blue' }).addTo(mapInstance.current);
+                    markerInstance.current = L.marker([lastPoint.lat, lastPoint.lon]).addTo(mapInstance.current);
+
+                    // Zoom the map to fit the entire track
+                    mapInstance.current.fitBounds(polylineInstance.current.getBounds());
                 } else {
-                    // If the map already exists, just move the view and marker
-                    mapInstance.current.setView([data.lat, data.lon]);
-                    markerInstance.current.setLatLng([data.lat, data.lon]);
+                    // If map exists, just update the data for the line and marker
+                    polylineInstance.current.setLatLngs(latLngs);
+                    markerInstance.current.setLatLng([lastPoint.lat, lastPoint.lon]);
+                    mapInstance.current.setView([lastPoint.lat, lastPoint.lon]); // Center on new point
                 }
             }
-            // Update the timestamp and clear any previous errors
-            setLastUpdated(new Date(data.tst * 1000).toLocaleString());
+
+            setLastUpdated(new Date(lastPoint.tst * 1000).toLocaleString());
             setError(null);
 
         } catch (err) {
             console.error(err);
-            setError('Could not retrieve latest location. The tracker might be offline.');
+            setError('Could not retrieve location history. The tracker might be offline.');
         }
     };
 
-    // This effect runs once when the component is first rendered
     useEffect(() => {
-        // Fetch the location immediately on load
         fetchAndUpdateMap();
-
-        // Then, set up an interval to fetch the location every 30 seconds
         const intervalId = setInterval(fetchAndUpdateMap, 30000);
-
-        // This is a cleanup function that runs when the component is removed
         return () => clearInterval(intervalId);
     }, []);
 
     return (
         <div>
-            {/* The ref tells Preact where to mount the map */}
             <div ref={mapContainer} style={{ height: '600px', width: '100%', borderRadius: '8px' }} />
             {error && <p class="text-center text-red-500 mt-2">{error}</p>}
             {lastUpdated && !error && (
