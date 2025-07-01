@@ -1,3 +1,5 @@
+// src/components/LiveMap.jsx
+
 import { h } from 'preact';
 import { useEffect, useState, useRef } from 'preact/hooks';
 
@@ -27,7 +29,6 @@ export default function LiveMap() {
 
   const fetchAndUpdateMap = async () => {
     try {
-      // ✅ Fetch using your secure domain
       const res = await fetch('https://map.waarisniels.nl/location_history.json');
 
       console.log("Fetching from: https://map.waarisniels.nl/location_history.json");
@@ -50,7 +51,7 @@ export default function LiveMap() {
           mapInstance.current = L.map(mapContainer.current).setView([lastPoint.lat, lastPoint.lon], 13);
           L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
             attribution:
-              '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO',
+              '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
           }).addTo(mapInstance.current);
 
           polylineInstance.current = L.polyline(latLngs, { color: 'blue' }).addTo(mapInstance.current);
