@@ -1,4 +1,3 @@
-// src/content/config.ts
 import { defineCollection, z } from 'astro:content';
 
 const blogCollection = defineCollection({
@@ -21,6 +20,4 @@ const blogCollection = defineCollection({
   }),
 });
 
-export const collections = {
-  blog: blogCollection,
-};
+export const collections = { blog: blogCollection };

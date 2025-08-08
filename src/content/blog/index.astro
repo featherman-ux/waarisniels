@@ -1,0 +1,33 @@
+---
+// src/pages/blog/index.astro
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+import BlogPostPreview from '../../components/BlogPostPreview.astro'; // Reusing the preview component
+
+const pageTitle = "All Blog Posts";
+const pageDescription = "Browse through all my travel stories, tips, and reflections.";
+
+// Fetch all non-draft blog posts, sorted by date
+const allPosts = (await getCollection('blog', ({ data }) => {
+  return data.draft!== true;
+}))
+.sort((a, b) => new Date(b.data.pubDate).valueOf() - new Date(a.data.pubDate).valueOf());
+---
+
+<BaseLayout title={pageTitle} description={pageDescription}>
+  <header class="mb-12 text-center">
+    <h1 class="text-4xl md:text-5xl font-bold text-gray-900 dark:text-gray-100 font-">{pageTitle}</h1>
+    <p class="mt-4 text-lg text-gray-600 dark:text-gray-400">{pageDescription}</p>
+  </header>
+
+  {allPosts.length > 0? (
+    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+      {allPosts.map(post => (
+        <BlogPostPreview post={post} />
+      ))}
+    </div>
+  ) : (
+    <p class="text-center text-gray-600 dark:text-gray-400">No posts published yet. Stay tuned!</p>
+  )}
+
+  </BaseLayout>
