@@ -14,7 +14,7 @@ Welkom allemaal bij mijn eerste blogpost. Het is eindelijk gelukt om alles draai
 ---
 
 ## Cocorná – Rustig beginnen (soort van)
-We kozen bewust om niet in de stad te starten, maar in het relaxte Cocorná. Jochem en ik waren als organisatie namelijk bang dat men anders direct hun kruid zou verschieten in de stad en de hike niet meer aan zou kunnen. We kwamen laat aan dus we gingen de eerste dag even chillen voordat we gingen **raften**. In de ochtend wilde ik even mijn nieuwe zakmes uitproberen en toen sneed ik direct bijna mijn vinger er af, gelukkig was dokter Bas mee en hoefde ik niet naar een ziekenhuis! Het raften: iedereen verwachtte er weinig van, maar het werd een onverwacht hoogtepunt: prachtige natuur, uitdagende stroomversnellingen en een busje met drie rafts op het dak dat ons terugbracht.
+We kozen bewust om niet in de stad te starten, maar in het relaxte Cocorná. Jochem en ik waren als organisatie namelijk bang dat men anders direct hun kruit zou verschieten in de stad en de hike niet meer aan zou kunnen. We kwamen laat aan dus we gingen de eerste dag even chillen voordat we gingen **raften**. In de ochtend wilde ik even mijn nieuwe zakmes uitproberen en toen sneed ik direct bijna mijn vinger er af, gelukkig was dokter Bas mee en hoefde ik niet naar een ziekenhuis! Het raften: iedereen verwachtte er weinig van, maar het werd een onverwacht hoogtepunt: prachtige natuur, uitdagende stroomversnellingen en een busje met drie rafts op het dak dat ons terugbracht.
 
 <div class="photo-grid">
   <img src="/images/Colombia/corcorna-huisje1enacht.jpeg" alt="Huisje met zwembad in Cocorná" />
@@ -37,7 +37,7 @@ Met een soort partybus werden we naar het startpunt gebracht. De eerste dag was 
 ---
 
 ## Medellín – Stad met twee gezichten
-Na de hike trokken we naar Medellín. We kwamen aan en we vonden het een verrassend mooie en schone stad, dit bleek echter voornamelijk de gegentrificeerde wijk waar wij verbleven. Ondanks een berg aan waarschuwingen hebben we ons niet echt onveilig gevoeld. We deden de **Comuna 13-tour**, gingen uit en genoten van het bubbelbad op het dak van ons hostel. Medellín is een stad die onder je huid kruipt: niet per se ‘mooi’, wel echt.
+Na de hike trokken we naar Medellín. We kwamen aan en we vonden het een verrassend mooie en schone stad, dit bleek echter voornamelijk de gegentrificeerde wijk waar wij verbleven. In de rest van de stad hebben wij ons ondanks een berg aan waarschuwingen niet echt onveilig gevoeld. We deden de **Comuna 13-tour**, gingen uit en genoten van het bubbelbad op het dak van ons hostel. Medellín: niet de mooiste stad, wel leuk.
 
 <div class="photo-grid">
   <img src="/images/Colombia/Medellin-communa13.jpeg" alt="Street art in Comuna 13" />
@@ -53,9 +53,9 @@ We vlogen van Medellín naar Santa Marta, een relaxte kuststad en ons startpunt 
 
 ## Motortour – Woestijn, kust en kitesurfers
 Drie dagen op pad:
-- **Santa Marta → Riohacha** (3–4 uur): wennen aan de motoren, veel plezier.  
-- **Riohacha → Cabo de la Vela**: heet, zanderig, smalle paadjes door de woestijn; bijna-cactusbotsingen, nul echte crashes.  
-- **Cabo de la Vela → Costeño Beach** (±6 uur): zwaar, maar na de laatste stop ineens weer energie. Cabo was een klein kitesurfdorpje in the middle of nowhere, absurde plek.
+- **Santa Marta → Riohacha** (3–4 uur): wennen aan de motoren, nog erg spannend het rijden.  
+- **Riohacha → Cabo de la Vela**: heet, zanderig, smalle paadjes door de woestijn; bijna-cactusbotsingen, nul echte crashes gelukkig (op Bas en Koen na maar de schade was beperkt). Uiteindelijk aangekomen in Cabo de la Vela, dit was een klein kitesurfdorpje in the middle of nowhere, absurde plek. Het waaide helaas te hard aflandig anders had ik ook wel willen proberen te kiten.
+- **Cabo de la Vela → Costeño Beach** (±6 uur): zwaar, maar na de laatste stop ineens weer energie. 'S avonds gelukkig ontspannen.
 
 <div class="photo-grid">
   <img src="/images/Colombia/motortour-group.jpeg" alt="Groep op motoren" />
@@ -82,7 +82,7 @@ Voor 3 dagen verbleven wij in een prachtig verblijf praktisch in de zee, hier ko
 ---
 
 ## Cartagena – Het grote afscheid
-De laatste stop met de groep. We huurden een motorboot, voeren langs eilandjes, zwommen, dansten en verbrandden net niet. Daarna ging iedereen z’n eigen weg: de meesten naar huis, Jochem naar New York, Antony bleef in Cartagena en ik vloog naar **Ecuador** voor het volgende hoofdstuk.
+De laatste stop met de groep. We huurden een motorboot, voeren langs eilandjes, zwommen, dansten, haalden een schouder uit de kom (Wessel) en verbrandden net niet. Daarna ging iedereen z’n eigen weg: de meesten naar huis, Jochem naar New York, Tony bleef in Cartagena en ik vloog naar **Ecuador** voor het volgende hoofdstuk.
 
 <div class="photo-grid">
   <img src="/images/Colombia/cartagena-motorboatparty.jpeg" alt="Motorbootfeest in Cartagena" />
@@ -92,4 +92,4 @@ De laatste stop met de groep. We huurden een motorboot, voeren langs eilandjes, 
 
 ---
 
-Tot de volgende post—en vergeet niet de [kaart](/map/) te checken voor de hele route!
+Tot de volgende post!!!!!!!!!!!!!!!!
