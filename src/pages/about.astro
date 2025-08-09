@@ -3,110 +3,119 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 
 const pageTitle = "Over Niels";
-const pageDescription = "Wie ik ben, wat ik doe, en waar deze site voor staat.";
+const pageDescription = "Leer meer over mij en het verhaal achter Waar is Niels?";
 ---
+
+<!--
+  About page for Waar is Niels?
+  This page follows the same colour scheme as the homepage: koningshuis‑oranje and geuzen‑blauw.
+  A simple hero section introduces the page, followed by several cards describing who you are,
+  what the site is about and how people can get in touch. Navigation and metadata come from
+  BaseLayout, so no additional nav bar is declared here.
+-->
 
 <BaseLayout title={pageTitle} description={pageDescription}>
   <style>
     :root {
-      --orange: #FFB703; /* Koningshuis-oranje */
-      --blue:   #023047; /* Geuzen-blauw   */
+      --orange: #ffb703;
+      --blue:   #023047;
     }
     header.hero {
       background: var(--orange);
       color: #fff;
       text-align: center;
-      padding: 4rem 2rem;
+      padding: 3rem 1.5rem;
+      margin-bottom: 2rem;
+      border-radius: 0.75rem;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     }
-    header.hero h1 { font-size: 2.5rem; margin: 0 0 .5rem; }
-    header.hero p  { margin: 0; font-size: 1.1rem; }
-
-    nav.local {
-      background: var(--blue);
-      display: flex; gap: 1.5rem; justify-content: center;
-      padding: .6rem 1rem;
+    header.hero h1 {
+      font-size: 2rem;
+      margin: 0 0 0.5rem;
     }
-    nav.local a { color: #fff; text-decoration: none; font-weight: 600; }
-    nav.local a:hover { text-decoration: underline; }
-
-    .container { max-width: 900px; margin: 0 auto; padding: 2rem; }
+    header.hero p {
+      margin: 0;
+      font-size: 1rem;
+      opacity: 0.95;
+    }
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 0 1.5rem 2rem;
+    }
     .card {
-      background: #fff; color: #111;
-      border: 1px solid #e5e7eb; border-radius: 12px;
-      padding: 1.5rem 1.75rem; box-shadow: 0 2px 10px rgba(0,0,0,.06);
+      background: #fff;
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+      padding: 1.25rem 1.5rem;
+      margin-bottom: 1.5rem;
     }
-    .grid { display: grid; gap: 1.25rem; }
-    @media (min-width: 900px) { .grid-2 { grid-template-columns: 1fr 1fr; } }
-
-    h2 { color: var(--blue); margin: .25rem 0 1rem; }
-    p  { line-height: 1.65; color: #374151; }
-
-    .muted { color: #6b7280; }
-    .btn {
-      display: inline-block; margin-top: .75rem;
-      background: var(--blue); color: #fff; text-decoration: none;
-      padding: .6rem .9rem; border-radius: 8px; font-weight: 600;
+    .card h2 {
+      color: var(--blue);
+      margin: 0 0 0.5rem;
+      font-size: 1.5rem;
     }
-    .btn:hover { filter: brightness(1.05); }
-    .links { display: flex; gap: .75rem; flex-wrap: wrap; }
+    .card p {
+      line-height: 1.6;
+      color: #374151;
+    }
+    .btn-row {
+      margin-top: 1rem;
+    }
+    .btn-row a {
+      display: inline-block;
+      background: var(--blue);
+      color: #fff;
+      text-decoration: none;
+      padding: 0.6rem 0.9rem;
+      margin-right: 0.75rem;
+      border-radius: 8px;
+      font-weight: 600;
+    }
+    .btn-row a:hover {
+      filter: brightness(1.05);
+    }
   </style>
-
-  <nav class="local">
-    <a href="/">Home</a>
-    <a href="/blog/">Blog</a>
-    <a href="/over/">Over</a>
-    <a href="/kaart/">Kaart</a>
-  </nav>
 
   <header class="hero">
     <h1>{pageTitle}</h1>
-    <p>Deze site is in herontwikkeling—ik heb ’m per ongeluk gesloopt, maar ik bouw ’m beter terug.</p>
+    <p>Deze site is in herontwikkeling – maar hier lees je alvast wat meer over mij.</p>
   </header>
 
   <main class="container">
-    <section class="grid grid-2">
-      <div class="card">
-        <h2>Wie ik ben</h2>
-        <p>
-          Ik ben Niels, reiziger in wording en bouwer van <em>WaarIsNiels</em>. Hier documenteer ik m’n route,
-          verhalen en inzichten onderweg. Momenteel ben ik actief bezig met het herontwerpen van de site en het
-          stroomlijnen van content.
-        </p>
-        <div class="links">
-          <a class="btn" href="/blog/">Naar de blog</a>
-          <a class="btn" href="/kaart/">Bekijk de kaart</a>
-        </div>
-      </div>
-
-      <div class="card">
-        <h2>Waar ik nu ben</h2>
-        <p>
-          Op dit moment bevind ik me in <strong>Quito, Ecuador</strong>. De homepage toont een live kaart en een
-          tijdlijn. Verwacht de komende tijd verbeteringen aan lay‑out, snelheid en navigatie.
-        </p>
-        <p class="muted">Tip: volg de updates via de homepage en mijn blogoverzicht.</p>
-      </div>
-    </section>
-
-    <section class="card" style="margin-top:1.25rem;">
-      <h2>Over deze website</h2>
+    <section class="card">
+      <h2>Wie ben ik?</h2>
       <p>
-        <em>WaarIsNiels</em> is een persoonlijke site met focus op reizen en verhalen. Technisch draait alles op Astro.
-        Ik voeg stap voor stap features toe zoals een interactieve kaart, een tijdlijn en nette bloglayouts. Omdat ik
-        onlangs de structuur heb moeten herstellen, staat er nog wat in de steigers—maar de basis is er.
+        Ik ben Niels, een reiziger en verhalenverteller in spe. Op deze plek deel ik mijn avonturen
+        door Zuid‑Amerika en andere plekken op de wereld. Omdat ik onlangs de website per ongeluk
+        om zeep hielp, is alles nog in heropbouw – maar ik werk hard aan een betere versie.
       </p>
-      <div class="links">
-        <a class="btn" href="/blog/">Laatste blogposts</a>
-        <a class="btn" href="/">Terug naar home</a>
+      <div class="btn-row">
+        <a href="/blog/">Laatste blogposts</a>
+        <a href="/map/">Live kaart</a>
       </div>
     </section>
 
-    <section class="card" style="margin-top:1.25rem;">
-      <h2>Contact</h2>
-      <p>Vragen of suggesties? Stuur gerust een berichtje.</p>
-      <div class="links">
-        <a class="btn" href="mailto:jouwmail@example.com">Mail mij</a>
-        <a class="btn" href="https://instagram.com/n.veerman" target="_blank" rel="noopener noreferrer">Instagram</a>
+    <section class="card">
+      <h2>Wat is Waar is Niels?</h2>
+      <p>
+        Waar is Niels? is een persoonlijke reisblog met een interactieve kaart, blogposts en een
+        tijdlijn van mijn tochten. Het doel is om vrienden, familie en andere geïnteresseerden
+        eenvoudig te laten volgen waar ik ben en wat ik beleef. Omdat de site opnieuw opgebouwd
+        wordt, kan er tijdelijk content ontbreken.
+      </p>
+    </section>
+
+    <section class="card">
+      <h2>Contact opnemen</h2>
+      <p>
+        Heb je vragen of wil je me steunen? Laat gerust een bericht achter. Je kunt mij bereiken via
+        e‑mail of sociale media. Bedankt voor je interesse!
+      </p>
+      <div class="btn-row">
+        <a href="mailto:veerman.niels@gmail.com">Mail</a>
+        <a href="https://instagram.com/n.veerman" target="_blank" rel="noopener noreferrer">Instagram</a>
       </div>
     </section>
   </main>

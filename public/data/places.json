@@ -1,0 +1,10 @@
+[
+  { "name": "Medellín",       "lat": 6.2442,  "lon": -75.5812, "notes": "Aankomst Colombia / start route 1" },
+  { "name": "Cocorná",        "lat": 6.0579,  "lon": -75.1850, "notes": "Dagtrip vanaf Medellín" },
+  { "name": "Santa Marta",    "lat": 11.2408, "lon": -74.1990, "notes": "Heenvlucht vanaf Medellín" },
+  { "name": "Riohacha",       "lat": 11.5440, "lon": -72.9070, "notes": "Poort naar La Guajira" },
+  { "name": "Cabo de la Vela","lat": 12.2010, "lon": -72.1690, "notes": "Woestijn / wind / Wayuu-gebied" },
+  { "name": "Costeño Beach",  "lat": 11.2650, "lon": -73.8160, "notes": "Strand & surf (nabij Tayrona)" },
+  { "name": "Cartagena",      "lat": 10.3910, "lon": -75.4790, "notes": "Einde route 1 (bus vanaf Costeño)" },
+  { "name": "Quito",          "lat": -0.1807, "lon": -78.4678, "notes": "Vlucht vanaf Cartagena / start volgende hoofdstuk" }
+]
