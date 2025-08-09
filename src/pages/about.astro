@@ -3,92 +3,111 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 
 const pageTitle = "Over Niels";
-const pageDescription = "Leer meer over Niels en zijn avonturen.";
+const pageDescription = "Wie ik ben, wat ik doe, en waar deze site voor staat.";
 ---
 
 <BaseLayout title={pageTitle} description={pageDescription}>
-  <section class="container mx-auto px-6 py-8 md:py-12">
-    <div class="max-w-3xl mx-auto bg-white dark:bg-gray-800 p-6 md:p-10 rounded-lg shadow-xl">
-      <h1 class="text-4xl md:text-5xl font-bold text-center mb-6 text-gray-900 dark:text-gray-100">
-        {pageTitle}
-      </h1>
+  <style>
+    :root {
+      --orange: #FFB703; /* Koningshuis-oranje */
+      --blue:   #023047; /* Geuzen-blauw   */
+    }
+    header.hero {
+      background: var(--orange);
+      color: #fff;
+      text-align: center;
+      padding: 4rem 2rem;
+    }
+    header.hero h1 { font-size: 2.5rem; margin: 0 0 .5rem; }
+    header.hero p  { margin: 0; font-size: 1.1rem; }
 
-      <div class="prose dark:prose-invert lg:prose-lg mx-auto">
+    nav.local {
+      background: var(--blue);
+      display: flex; gap: 1.5rem; justify-content: center;
+      padding: .6rem 1rem;
+    }
+    nav.local a { color: #fff; text-decoration: none; font-weight: 600; }
+    nav.local a:hover { text-decoration: underline; }
+
+    .container { max-width: 900px; margin: 0 auto; padding: 2rem; }
+    .card {
+      background: #fff; color: #111;
+      border: 1px solid #e5e7eb; border-radius: 12px;
+      padding: 1.5rem 1.75rem; box-shadow: 0 2px 10px rgba(0,0,0,.06);
+    }
+    .grid { display: grid; gap: 1.25rem; }
+    @media (min-width: 900px) { .grid-2 { grid-template-columns: 1fr 1fr; } }
+
+    h2 { color: var(--blue); margin: .25rem 0 1rem; }
+    p  { line-height: 1.65; color: #374151; }
+
+    .muted { color: #6b7280; }
+    .btn {
+      display: inline-block; margin-top: .75rem;
+      background: var(--blue); color: #fff; text-decoration: none;
+      padding: .6rem .9rem; border-radius: 8px; font-weight: 600;
+    }
+    .btn:hover { filter: brightness(1.05); }
+    .links { display: flex; gap: .75rem; flex-wrap: wrap; }
+  </style>
+
+  <nav class="local">
+    <a href="/">Home</a>
+    <a href="/blog/">Blog</a>
+    <a href="/over/">Over</a>
+    <a href="/kaart/">Kaart</a>
+  </nav>
+
+  <header class="hero">
+    <h1>{pageTitle}</h1>
+    <p>Deze site is in herontwikkeling—ik heb ’m per ongeluk gesloopt, maar ik bouw ’m beter terug.</p>
+  </header>
+
+  <main class="container">
+    <section class="grid grid-2">
+      <div class="card">
+        <h2>Wie ik ben</h2>
         <p>
-          Hoi! Ik ben Niels, de persoon achter "Waar is Niels?" – jouw plek voor bart en biersaus.  
-          Reizen is voor mij niet alleen een hobby, maar een lifestyle (prank) (gewoon geen zin om te werken)
+          Ik ben Niels, reiziger in wording en bouwer van <em>WaarIsNiels</em>. Hier documenteer ik m’n route,
+          verhalen en inzichten onderweg. Momenteel ben ik actief bezig met het herontwerpen van de site en het
+          stroomlijnen van content.
         </p>
-        <p>
-          Dit jaar ga ik een half jaartje naar Zuid-Amerika (of misschien wel voor altijd, sorry mam). Een grote uitdaging want ik weet dat ik er misschien ook ziek kan worden of ontvoerd kan worden of kan vallen met een motor, maar het avontuur lonkt te hard om stil te blijven zitten.  
-
-        </p>
-        <p>
-          Ik woon nu in Utrecht, aan de Nieuwekeizersgracht – een plek zonder echte gracht, maar met een naam die aan vroeger herinnert.  
-          Ik ben geboren in Wageningen.
-        </p>
-
-        <hr class="my-8" />
-
-        <h3>En nu, een serieus stukje over mij...</h3>
-
-        <p style="font-size:18px; line-height:1.5;">
-          Hoi, ik ben Niels. Ik verveelde me, ik wilde niet leren voor mijn tentamen.  
-          Dus toen ben ik maar bezig gegaan met het bouwen van deze website.  
-          Toen dacht ik: daar leer ik misschien iets van voor mijn tentamen.  
-          Maar natuurlijk ben ik nog steeds niets aan het leren, want het gaat over hele andere dingen.  
-          Ja, en ik ga dus een klein half jaar naar Zuid-Amerika toe. Word doodziek.  
-          Ga mooie dingen zien. Als er geld op is, moet ik naar huis.  
-          Dus als je nog geld over hebt, maak vooral over.  
-          Stuur me even een mailtje, dan stuur ik mijn rekeningnummer.
-        </p>
-
-        <p style="font-size:16px; line-height:1.4;">
-          Verder wil ik graag allemaal dingen vertellen over mezelf.  
-          Ik ben dus Niels. Kom uit Wageningen.  
-          Woon in Utrecht, Nieuwkijksgracht. Er is daar geen gracht. Maar het heet wel zo.  
-          Vroeger was er wel een gracht.  
-          Verder ben ik mega super goed in waterpolo.  
-          Maar nog beter in volleybal. Echt doodziek.
-        </p>
-
-        <p style="font-size:14px; line-height:1.3;">
-          Ik ben nu een natuurdocuaan het kijken.  
-          Er zit nu een haai in.  
-        </p>
-
-        <p style="font-size:12px; line-height:1.2;">
-          Daarnaast ben ik dol op het uitpluizen van allerlei nutteloze details.  
-          Bijvoorbeeld: hoeveel stappen ik op een dag zet, of hoeveel koffie ik in een week drink.  
-          Ik schrijf het allemaal netjes op, want je weet maar nooit wanneer het handig kan zijn.  
-          Soms denk ik na over welke kleur sokken het beste bij mijn stemming past,  
-          en ja, dat is echt iets waar ik tijd aan besteed.
-        </p>
-
-        <p style="font-size:10px; line-height:1.1;">
-          Ook heb ik een uitgebreide collectie penselen, die ik categoriseer op hardheid, merk en haarsoort.  
-          Mijn bureau is zo georganiseerd dat alles binnen een straal van 2 millimeter precies ligt waar het moet liggen.  
-          Dit geeft me rust in mijn hoofd, ook al klinkt het misschien een beetje obsessief.  
-          Maar goed, ieder zijn ding.
-        </p>
-
-        <p style="font-size:8px; line-height:1.0;">
-          En dan nog iets: ik kan uren praten over de geschiedenis van nietszeggende voorwerpen, zoals paperclips en post-its.  
-          Er is zelfs een spreadsheet waarin ik elke keer noteer wanneer ik een nieuwe paperclip koop en waarom.  
-          Ik weet niet precies waarom, maar dit soort onzin geeft me blijkbaar voldoening.  
-          Misschien heb ik een verborgen nerd in me die niet naar buiten wil komen.
-        </p>
-
-        <p style="font-size:6px; line-height:0.9;">
-          Uiteindelijk draait het allemaal om kleine dingen, toch?  
-          Kleine details die het leven net iets interessanter maken, ook als niemand anders ze ziet of waardeert.  
-          Maar hé, als je dit nu nog leest, dan wil ik zeggen: respect voor je doorzettingsvermogen.  
-          Ik had er allang mee opgehouden.
-        </p>
-
-        <p class="mt-12 italic text-center text-gray-600 dark:text-gray-400" style="font-size:5px;">
-          Hoop dat je dit niet helemaal hebt gelezen, ik heb dit ook niet zelf geschreven. wilde er wel leukere fun facts in laten verwerken, maar chatgpt is niet zo creatief.
-        </p>
+        <div class="links">
+          <a class="btn" href="/blog/">Naar de blog</a>
+          <a class="btn" href="/kaart/">Bekijk de kaart</a>
+        </div>
       </div>
-    </div>
-  </section>
+
+      <div class="card">
+        <h2>Waar ik nu ben</h2>
+        <p>
+          Op dit moment bevind ik me in <strong>Quito, Ecuador</strong>. De homepage toont een live kaart en een
+          tijdlijn. Verwacht de komende tijd verbeteringen aan lay‑out, snelheid en navigatie.
+        </p>
+        <p class="muted">Tip: volg de updates via de homepage en mijn blogoverzicht.</p>
+      </div>
+    </section>
+
+    <section class="card" style="margin-top:1.25rem;">
+      <h2>Over deze website</h2>
+      <p>
+        <em>WaarIsNiels</em> is een persoonlijke site met focus op reizen en verhalen. Technisch draait alles op Astro.
+        Ik voeg stap voor stap features toe zoals een interactieve kaart, een tijdlijn en nette bloglayouts. Omdat ik
+        onlangs de structuur heb moeten herstellen, staat er nog wat in de steigers—maar de basis is er.
+      </p>
+      <div class="links">
+        <a class="btn" href="/blog/">Laatste blogposts</a>
+        <a class="btn" href="/">Terug naar home</a>
+      </div>
+    </section>
+
+    <section class="card" style="margin-top:1.25rem;">
+      <h2>Contact</h2>
+      <p>Vragen of suggesties? Stuur gerust een berichtje.</p>
+      <div class="links">
+        <a class="btn" href="mailto:jouwmail@example.com">Mail mij</a>
+        <a class="btn" href="https://instagram.com/n.veerman" target="_blank" rel="noopener noreferrer">Instagram</a>
+      </div>
+    </section>
+  </main>
 </BaseLayout>

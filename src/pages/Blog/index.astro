@@ -1,0 +1,21 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+import BlogPostPreview from '../../components/BlogPostPreview.astro';
+
+const posts = (await getCollection('blog', ({ data }) => data.draft !== true))
+  .sort((a, b) => new Date(b.data.pubDate).valueOf() - new Date(a.data.pubDate).valueOf());
+---
+
+<BaseLayout title="Blog" description="Alle blogposts">
+  <section class="container mx-auto px-6 py-10">
+    <h1 class="text-3xl font-bold mb-6">Blog</h1>
+    {posts.length ? (
+      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {posts.map((p) => <BlogPostPreview post={p} />)}
+      </div>
+    ) : (
+      <p>Geen posts gepubliceerd.</p>
+    )}
+  </section>
+</BaseLayout>

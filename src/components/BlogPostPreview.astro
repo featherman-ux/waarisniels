@@ -1,26 +1,16 @@
 ---
-export interface Props {
-  post: any;
-}
+export interface Props { post: any }
 const { post } = Astro.props;
 const { title, description, pubDate, image } = post.data;
 const href = `/blog/${post.slug}/`;
 ---
 
-<article class="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm overflow-hidden hover:shadow-md transition-shadow">
+<article class="rounded-lg border bg-white dark:bg-gray-800 p-4 shadow-sm hover:shadow-md transition">
   <a href={href} class="block">
-    {image?.url ? (
-      <img src={image.url} alt={image?.alt ?? title} class="w-full h-48 object-cover" />
-    ) : null}
-    <div class="p-4">
-      <h3 class="text-xl font-semibold mb-1">{title}</h3>
-      <p class="text-sm text-gray-500 mb-3">
-        {new Date(pubDate).toLocaleDateString('nl-NL')}
-      </p>
-      {description ? (
-        <p class="text-gray-700 dark:text-gray-300 line-clamp-3">{description}</p>
-      ) : null}
-      <span class="inline-block mt-4 text-primary dark:text-primary-light underline">Lees verder</span>
-    </div>
+    {image?.url && <img src={image.url} alt={image?.alt ?? title} class="w-full h-44 object-cover rounded-md mb-3" />}
+    <h3 class="text-xl font-semibold">{title}</h3>
+    <p class="text-sm text-gray-500 mb-2">{new Date(pubDate).toLocaleDateString('nl-NL')}</p>
+    {description && <p class="text-gray-700 dark:text-gray-300 line-clamp-3">{description}</p>}
+    <span class="inline-block mt-3 underline">Lees verder</span>
   </a>
 </article>
