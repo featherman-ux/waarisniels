@@ -9,6 +9,8 @@ draft: false
 ---
 
 # Hallo, hallo, hallo!
+(Het laden van de foto's lukt nog niet echt goed vgm. Of het ligt aan mijn internet hier)
+
 Welkom allemaal bij mijn eerste blogpost. Het is eindelijk gelukt om alles draaiende te krijgen! Deze blogpost gaat helemaal over mijn avontuur in **Colombia** met de club – van Medellín en Cocorná tot Cartagena. Wil je direct zien waar ik allemaal ben geweest? Check dan [de kaart met mijn route](/map/).
 
 ---
@@ -87,7 +89,6 @@ De laatste stop met de groep. We huurden een motorboot, voeren langs eilandjes, 
 <div class="photo-grid">
   <img src="/images/Colombia/cartagena-motorboatparty.jpeg" alt="Motorbootfeest in Cartagena" />
   <img src="/images/Colombia/cartagena-motorboatparty2.JPG" alt="Feest op het water" />
-  <img src="/images/Colombia/Cartagena.jpeg" alt="Kleurrijke straat in Cartagena" />
 </div>
 
 ---
