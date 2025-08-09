@@ -1,0 +1,119 @@
+---
+/**
+ * Kleine, echte Leaflet-kaart voor de homepage.
+ * Leest data uit /data/route.geojson en /data/places.json (public/…).
+ * Robuust: gebruikt ESM import (geen globale L) en duidelijke foutlogs.
+ */
+const ROUTE_URL  = "/data/route.geojson";
+const PLACES_URL = "/data/places.json";
+---
+
+<style>
+  .mini-map-wrap {
+    position: relative;
+    max-width: 560px;
+    margin: 0 auto 2rem;
+  }
+  .mini-map {
+    height: 260px;              /* compact formaat */
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 6px 14px rgba(0,0,0,0.08);
+  }
+  .mini-map-link {
+    position: absolute; inset: 0; z-index: 20; text-indent: -9999px;
+  }
+  .mini-map-cta {
+    position: absolute; right: 10px; bottom: 10px; z-index: 25;
+    background: #fff; border: 1px solid #e5e7eb; border-radius: 9999px;
+    padding: .35rem .7rem; font-size: .9rem; color: #023047;
+    box-shadow: 0 2px 8px rgba(0,0,0,.06);
+    text-decoration: none;
+  }
+</style>
+
+<div class="mini-map-wrap">
+  <a class="mini-map-link" href="/map/">Bekijk interactieve kaart</a>
+  <div id="mini-map" class="mini-map" role="img" aria-label="Mini kaart van mijn route"></div>
+  <a href="/map/" class="mini-map-cta" aria-label="Bekijk de interactieve kaart">Open kaart →</a>
+</div>
+
+<!-- Leaflet CSS (alleen CSS via CDN is oké) -->
+<link
+  rel="stylesheet"
+  href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css"
+/>
+
+<script type="module" is:inline>
+  // 1) Leaflet ESM laden (geen globale L meer nodig)
+  let L;
+  try {
+    L = await import('https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet-src.esm.js');
+  } catch (e) {
+    console.error("[MiniMap] Kon Leaflet ESM niet laden:", e);
+  }
+
+  if (!L) {
+    // Als CDN policy het blokkeert kunnen we later lokaal hosten (zie opmerking onderaan)
+    throw new Error("Leaflet kon niet geladen worden (ESM).");
+  }
+
+  // 2) Map initialiseren
+  const map = L.map('mini-map', {
+    scrollWheelZoom: false,
+    dragging: true,
+    zoomControl: false
+  });
+
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap contributors'
+  }).addTo(map);
+
+  // Fallback view (Quito)
+  let bounds = null;
+  map.setView([-0.18, -78.47], 3);
+
+  // 3) Route tekenen
+  try {
+    const r = await fetch(ROUTE_URL, { cache: 'no-cache' });
+    if (!r.ok) throw new Error(r.status + " " + r.statusText);
+    const geo = await r.json();
+    const routeLayer = L.geoJSON(geo, {
+      style: (f) => {
+        const mode = f?.properties?.mode;
+        if (mode === 'flight') return { color: '#ffb703', weight: 3, opacity: 0.9, dashArray: '6 6' };
+        if (mode === 'motor')  return { color: '#10b981', weight: 3, opacity: 0.9, dashArray: '2 8' };
+        return { color: '#023047', weight: 3, opacity: 0.9 };
+      }
+    }).addTo(map);
+    try { bounds = routeLayer.getBounds(); } catch {}
+  } catch (e) {
+    console.warn("[MiniMap] Kon route niet laden:", ROUTE_URL, e);
+  }
+
+  // 4) Markers plaatsen
+  try {
+    const r = await fetch(PLACES_URL, { cache: 'no-cache' });
+    if (!r.ok) throw new Error(r.status + " " + r.statusText);
+    const places = await r.json();
+    const markers = [];
+    for (const p of places) {
+      if (typeof p.lat === 'number' && typeof p.lon === 'number') {
+        const m = L.marker([p.lat, p.lon]).addTo(map);
+        m.bindTooltip(p.name || 'Stop', { direction: 'top', offset: [0,-6] });
+        markers.push(m);
+      }
+    }
+    if (!bounds && markers.length) {
+      const group = L.featureGroup(markers);
+      bounds = group.getBounds();
+    }
+  } catch (e) {
+    console.warn("[MiniMap] Kon places niet laden:", PLACES_URL, e);
+  }
+
+  if (bounds && bounds.isValid && bounds.isValid()) {
+    map.fitBounds(bounds.pad(0.25));
+  }
+</script>

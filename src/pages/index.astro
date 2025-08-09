@@ -2,6 +2,7 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { getCollection } from 'astro:content';
 import BlogPostPreview from '../components/BlogPostPreview.astro';
+import MiniMap from '../components/MiniMap.astro';
 
 const latestPosts = (await getCollection('blog', ({ data }) => data.draft !== true))
   .sort((a, b) => new Date(b.data.pubDate) - new Date(a.data.pubDate))
@@ -10,92 +11,46 @@ const latestPosts = (await getCollection('blog', ({ data }) => data.draft !== tr
 
 <BaseLayout title="Waar is Niels?" description="Welkom op mijn reisblog">
   <style>
-    :root {
-      --orange: #ffb703; /* koningshuis-oranje */
-      --blue:   #023047; /* geuzen-blauw   */
-    }
-    /* hero styling */
+    :root { --orange:#ffb703; --blue:#023047; }
     .hero {
-      position: relative;
-      width: 100%;
-      min-height: 300px;
-      overflow: hidden;
-      border-radius: 0.75rem;
-      margin: 1rem auto 2rem;
+      position: relative; width: 100%;
+      min-height: 210px; max-height: 320px;     /* nog iets compacter */
+      overflow: hidden; border-radius: 0.75rem;
+      margin: 0.75rem auto 1.25rem;
       box-shadow: 0 8px 16px rgba(0,0,0,0.1);
     }
-    .hero img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      object-position: center;
-      filter: brightness(0.75);
-    }
-    .hero-text {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      color: white;
-      text-align: center;
-      padding: 1rem 2rem;
-    }
-    .hero-text h1 {
-      font-size: 2.5rem;
-      margin-bottom: 0.5rem;
-    }
-    .hero-text p {
-      font-size: 1.1rem;
-      margin: 0;
-    }
+    .hero img { width: 100%; height: 100%; object-fit: cover; filter: brightness(.7); transform: scale(1.02); }
+    .hero-text { position: absolute; inset: 0; display: grid; place-items: center; color: #fff; text-align: center; padding: 0 1rem; }
+    .hero-text h1 { font-size: 1.9rem; margin: 0 0 .3rem; line-height: 1.2; }
+    .hero-text p { font-size: 0.98rem; margin: 0; opacity: .95; }
 
-    /* posts section */
-    .posts {
-      padding: 2rem 1rem 3rem;
-      background: #f8f9fa;
-      border-radius: 0.75rem;
-      max-width: 1200px;
-      margin: auto;
-    }
-    .posts h2 {
-      color: var(--blue);
-      text-align: center;
-      margin-bottom: 1.5rem;
-      font-size: 2rem;
-    }
-    .grid-posts {
-      display: grid;
-      gap: 1.5rem;
-    }
-    @media (min-width: 640px) {
-      .grid-posts {
-        grid-template-columns: repeat(2, 1fr);
-      }
-    }
-    @media (min-width: 1024px) {
-      .grid-posts {
-        grid-template-columns: repeat(3, 1fr);
-      }
-    }
+    .posts { padding: 1.5rem 1rem 2.5rem; background:#f8f9fa; border-radius:.75rem; max-width:1200px; margin:auto; }
+    .posts h2 { color: var(--blue); text-align:center; margin-bottom:1.1rem; font-size:1.6rem; }
+    .grid-posts { display: grid; gap: 1.1rem; }
+    @media (min-width: 640px) {.grid-posts { grid-template-columns: repeat(2,1fr); } }
+    @media (min-width: 1024px){ .grid-posts { grid-template-columns: repeat(3,1fr); } }
   </style>
 
-  <!-- Hero with image and overlay -->
+  <!-- Compacte hero -->
   <section class="hero">
-    <img src="/images/orange-car.jpg" alt="Oranje auto op de weg">
+    <img src="/images/orange-car.jpg" alt="Oranje auto op de weg" />
     <div class="hero-text">
-      <h1>Waar is Niels?</h1>
-      <p>Deze website is in herontwikkeling – ik heb ’m per ongeluk gesloopt, maar hij komt snel terug!</p>
+      <div>
+        <h1>Waar is Niels?</h1>
+        <p>Website in herontwikkeling – stap voor stap terug online. De eerste blogpost staat live!!!!! Crazy times</p>
+      </div>
     </div>
   </section>
 
-  <!-- Latest blog posts -->
+  <!-- Echte mini-kaart -->
+  <MiniMap />
+
+  <!-- Laatste blogposts -->
   <section class="posts">
     <h2>Laatste blogposts</h2>
     {latestPosts.length > 0 ? (
       <div class="grid-posts">
-        {latestPosts.map(post => (
-          <BlogPostPreview post={post} />
-        ))}
+        {latestPosts.map(post => (<BlogPostPreview post={post} />))}
       </div>
     ) : (
       <p style="text-align:center;">Nog geen blogposts beschikbaar.</p>
