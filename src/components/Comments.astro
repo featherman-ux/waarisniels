@@ -1,0 +1,100 @@
+---
+// /src/components/Comments.astro
+export interface Props { slug: string; title?: string }
+const { slug, title } = Astro.props;
+---
+<style>
+  .comments { margin-top: 2rem; }
+  .comments h3 { margin: 0 0 .75rem; font-size: 1.25rem; color: #023047; }
+  .list { display: grid; gap: .75rem; margin: 1rem 0; }
+  .card { background:#fff; border:1px solid #e5e7eb; border-radius:10px; padding:.75rem .9rem; }
+  .meta { font-size:.85rem; color:#64748b; margin-bottom:.35rem; }
+  form { display:grid; gap:.6rem; background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding: .9rem; }
+  input, textarea { width:100%; border:1px solid #cbd5e1; border-radius:8px; padding:.6rem .7rem; font: inherit; }
+  button { background:#ffb703; color:#022b3a; font-weight:700; border:0; border-radius:8px; padding:.6rem .9rem; cursor:pointer; }
+  button:disabled { opacity:.6; cursor:not-allowed; }
+  .row { display:grid; gap:.6rem; grid-template-columns: 1fr; }
+  @media (min-width:640px){ .row { grid-template-columns: 1fr 2fr; } }
+  .visually-hidden{position:absolute!important;height:1px;width:1px;overflow:hidden;clip:rect(1px,1px,1px,1px);white-space:nowrap}
+</style>
+
+<section class="comments" aria-labelledby="c-head">
+  <h3 id="c-head">Reageren</h3>
+
+  <div class="list" id="c-list" data-slug={slug} data-title={title || ''}>
+    <!-- wordt gevuld door script -->
+  </div>
+
+  <form id="c-form" novalidate>
+    <div class="row">
+      <div>
+        <label for="c-name">Naam (optioneel)</label>
+        <input id="c-name" name="name" maxlength="60" placeholder="Anoniem" />
+      </div>
+      <div style="position:relative">
+        <label for="c-message">Bericht</label>
+        <textarea id="c-message" name="message" rows="3" maxlength="1000" required placeholder="Laat een berichtje achter…"></textarea>
+      </div>
+    </div>
+
+    <!-- Honeypot: echte bezoekers laten dit leeg -->
+    <input class="visually-hidden" type="text" name="website" tabindex="-1" autocomplete="off" />
+
+    <input type="hidden" name="slug" value={slug} />
+    <button type="submit">Plaatsen</button>
+    <span id="c-status" style="margin-left:.5rem;font-size:.9rem;"></span>
+  </form>
+</section>
+
+<script is:inline>
+  const listEl = document.getElementById('c-list');
+  const form = document.getElementById('c-form');
+  const statusEl = document.getElementById('c-status');
+  const slug = listEl?.dataset.slug;
+
+  function esc(s) { return String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+  function fmt(d){ try { return new Date(d).toLocaleString(); } catch { return d; } }
+
+  async function load() {
+    if (!slug) return;
+    const r = await fetch(`/api/comments?slug=${encodeURIComponent(slug)}`);
+    const items = (await r.json()) || [];
+    if (!Array.isArray(items) || items.length === 0) {
+      listEl.innerHTML = '<div class="card">Nog geen reacties. Wees de eerste!</div>';
+      return;
+    }
+    listEl.innerHTML = items.map(it => `
+      <article class="card">
+        <div class="meta">${esc(it.name || 'Anoniem')} • ${esc(fmt(it.createdAt))}</div>
+        <div>${esc(it.message)}</div>
+      </article>
+    `).join('');
+  }
+
+  form?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = form.querySelector('button');
+    btn.disabled = true; statusEl.textContent = 'Plaatsen…';
+    const fd = new FormData(form);
+    const payload = Object.fromEntries(fd.entries());
+    try {
+      const r = await fetch('/api/comments', {
+        method: 'POST',
+        headers: {'content-type':'application/json'},
+        body: JSON.stringify(payload)
+      });
+      const data = await r.json();
+      if (!r.ok) throw new Error(data?.error || 'Mislukt');
+      (form.querySelector('#c-message')).value = '';
+      await load();
+      statusEl.textContent = '✔️ Geplaatst';
+    } catch (err) {
+      statusEl.textContent = '⚠️ ' + (err.message || 'Kon niet plaatsen');
+    } finally {
+      btn.disabled = false;
+      setTimeout(()=> statusEl.textContent = '', 3000);
+    }
+  });
+
+  load();
+</script>

@@ -1,6 +1,9 @@
 ---
+// src/layouts/BlogPostLayout.astro
 import BaseLayout from './BaseLayout.astro';
 import type { CollectionEntry } from 'astro:content';
+// Commentaarfunctionaliteit (optioneel):
+import Comments from '../components/Comments.astro';
 
 export interface Props {
   post: CollectionEntry<'blog'>;
@@ -16,32 +19,93 @@ const dateStr = new Date(pubDate).toLocaleDateString('nl-NL', {
 ---
 
 <BaseLayout title={title} description={description ?? title}>
+  <style>
+    :root { --orange:#ffb703; --blue:#023047; }
+
+    /* Hero (cover) */
+    .hero {
+      position: relative;
+      width: 100%;
+      min-height: 240px;
+      max-height: 420px;
+      border-radius: 14px;
+      overflow: hidden;
+      margin: 0 0 1.25rem 0;
+      box-shadow: 0 10px 22px rgba(2,48,71,.12);
+      background: linear-gradient(120deg, var(--orange), var(--blue));
+    }
+    .hero img {
+      width: 100%; height: 100%; object-fit: cover;
+      filter: brightness(.85);
+      transform: scale(1.02);
+    }
+    .hero-grad {
+      position:absolute; inset:0;
+      background: linear-gradient(180deg, rgba(0,0,0,.05), rgba(0,0,0,.35));
+    }
+    .meta-row {
+      display:flex; flex-wrap:wrap; gap:.5rem .75rem; align-items:center;
+      color:#475569; font-size:.9rem;
+    }
+    .chip {
+      background:#f1f5f9; border:1px solid #e5e7eb; color:#0f172a;
+      padding:.2rem .55rem; border-radius:9999px; font-size:.78rem; font-weight:600;
+    }
+
+    /* Markdown typografie */
+    .prose-wrap { margin-top: 1rem; }
+    .prose-wrap :where(img){ border-radius:12px; box-shadow:0 6px 18px rgba(0,0,0,.08) }
+
+    /* Foto-roosters die je in MD gebruikt (.photo-grid, .photo-duo) */
+    .photo-grid, .photo-duo {
+      display:grid; gap:.75rem; margin: 1rem 0;
+    }
+    .photo-grid  { grid-template-columns: repeat(auto-fill, minmax(180px,1fr)); }
+    .photo-duo   { grid-template-columns: repeat(2, 1fr); }
+    @media (min-width: 768px){
+      .photo-grid  { gap: 1rem; }
+      .photo-duo   { gap: 1rem; }
+    }
+
+    /* Scheidslijn boven comments */
+    .sep { height:1px; background:#e5e7eb; margin:2rem 0; }
+  </style>
+
   <article class="max-w-3xl mx-auto">
-    <header class="mb-6">
-      <h1 class="text-4xl font-bold text-gray-900 dark:text-gray-100">{title}</h1>
-      <p class="text-sm text-gray-500 mt-2">{dateStr}</p>
-      {tags && tags.length > 0 && (
-        <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
-          {tags.map((t, i) => i? ` · ${t}` : t)}
-        </p>
+    {image?.url ? (
+      <figure class="hero">
+        <img src={image.url} alt={image?.alt ?? title} loading="eager" decoding="async" />
+        <div class="hero-grad" />
+      </figure>
+    ) : null}
+
+    <header class="mb-4">
+      <h1 class="text-4xl font-extrabold tracking-tight text-gray-900 dark:text-gray-100">
+        {title}
+      </h1>
+      <div class="meta-row mt-2">
+        <span>{dateStr}</span>
+        {tags && tags.length ? (
+          <span aria-hidden="true">•</span>
+        ) : null}
+        {tags && tags.length ? (
+          <div style="display:flex; gap:.4rem; flex-wrap:wrap">
+            {tags.map((t) => <span class="chip">{t}</span>)}
+          </div>
+        ) : null}
+      </div>
+      {description && (
+        <p class="mt-2 text-gray-600 dark:text-gray-400">{description}</p>
       )}
     </header>
 
-    {image?.url && (
-      <figure class="mb-8">
-        <img
-          src={image.url}
-          alt={image?.alt ?? title}
-          class="w-full h-auto rounded-lg shadow-md"
-          loading="lazy"
-          decoding="async"
-        />
-        {image?.alt && <figcaption class="mt-2 text-sm text-gray-500">{image.alt}</figcaption>}
-      </figure>
-    )}
-
-    <div class="prose prose-neutral dark:prose-invert max-w-none">
+    <!-- Inhoud van de blogpost (Markdown) -->
+    <div class="prose-wrap prose prose-neutral dark:prose-invert max-w-none">
       <Content />
     </div>
+
+    <!-- Comments (optioneel, werkt met Cloudflare KV) -->
+    <div class="sep" />
+    <Comments slug={post.slug} title={title} />
   </article>
 </BaseLayout>

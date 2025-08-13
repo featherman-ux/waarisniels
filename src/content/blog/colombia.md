@@ -9,7 +9,7 @@ draft: false
 ---
 
 # Hallo, hallo, hallo!
-(Het laden van de foto's lukt nog niet echt goed vgm. Of het ligt aan mijn internet hier)
+(Geupdate omdat ik nog wat tekst wilde toevoegen voor mijn eigen archief)
 
 Welkom allemaal bij mijn eerste blogpost. Het is eindelijk gelukt om alles draaiende te krijgen! Deze blogpost gaat helemaal over mijn avontuur in **Colombia** met de club – van Medellín en Cocorná tot Cartagena. Wil je direct zien waar ik allemaal ben geweest? Check dan [de kaart met mijn route](/map/).
 
@@ -26,7 +26,7 @@ We kozen bewust om niet in de stad te starten, maar in het relaxte Cocorná. Joc
 ---
 
 ## Hike rondom Cocorná
-Met een soort partybus werden we naar het startpunt gebracht. De eerste dag was pittig: vijf à zes uur wandelen in de warmte, maar wel met stops bij riviertjes en watervallen. Lunch kregen we geserveerd in een bananenblad; simpel maar heerlijk. We sliepen in een hutje midden in de natuur. De terugweg? Verrassend makkelijk vergeleken met de heenweg (terwijl het praktisch dezelfde route was).
+Met een soort partybus werden we naar het startpunt gebracht. Aangezien we de eerste 2 dagen geen enkele toerist hadden gezien vonden wij de reis al een mooie unieke ervaring, bij het begin van de hike kwamen we echter direct al wel Nederlandse chicks club tegen, iets wat een terugkerend thema werd op de reis maar gelukkig durft niemand in de club met vrouwen te praten dus bleef de reis erg uniek. De eerste dag was pittig: vijf à zes uur wandelen in de warmte, maar wel met stops bij riviertjes en watervallen. Lunch kregen we geserveerd in een bananenblad. We sliepen in een hutje midden in de natuur. De terugweg? Verrassend makkelijk vergeleken met de heenweg (terwijl het praktisch dezelfde route was).
 
 <div class="photo-grid">
   <img src="/images/Colombia/Cocorna-hike.jpeg" alt="Bergpad tijdens de hike" />
@@ -39,7 +39,7 @@ Met een soort partybus werden we naar het startpunt gebracht. De eerste dag was 
 ---
 
 ## Medellín – Stad met twee gezichten
-Na de hike trokken we naar Medellín. We kwamen aan en we vonden het een verrassend mooie en schone stad, dit bleek echter voornamelijk de gegentrificeerde wijk waar wij verbleven. In de rest van de stad hebben wij ons ondanks een berg aan waarschuwingen niet echt onveilig gevoeld. We deden de **Comuna 13-tour**, gingen uit en genoten van het bubbelbad op het dak van ons hostel. Medellín: niet de mooiste stad, wel leuk.
+Na de hike trokken we naar Medellín. We kwamen aan en we vonden het een verrassend mooie en schone stad, dit bleek echter voornamelijk de gegentrificeerde wijk waar wij verbleven. In de rest van de stad hebben wij ons ondanks een berg aan waarschuwingen niet echt onveilig gevoeld. We deden de **Comuna 13-tour**, gingen uit en genoten van het bubbelbad op het dak van ons hostel. Medellín: niet de mooiste stad, wel leuk. Tijdens het uitgaan in Medellin werden wij nog geconfronteerd met de corruptheid in het land: we waren met drie man een biertje aan het drinken in wat schijnbaar een speeltuin was en toen waren we direct de sjaak... Gelukkig waren we ingelicht en wisten we precies wat we niet moesten doen: onze identificatie afgeven. Dus wij geven natuurlijk direct onze identificatie aan de 'agent' en toen had een goede positie om ons even af te troggelen, €40 lichter en toen mochten we weer door!
 
 <div class="photo-grid">
   <img src="/images/Colombia/Medellin-communa13.jpeg" alt="Street art in Comuna 13" />
@@ -75,7 +75,7 @@ Drie dagen op pad:
 ---
 ## Costeño Beach - even ontspannen
 
-Voor 3 dagen verbleven wij in een prachtig verblijf praktisch in de zee, hier konden wij heerlijk even bijkomen en genieten van de leuke feestjes in nabijgelegen hostels.
+Voor 3 dagen verbleven wij in een prachtig verblijf praktisch in de zee, hier konden wij heerlijk even bijkomen en genieten van de leuke feestjes in nabijgelegen hostels. Costeno beach deed een beetje denken aan ons bezoek aan de Therme in Boekarest tijdens clubvakantie een aantal jaar terug. Bij beide accommodaties hoefde we namelijk pas aan het eind alles te betalen door het gebruik van een bandje en waren de kosten per versnapering redelijk onduidelijk, een dodelijke combo.
 
 
 <div class="photo-grid">
@@ -84,7 +84,7 @@ Voor 3 dagen verbleven wij in een prachtig verblijf praktisch in de zee, hier ko
 ---
 
 ## Cartagena – Het grote afscheid
-De laatste stop met de groep. We huurden een motorboot, voeren langs eilandjes, zwommen, dansten, haalden een schouder uit de kom (Wessel) en verbrandden net niet. Daarna ging iedereen z’n eigen weg: de meesten naar huis, Jochem naar New York, Tony bleef in Cartagena en ik vloog naar **Ecuador** voor het volgende hoofdstuk.
+De laatste stop met de groep. We huurden een motorboot, voeren langs eilandjes, zwommen, dansten, haalden een schouder uit de kom (Wessel) en verbrandden net niet. 's Avonds doken we nog een bar in waar niemand was waardoor wij van de dj onze eigen karaoke avond mochten houden, een groot succes voor ons, een minder succes voor de enkele Colombianen die er wel waren. Daarna ging iedereen z’n eigen weg: de meesten naar huis, Jochem naar New York, Tony bleef in Cartagena en ik vloog naar **Ecuador** voor het volgende hoofdstuk.
 
 <div class="photo-grid">
   <img src="/images/Colombia/cartagena-motorboatparty.jpeg" alt="Motorbootfeest in Cartagena" />
