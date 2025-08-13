@@ -2,7 +2,6 @@
 // src/layouts/BlogPostLayout.astro
 import BaseLayout from './BaseLayout.astro';
 import type { CollectionEntry } from 'astro:content';
-// Commentaarfunctionaliteit (optioneel):
 import Comments from '../components/Comments.astro';
 
 export interface Props {
@@ -16,8 +15,13 @@ const { Content } = await post.render();
 const dateStr = new Date(pubDate).toLocaleDateString('nl-NL', {
   year: 'numeric', month: 'long', day: 'numeric'
 });
----
 
+// hulpfunctie: geef .webp bron als je jpg/png is
+function webp(src?: string) {
+  if (!src) return undefined;
+  return src.replace(/\.(jpe?g|png)$/i, '.webp');
+}
+---
 <BaseLayout title={title} description={description ?? title}>
   <style>
     :root { --orange:#ffb703; --blue:#023047; }
@@ -35,14 +39,17 @@ const dateStr = new Date(pubDate).toLocaleDateString('nl-NL', {
       background: linear-gradient(120deg, var(--orange), var(--blue));
     }
     .hero img {
-      width: 100%; height: 100%; object-fit: cover;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
       filter: brightness(.85);
       transform: scale(1.02);
     }
     .hero-grad {
-      position:absolute; inset:0;
+      position: absolute; inset: 0;
       background: linear-gradient(180deg, rgba(0,0,0,.05), rgba(0,0,0,.35));
     }
+
     .meta-row {
       display:flex; flex-wrap:wrap; gap:.5rem .75rem; align-items:center;
       color:#475569; font-size:.9rem;
@@ -54,14 +61,18 @@ const dateStr = new Date(pubDate).toLocaleDateString('nl-NL', {
 
     /* Markdown typografie */
     .prose-wrap { margin-top: 1rem; }
-    .prose-wrap :where(img){ border-radius:12px; box-shadow:0 6px 18px rgba(0,0,0,.08) }
+    .prose-wrap :where(img){
+      border-radius:12px;
+      box-shadow:0 6px 18px rgba(0,0,0,.08)
+    }
 
-    /* Foto-roosters die je in MD gebruikt (.photo-grid, .photo-duo) */
+    /* Foto-roosters die je in MD gebruikt */
     .photo-grid, .photo-duo {
       display:grid; gap:.75rem; margin: 1rem 0;
     }
     .photo-grid  { grid-template-columns: repeat(auto-fill, minmax(180px,1fr)); }
     .photo-duo   { grid-template-columns: repeat(2, 1fr); }
+
     @media (min-width: 768px){
       .photo-grid  { gap: 1rem; }
       .photo-duo   { gap: 1rem; }
@@ -74,7 +85,17 @@ const dateStr = new Date(pubDate).toLocaleDateString('nl-NL', {
   <article class="max-w-3xl mx-auto">
     {image?.url ? (
       <figure class="hero">
-        <img src={image.url} alt={image?.alt ?? title} loading="eager" decoding="async" />
+        <picture>
+          {/* Probeer webp eerst als je er één naast hebt staan */}
+          <source srcset={webp(image.url)} type="image/webp" />
+          <img
+            src={image.url}
+            alt={image?.alt ?? title}
+            loading="eager"
+            decoding="async"
+            sizes="(max-width: 768px) 100vw, 1024px"
+          />
+        </picture>
         <div class="hero-grad" />
       </figure>
     ) : null}
@@ -85,9 +106,7 @@ const dateStr = new Date(pubDate).toLocaleDateString('nl-NL', {
       </h1>
       <div class="meta-row mt-2">
         <span>{dateStr}</span>
-        {tags && tags.length ? (
-          <span aria-hidden="true">•</span>
-        ) : null}
+        {tags && tags.length ? <span aria-hidden="true">•</span> : null}
         {tags && tags.length ? (
           <div style="display:flex; gap:.4rem; flex-wrap:wrap">
             {tags.map((t) => <span class="chip">{t}</span>)}
@@ -99,12 +118,12 @@ const dateStr = new Date(pubDate).toLocaleDateString('nl-NL', {
       )}
     </header>
 
-    <!-- Inhoud van de blogpost (Markdown) -->
+    {/* Inhoud van de blogpost (Markdown) */}
     <div class="prose-wrap prose prose-neutral dark:prose-invert max-w-none">
       <Content />
     </div>
 
-    <!-- Comments (optioneel, werkt met Cloudflare KV) -->
+    {/* Comments (werkt met Cloudflare KV + jouw /functions/api/comments) */}
     <div class="sep" />
     <Comments slug={post.slug} title={title} />
   </article>
