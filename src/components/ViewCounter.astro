@@ -1,17 +1,26 @@
 ---
-const path = Astro.props.path ?? '';
+// src/components/ViewCounter.astro
+import { apiUrl } from '../lib/api';
+const ENDPOINT = apiUrl('/api/view');
 ---
+<span id="views-chip" class="chip">👀 0</span>
 
-<span id="view-count" style="font-variant-numeric: tabular-nums;">—</span> views
-
-<script>
+<script is:inline>
   (async () => {
+    const el = document.getElementById('views-chip');
+    if (!el) return;
+    const endpoint = {e: JSON.stringify(ENDPOINT)}.e;
     try {
-      const path = location.pathname;
-      const res = await fetch(`/api/view?path=${encodeURIComponent(path)}`);
-      const data = await res.json().catch(() => ({}));
-      const el = document.getElementById('view-count');
-      if (el && typeof data.views === 'number') el.textContent = String(data.views);
+      const r = await fetch(`${endpoint}?path=${encodeURIComponent(location.pathname)}`);
+      const j = await r.json();
+      el.textContent = `👀 ${j.views ?? 0}`;
     } catch {}
   })();
 </script>
+
+<style>
+  .chip {
+    background:#f1f5f9; border:1px solid #e5e7eb; color:#0f172a;
+    padding:.3rem .65rem; border-radius:9999px; font-size:.85rem; font-weight:600;
+  }
+</style>

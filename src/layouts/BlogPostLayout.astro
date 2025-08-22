@@ -15,12 +15,6 @@ const { Content } = await post.render();
 const dateStr = new Date(pubDate).toLocaleDateString('nl-NL', {
   year: 'numeric', month: 'long', day: 'numeric'
 });
-
-// hulpfunctie: serveer .webp als die bestaat naast jpg/png
-function webp(src?: string) {
-  if (!src) return undefined;
-  return src.replace(/\.(jpe?g|png)$/i, '.webp');
-}
 ---
 <BaseLayout title={title} description={description ?? title}>
   <style>
@@ -54,14 +48,13 @@ function webp(src?: string) {
   <article class="max-w-3xl mx-auto">
     {image?.url ? (
       <figure class="hero">
-        <picture>
-          <source srcset={webp(image.url)} type="image/webp" />
-          <img
-            src={image.url} alt={image?.alt ?? title}
-            loading="eager" decoding="async"
-            sizes="(max-width: 768px) 100vw, 1024px"
-          />
-        </picture>
+        <img
+          src={image.url}
+          alt={image?.alt ?? title}
+          loading="eager"
+          decoding="async"
+          sizes="(max-width: 768px) 100vw, 1024px"
+        />
         <div class="hero-grad" />
       </figure>
     ) : null}
@@ -81,10 +74,10 @@ function webp(src?: string) {
         ) : null}
       </div>
 
-      {/* Interactie: views + likes */}
+      <!-- Interactie: views + likes -->
       <div class="meta-row" style="gap:1rem; margin-top:.35rem">
         <ViewCounter />
-        <LikeButton />
+        <LikeButton key={post.slug} />
       </div>
 
       {description && (
@@ -99,4 +92,25 @@ function webp(src?: string) {
     <div class="sep" />
     <Comments slug={post.slug} title={title} />
   </article>
+
+  <!-- Lightweight analytics ping -->
+  <script is:inline>
+    (async () => {
+      try {
+        const evt = {
+          type: 'pageview',
+          path: location.pathname,
+          ref: document.referrer || null,
+          ua: navigator.userAgent.slice(0,120),
+          w: screen?.width, h: screen?.height,
+        };
+        fetch('/api/analytics', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify(evt),
+          keepalive: true
+        }).catch(()=>{});
+      } catch {}
+    })();
+  </script>
 </BaseLayout>

@@ -1,24 +1,22 @@
-// Increment like counter
-export async function onRequestPost({ request, env }: { request: Request; env: any }) {
-  const body = await request.json().catch(() => ({}));
-  const key = String(body.key ?? 'site');
+export interface Env { bibbibib: KVNamespace }
 
-  const current = Number((await env.bibbibib.get(key)) ?? 0);
-  const next = current + 1;
-
-  await env.bibbibib.put(key, String(next));
-  return new Response(JSON.stringify({ count: next }), {
-    headers: { 'content-type': 'application/json' },
-  });
-}
-
-// Get current like count
-export async function onRequestGet({ request, env }: { request: Request; env: any }) {
+export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
   const { searchParams } = new URL(request.url);
   const key = String(searchParams.get('key') ?? 'site');
-
-  const current = Number((await env.bibbibib.get(key)) ?? 0);
+  const current = Number((await env.bibbibib.get(`like:${key}`)) ?? 0);
   return new Response(JSON.stringify({ count: current }), {
-    headers: { 'content-type': 'application/json' },
+    headers: { 'content-type': 'application/json', 'Access-Control-Allow-Origin': '*' },
   });
-}
+};
+
+export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
+  const body = await request.json().catch(() => ({}));
+  const key = String(body.key ?? 'site');
+  const k = `like:${key}`;
+  const current = Number((await env.bibbibib.get(k)) ?? 0);
+  const next = current + 1;
+  await env.bibbibib.put(k, String(next));
+  return new Response(JSON.stringify({ count: next }), {
+    headers: { 'content-type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+  });
+};

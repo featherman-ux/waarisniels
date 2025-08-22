@@ -9,12 +9,13 @@ export interface Props {
 
 const { title, description = 'WaarIsNiels – reisblog & kaart' } = Astro.props;
 
-// Huidige pad voor active-state in de navbar
+// Active-state helper for the navbar
 const path = Astro.url.pathname;
 const isActive = (p: string) => path === p || path.startsWith(p);
+
+// Footer year
 const currentYear = new Date().getFullYear();
 ---
-
 <!doctype html>
 <html lang="nl" class="scroll-smooth">
   <head>
@@ -23,7 +24,7 @@ const currentYear = new Date().getFullYear();
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="generator" content={Astro.generator} />
 
-    <title>{title} | WaarIsNiels</title>
+    <title>{`${title} | WaarIsNiels`}</title>
     <meta name="description" content={description} />
 
     <!-- OpenGraph / Twitter -->
@@ -40,11 +41,11 @@ const currentYear = new Date().getFullYear();
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
 
-    <!-- Pagina-specifieke head -->
+    <!-- Page-specific head slot -->
     <slot name="head" />
   </head>
   <body class="bg-gray-50 text-gray-800 dark:bg-gray-900 dark:text-gray-200 antialiased">
-    <!-- Sticky banner / navbar -->
+    <!-- Sticky navbar -->
     <header class="bg-white/90 backdrop-blur dark:bg-gray-800/90 shadow-md sticky top-0 z-50">
       <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
         <a href="/" class="text-2xl font-bold text-primary dark:text-primary-light">
@@ -55,22 +56,31 @@ const currentYear = new Date().getFullYear();
           <a
             href="/blog/"
             aria-current={isActive('/blog/') ? 'page' : undefined}
-            class={`text-sm sm:text-base px-2 py-1 rounded transition-colors
-                    ${isActive('/blog/') ? 'text-primary dark:text-primary-light underline underline-offset-4' : 'text-gray-700 dark:text-gray-300 hover:text-primary dark:hover:text-primary-light'}`}
+            class={`text-sm sm:text-base px-2 py-1 rounded transition-colors ${
+              isActive('/blog/')
+                ? 'text-primary dark:text-primary-light underline underline-offset-4'
+                : 'text-gray-700 dark:text-gray-300 hover:text-primary dark:hover:text-primary-light'
+            }`}
           >Blog</a>
 
           <a
             href="/map/"
             aria-current={isActive('/map/') ? 'page' : undefined}
-            class={`text-sm sm:text-base px-2 py-1 rounded transition-colors
-                    ${isActive('/map/') ? 'text-primary dark:text-primary-light underline underline-offset-4' : 'text-gray-700 dark:text-gray-300 hover:text-primary dark:hover:text-primary-light'}`}
+            class={`text-sm sm:text-base px-2 py-1 rounded transition-colors ${
+              isActive('/map/')
+                ? 'text-primary dark:text-primary-light underline underline-offset-4'
+                : 'text-gray-700 dark:text-gray-300 hover:text-primary dark:hover:text-primary-light'
+            }`}
           >Kaart</a>
 
           <a
             href="/about/"
             aria-current={isActive('/about/') ? 'page' : undefined}
-            class={`text-sm sm:text-base px-2 py-1 rounded transition-colors
-                    ${isActive('/about/') ? 'text-primary dark:text-primary-light underline underline-offset-4' : 'text-gray-700 dark:text-gray-300 hover:text-primary dark:hover:text-primary-light'}`}
+            class={`text-sm sm:text-base px-2 py-1 rounded transition-colors ${
+              isActive('/about/')
+                ? 'text-primary dark:text-primary-light underline underline-offset-4'
+                : 'text-gray-700 dark:text-gray-300 hover:text-primary dark:hover:text-primary-light'
+            }`}
           >Over</a>
         </div>
       </nav>
@@ -88,5 +98,32 @@ const currentYear = new Date().getFullYear();
         Powered by <a href="https://astro.build/" target="_blank" rel="noopener noreferrer" class="hover:text-primary dark:hover:text-primary-light">Astro</a>
       </p>
     </footer>
+
+    <!-- Safe, non-blocking analytics ping: choose endpoint on the CLIENT -->
+    <script is:inline>
+      (async () => {
+        try {
+          const ENDPOINT =
+            (location.hostname === 'localhost' && location.port === '4321')
+              ? 'http://localhost:8788/api/analytics'
+              : '/api/analytics';
+
+          const evt = {
+            type: 'pageview',
+            path: location.pathname,
+            ref: document.referrer || null,
+            ua: navigator.userAgent.slice(0, 120),
+            w: screen?.width, h: screen?.height,
+          };
+
+          fetch(ENDPOINT, {
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify(evt),
+            keepalive: true
+          }).catch(() => {});
+        } catch {}
+      })();
+    </script>
   </body>
 </html>

@@ -1,17 +1,17 @@
 // astro.config.mjs
 import { defineConfig } from 'astro/config';
 import tailwind from '@astrojs/tailwind';
-
 import preact from '@astrojs/preact';
 
 export default defineConfig({
-  site: 'https://waarisniels.nl', // Make sure this is your custom domain
-  base: '/', // Crucial for custom domains pointing to the root of your repo
-  integrations: [// No Cloudflare adapter for static GitHub Pages!
-  tailwind(), preact()],
-  output: 'static', // Must be 'static' for GitHub Pages
+  site: 'https://waarisniels.nl',   // your canonical domain
+  base: '/',                        // root deploy (keep '/')
+  output: 'static',                 // static build; CF Pages will serve it
   build: {
-    format: 'directory', // Ensures clean URLs like /blog/my-post/
+    format: 'directory',            // clean URLs: /page/ instead of /page.html
   },
-  // You can remove any commented-out `vite` or `image` sections if they're not used.
+  integrations: [
+    tailwind(),
+    preact(),                       // enables islands (use client:* in components)
+  ],
 });

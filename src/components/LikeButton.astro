@@ -1,42 +1,46 @@
 ---
-const key = Astro.props.key ?? 'site';
+// src/components/LikeButton.astro
+import { apiUrl } from '../lib/api';
+
+interface Props { key?: string }
+const likeKey: string = (Astro.props?.key as string) ?? Astro.url.pathname.replace(/\/$/, '');
+const ENDPOINT = apiUrl('/api/like');
 ---
+<button id="like-btn" class="chip" data-key={likeKey}>👍 Like (<span id="like-cnt">0</span>)</button>
 
-<button id="like-btn"
-  style="display:inline-flex;align-items:center;gap:.5rem;padding:.45rem .75rem;border:1px solid #e5e7eb;border-radius:9999px;background:#fff;cursor:pointer">
-  <span>👍</span>
-  <span id="like-count">0</span>
-</button>
-
-<script>
+<script is:inline>
   (async () => {
-    const key = `${encodeURIComponent(`like:${location.pathname}`)}`;
-    const countEl = document.getElementById('like-count');
     const btn = document.getElementById('like-btn');
+    const span = document.getElementById('like-cnt');
+    if (!btn || !span) return;
 
-    async function refresh() {
-      try {
-        const r = await fetch(`/api/like?key=${key}`);
-        const d = await r.json().catch(()=>({}));
-        if (typeof d.count === 'number') countEl.textContent = String(d.count);
-      } catch {}
-    }
+    const key = btn.dataset.key || 'site';
+    const endpoint = {e: JSON.stringify(ENDPOINT)}.e;
 
-    btn?.addEventListener('click', async () => {
-      btn.disabled = true;
+    try {
+      const r = await fetch(`${endpoint}?key=${encodeURIComponent(key)}`);
+      const j = await r.json();
+      span.textContent = String(j.count ?? 0);
+    } catch {}
+
+    btn.addEventListener('click', async () => {
       try {
-        const r = await fetch('/api/like', {
+        const r = await fetch(endpoint, {
           method: 'POST',
-          headers: {'content-type':'application/json'},
-          body: JSON.stringify({ key })
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ key }),
         });
-        const d = await r.json().catch(()=>({}));
-        if (typeof d.count === 'number') countEl.textContent = String(d.count);
-      } finally {
-        btn.disabled = false;
-      }
+        const j = await r.json();
+        span.textContent = String(j.count ?? 0);
+      } catch {}
     });
-
-    refresh();
   })();
 </script>
+
+<style>
+  .chip {
+    background:#f1f5f9; border:1px solid #e5e7eb; color:#0f172a;
+    padding:.3rem .65rem; border-radius:9999px; font-size:.85rem; font-weight:600;
+    cursor:pointer;
+  }
+</style>

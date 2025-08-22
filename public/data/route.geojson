@@ -1,93 +1,71 @@
 {
   "type": "FeatureCollection",
   "features": [
-    {
-      "type": "Feature",
+    { "type": "Feature",
       "properties": { "name": "Medellín ➜ Cocorná", "mode": "bus", "order": 1 },
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
-          [-75.5812, 6.2442],
-          [-75.1850, 6.0579]
-        ]
-      }
+      "geometry": { "type": "LineString", "coordinates": [[-75.5812, 6.2442], [-75.1850, 6.0579]] }
     },
-    {
-      "type": "Feature",
+    { "type": "Feature",
       "properties": { "name": "Cocorná ➜ Medellín", "mode": "bus", "order": 2 },
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
-          [-75.1850, 6.0579],
-          [-75.5812, 6.2442]
-        ]
-      }
+      "geometry": { "type": "LineString", "coordinates": [[-75.1850, 6.0579], [-75.5812, 6.2442]] }
     },
-    {
-      "type": "Feature",
+    { "type": "Feature",
       "properties": { "name": "Medellín ✈ Santa Marta", "mode": "flight", "order": 3 },
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
-          [-75.5812, 6.2442],
-          [-74.1990, 11.2408]
-        ]
-      }
+      "geometry": { "type": "LineString", "coordinates": [[-75.5812, 6.2442], [-74.1990, 11.2408]] }
     },
-    {
-      "type": "Feature",
+    { "type": "Feature",
       "properties": { "name": "Santa Marta ➜ Riohacha", "mode": "motor", "order": 4 },
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
-          [-74.1990, 11.2408],
-          [-72.9070, 11.5440]
-        ]
-      }
+      "geometry": { "type": "LineString", "coordinates": [[-74.1990, 11.2408], [-72.9070, 11.5440]] }
     },
-    {
-      "type": "Feature",
+    { "type": "Feature",
       "properties": { "name": "Riohacha ➜ Cabo de la Vela", "mode": "motor", "order": 5 },
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
-          [-72.9070, 11.5440],
-          [-72.1690, 12.2010]
-        ]
-      }
+      "geometry": { "type": "LineString", "coordinates": [[-72.9070, 11.5440], [-72.1690, 12.2010]] }
     },
-    {
-      "type": "Feature",
+    { "type": "Feature",
       "properties": { "name": "Cabo de la Vela ➜ Costeño Beach", "mode": "motor", "order": 6 },
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
-          [-72.1690, 12.2010],
-          [-73.8160, 11.2650]
-        ]
-      }
+      "geometry": { "type": "LineString", "coordinates": [[-72.1690, 12.2010], [-73.8160, 11.2650]] }
     },
-    {
-      "type": "Feature",
+    { "type": "Feature",
       "properties": { "name": "Costeño Beach ➜ Cartagena", "mode": "bus", "order": 7 },
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
-          [-73.8160, 11.2650],
-          [-75.4790, 10.3910]
-        ]
-      }
+      "geometry": { "type": "LineString", "coordinates": [[-73.8160, 11.2650], [-75.4790, 10.3910]] }
     },
-    {
-      "type": "Feature",
-      "properties": { "name": "Cartagena ✈ Quito (einde route 1 ➜ nieuwe start)", "mode": "flight", "order": 8 },
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
-          [-75.4790, 10.3910],
-          [-78.4678, -0.1807]
-        ]
-      }
+    { "type": "Feature",
+      "properties": { "name": "Cartagena ✈ Quito", "mode": "flight", "order": 8 },
+      "geometry": { "type": "LineString", "coordinates": [[-75.4790, 10.3910], [-78.4678, -0.1807]] }
+    },
+
+    { "type": "Feature",
+      "properties": { "name": "Quito ➜ Quilotoa", "mode": "motor", "order": 9 },
+      "geometry": { "type": "LineString", "coordinates": [[-78.4678, -0.1807], [-78.9010, -0.8640]] }
+    },
+    { "type": "Feature",
+      "properties": { "name": "Quilotoa ➜ Llullu Llama (Isinliví)", "mode": "motor", "order": 10 },
+      "geometry": { "type": "LineString", "coordinates": [[-78.9010, -0.8640], [-78.8450, -0.5539]] }
+    },
+    { "type": "Feature",
+      "properties": { "name": "Isinliví ➜ Quito", "mode": "motor", "order": 11 },
+      "geometry": { "type": "LineString", "coordinates": [[-78.8450, -0.5539], [-78.4678, -0.1807]] }
+    },
+
+    { "type": "Feature",
+      "properties": { "name": "Quito ✈ Santa Cruz (Puerto Ayora)", "mode": "flight", "order": 12 },
+      "geometry": { "type": "LineString", "coordinates": [[-78.4678, -0.1807], [-90.3510, -0.7390]] }
+    },
+    { "type": "Feature",
+      "properties": { "name": "Santa Cruz ⇢ Isabela (veerboot)", "mode": "boat", "order": 13 },
+      "geometry": { "type": "LineString", "coordinates": [[-90.3510, -0.7390], [-90.9650, -0.9550]] }
+    },
+    { "type": "Feature",
+      "properties": { "name": "Isabela ⇢ Santa Cruz (veerboot)", "mode": "boat", "order": 14 },
+      "geometry": { "type": "LineString", "coordinates": [[-90.9650, -0.9550], [-90.3510, -0.7390]] }
+    },
+    { "type": "Feature",
+      "properties": { "name": "Santa Cruz ⇢ San Cristóbal (veerboot)", "mode": "boat", "order": 15 },
+      "geometry": { "type": "LineString", "coordinates": [[-90.3510, -0.7390], [-89.6100, -0.9030]] }
+    },
+    { "type": "Feature",
+      "properties": { "name": "San Cristóbal ✈ Guayaquil", "mode": "flight", "order": 16 },
+      "geometry": { "type": "LineString", "coordinates": [[-89.6100, -0.9030], [-79.9220, -2.1700]] }
     }
   ]
 }

@@ -1,17 +1,12 @@
-// /functions/api/comments.ts
-// KV-bindingnaam = "bibbibib" (zoals ingesteld bij Pages → Settings → Bindings)
-
-export interface Env {
-  bibbibib: KVNamespace; // <-- gebruik deze naam exact
-}
+export interface Env { bibbibib: KVNamespace }
 
 type Comment = {
   id: string;
   slug: string;
   name: string;
   message: string;
-  createdAt: string; // ISO
-  ipHash?: string;   // rudimentaire throttle
+  createdAt: string;
+  ipHash?: string;
 };
 
 const cors = {
@@ -26,13 +21,9 @@ function json(data: unknown, init: ResponseInit = {}) {
     ...init,
   });
 }
-
-function bad(msg: string, status = 400) {
-  return json({ error: msg }, { status });
-}
+const bad = (msg: string, status = 400) => json({ error: msg }, { status });
 
 function hashIP(ip: string) {
-  // super simpele hash om IP niet in plain text op te slaan
   let h = 0;
   for (let i = 0; i < ip.length; i++) h = (h * 31 + ip.charCodeAt(i)) | 0;
   return String(h);
@@ -59,10 +50,10 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
   const body = await request.json().catch(() => ({} as any));
   const { slug, name, message, website } = body ?? {};
 
-  // Honeypot — echte users laten dit leeg
   if (website) return bad('Spam detected', 422);
   if (!slug) return bad('Missing slug');
   if (typeof message !== 'string' || message.trim().length < 2) return bad('Message too short');
+
   const cleanMsg = message.trim().slice(0, 1000);
   const cleanName = (typeof name === 'string' ? name : '').trim().slice(0, 60) || 'Anoniem';
 
@@ -86,13 +77,11 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
     ipHash: hashIP(ip),
   };
 
-  // simpele caps
   const MAX_PER_POST = 500;
   const next = [...list, item].slice(-MAX_PER_POST);
 
   await env.bibbibib.put(key, JSON.stringify(next), {
-    // optioneel: automatische expiratie in 2 jaar
-    expirationTtl: 60 * 60 * 24 * 730,
+    expirationTtl: 60 * 60 * 24 * 730, // 2 years
   });
 
   return json(item, { status: 201 });
