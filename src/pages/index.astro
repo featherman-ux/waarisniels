@@ -3,6 +3,7 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { getCollection } from 'astro:content';
 import BlogPostPreview from '../components/BlogPostPreview.astro';
+import HomePopup from '../components/HomePopup.astro'; // ⬅️ popup import
 
 const latestPosts = (await getCollection('blog', ({ data }) => data.draft !== true))
   .sort((a, b) => new Date(b.data.pubDate).valueOf() - new Date(a.data.pubDate).valueOf())
@@ -14,7 +15,7 @@ const latestPosts = (await getCollection('blog', ({ data }) => data.draft !== tr
     :root { --orange:#ffb703; --blue:#023047; }
     .hero {
       position: relative; width: 100%;
-      min-height: 350px; /* terug naar grotere hoogte */
+      min-height: 350px;
       max-height: 500px;
       overflow: hidden; border-radius: 0.75rem;
       margin: 0.75rem auto 1.25rem;
@@ -41,10 +42,13 @@ const latestPosts = (await getCollection('blog', ({ data }) => data.draft !== tr
     <div class="hero-text">
       <div>
         <h1>Waar is Niels?</h1>
-        <p>Website in herontwikkeling – stap voor stap terug online. De eerste blogpost staat live!!!!! Crazy times</p>
+        <p>Website in herontwikkeling – stap voor stap terug online. De eerste blogposts staan live!!!!! Crazy times</p>
       </div>
     </div>
   </section>
+
+  <!-- ⬇️ Popup (tonen op homepage, 1x per persoon) -->
+  <HomePopup />
 
   <!-- Link naar kaart -->
   <div class="map-link">
