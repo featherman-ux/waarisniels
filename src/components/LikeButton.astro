@@ -1,0 +1,42 @@
+---
+const key = Astro.props.key ?? 'site';
+---
+
+<button id="like-btn"
+  style="display:inline-flex;align-items:center;gap:.5rem;padding:.45rem .75rem;border:1px solid #e5e7eb;border-radius:9999px;background:#fff;cursor:pointer">
+  <span>👍</span>
+  <span id="like-count">0</span>
+</button>
+
+<script>
+  (async () => {
+    const key = `${encodeURIComponent(`like:${location.pathname}`)}`;
+    const countEl = document.getElementById('like-count');
+    const btn = document.getElementById('like-btn');
+
+    async function refresh() {
+      try {
+        const r = await fetch(`/api/like?key=${key}`);
+        const d = await r.json().catch(()=>({}));
+        if (typeof d.count === 'number') countEl.textContent = String(d.count);
+      } catch {}
+    }
+
+    btn?.addEventListener('click', async () => {
+      btn.disabled = true;
+      try {
+        const r = await fetch('/api/like', {
+          method: 'POST',
+          headers: {'content-type':'application/json'},
+          body: JSON.stringify({ key })
+        });
+        const d = await r.json().catch(()=>({}));
+        if (typeof d.count === 'number') countEl.textContent = String(d.count);
+      } finally {
+        btn.disabled = false;
+      }
+    });
+
+    refresh();
+  })();
+</script>

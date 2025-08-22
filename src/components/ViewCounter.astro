@@ -1,0 +1,17 @@
+---
+const path = Astro.props.path ?? '';
+---
+
+<span id="view-count" style="font-variant-numeric: tabular-nums;">—</span> views
+
+<script>
+  (async () => {
+    try {
+      const path = location.pathname;
+      const res = await fetch(`/api/view?path=${encodeURIComponent(path)}`);
+      const data = await res.json().catch(() => ({}));
+      const el = document.getElementById('view-count');
+      if (el && typeof data.views === 'number') el.textContent = String(data.views);
+    } catch {}
+  })();
+</script>

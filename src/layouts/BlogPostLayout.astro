@@ -3,10 +3,10 @@
 import BaseLayout from './BaseLayout.astro';
 import type { CollectionEntry } from 'astro:content';
 import Comments from '../components/Comments.astro';
+import ViewCounter from '../components/ViewCounter.astro';
+import LikeButton from '../components/LikeButton.astro';
 
-export interface Props {
-  post: CollectionEntry<'blog'>;
-}
+export interface Props { post: CollectionEntry<'blog'>; }
 
 const { post } = Astro.props;
 const { title, description, pubDate, image, tags } = post.data;
@@ -16,7 +16,7 @@ const dateStr = new Date(pubDate).toLocaleDateString('nl-NL', {
   year: 'numeric', month: 'long', day: 'numeric'
 });
 
-// hulpfunctie: geef .webp bron als je jpg/png is
+// hulpfunctie: serveer .webp als die bestaat naast jpg/png
 function webp(src?: string) {
   if (!src) return undefined;
   return src.replace(/\.(jpe?g|png)$/i, '.webp');
@@ -26,59 +26,28 @@ function webp(src?: string) {
   <style>
     :root { --orange:#ffb703; --blue:#023047; }
 
-    /* Hero (cover) */
     .hero {
-      position: relative;
-      width: 100%;
-      min-height: 240px;
-      max-height: 420px;
-      border-radius: 14px;
-      overflow: hidden;
+      position: relative; width: 100%;
+      min-height: 240px; max-height: 420px;
+      border-radius: 14px; overflow: hidden;
       margin: 0 0 1.25rem 0;
       box-shadow: 0 10px 22px rgba(2,48,71,.12);
       background: linear-gradient(120deg, var(--orange), var(--blue));
     }
-    .hero img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      filter: brightness(.85);
-      transform: scale(1.02);
-    }
-    .hero-grad {
-      position: absolute; inset: 0;
-      background: linear-gradient(180deg, rgba(0,0,0,.05), rgba(0,0,0,.35));
-    }
+    .hero img { width:100%; height:100%; object-fit:cover; filter:brightness(.85); transform:scale(1.02); }
+    .hero-grad { position:absolute; inset:0; background:linear-gradient(180deg, rgba(0,0,0,.05), rgba(0,0,0,.35)); }
 
-    .meta-row {
-      display:flex; flex-wrap:wrap; gap:.5rem .75rem; align-items:center;
-      color:#475569; font-size:.9rem;
-    }
-    .chip {
-      background:#f1f5f9; border:1px solid #e5e7eb; color:#0f172a;
-      padding:.2rem .55rem; border-radius:9999px; font-size:.78rem; font-weight:600;
-    }
+    .meta-row { display:flex; flex-wrap:wrap; gap:.5rem .75rem; align-items:center; color:#475569; font-size:.9rem; }
+    .chip { background:#f1f5f9; border:1px solid #e5e7eb; color:#0f172a; padding:.2rem .55rem; border-radius:9999px; font-size:.78rem; font-weight:600; }
 
-    /* Markdown typografie */
     .prose-wrap { margin-top: 1rem; }
-    .prose-wrap :where(img){
-      border-radius:12px;
-      box-shadow:0 6px 18px rgba(0,0,0,.08)
-    }
+    .prose-wrap :where(img){ border-radius:12px; box-shadow:0 6px 18px rgba(0,0,0,.08) }
 
-    /* Foto-roosters die je in MD gebruikt */
-    .photo-grid, .photo-duo {
-      display:grid; gap:.75rem; margin: 1rem 0;
-    }
-    .photo-grid  { grid-template-columns: repeat(auto-fill, minmax(180px,1fr)); }
-    .photo-duo   { grid-template-columns: repeat(2, 1fr); }
+    .photo-grid, .photo-duo { display:grid; gap:.75rem; margin:1rem 0; }
+    .photo-grid { grid-template-columns: repeat(auto-fill, minmax(180px,1fr)); }
+    .photo-duo { grid-template-columns: repeat(2,1fr); }
+    @media (min-width:768px){ .photo-grid, .photo-duo { gap:1rem; } }
 
-    @media (min-width: 768px){
-      .photo-grid  { gap: 1rem; }
-      .photo-duo   { gap: 1rem; }
-    }
-
-    /* Scheidslijn boven comments */
     .sep { height:1px; background:#e5e7eb; margin:2rem 0; }
   </style>
 
@@ -86,13 +55,10 @@ function webp(src?: string) {
     {image?.url ? (
       <figure class="hero">
         <picture>
-          {/* Probeer webp eerst als je er één naast hebt staan */}
           <source srcset={webp(image.url)} type="image/webp" />
           <img
-            src={image.url}
-            alt={image?.alt ?? title}
-            loading="eager"
-            decoding="async"
+            src={image.url} alt={image?.alt ?? title}
+            loading="eager" decoding="async"
             sizes="(max-width: 768px) 100vw, 1024px"
           />
         </picture>
@@ -104,6 +70,7 @@ function webp(src?: string) {
       <h1 class="text-4xl font-extrabold tracking-tight text-gray-900 dark:text-gray-100">
         {title}
       </h1>
+
       <div class="meta-row mt-2">
         <span>{dateStr}</span>
         {tags && tags.length ? <span aria-hidden="true">•</span> : null}
@@ -113,17 +80,22 @@ function webp(src?: string) {
           </div>
         ) : null}
       </div>
+
+      {/* Interactie: views + likes */}
+      <div class="meta-row" style="gap:1rem; margin-top:.35rem">
+        <ViewCounter />
+        <LikeButton />
+      </div>
+
       {description && (
         <p class="mt-2 text-gray-600 dark:text-gray-400">{description}</p>
       )}
     </header>
 
-    {/* Inhoud van de blogpost (Markdown) */}
     <div class="prose-wrap prose prose-neutral dark:prose-invert max-w-none">
       <Content />
     </div>
 
-    {/* Comments (werkt met Cloudflare KV + jouw /functions/api/comments) */}
     <div class="sep" />
     <Comments slug={post.slug} title={title} />
   </article>

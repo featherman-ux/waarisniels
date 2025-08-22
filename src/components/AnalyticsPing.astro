@@ -1,0 +1,20 @@
+<script>
+  // minimal, anonymous pageview/event ping
+  (async () => {
+    try {
+      const evt = {
+        type: 'pageview',
+        path: location.pathname,
+        ref: document.referrer || null,
+        ua: navigator.userAgent.slice(0,120),
+        w: screen?.width, h: screen?.height,
+      };
+      fetch('/api/analytics', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify(evt),
+        keepalive: true
+      }).catch(()=>{});
+    } catch {}
+  })();
+</script>
