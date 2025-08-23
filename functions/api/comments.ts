@@ -1,5 +1,7 @@
-export interface Env { bibbibib: KVNamespace }
+// src/pages/api/comments.ts
+import type { APIRoute } from 'astro';
 
+// Definieer je types, net zoals je al had
 type Comment = {
   id: string;
   slug: string;
@@ -9,80 +11,80 @@ type Comment = {
   ipHash?: string;
 };
 
-const cors = {
+// CORS headers voor cross-origin requests
+const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
   'Access-Control-Allow-Headers': 'Content-Type',
 };
 
-function json(data: unknown, init: ResponseInit = {}) {
+// Functie voor een JSON-response
+const jsonResponse = (data: unknown, init: ResponseInit = {}) => {
   return new Response(JSON.stringify(data), {
-    headers: { 'content-type': 'application/json; charset=utf-8', ...cors },
+    headers: { 'Content-Type': 'application/json; charset=utf-8', ...corsHeaders },
     ...init,
   });
+};
+const badRequest = (msg: string, status = 400) => jsonResponse({ error: msg }, { status });
+
+// Functie om het IP-adres te hashen
+const hashIP = async (ip: string) => {
+  const msgUint8 = new TextEncoder().encode(ip);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 }
-const bad = (msg: string, status = 400) => json({ error: msg }, { status });
 
-function hashIP(ip: string) {
-  let h = 0;
-  for (let i = 0; i < ip.length; i++) h = (h * 31 + ip.charCodeAt(i)) | 0;
-  return String(h);
-}
-
-export const onRequestOptions: PagesFunction<Env> = async () =>
-  new Response(null, { headers: cors });
-
-export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
-  const url = new URL(request.url);
-  const slug = url.searchParams.get('slug');
-  if (!slug) return bad('Missing slug');
-
-  const key = `comments:${slug}`;
-  const raw = (await env.bibbibib.get(key)) || '[]';
-  return json(JSON.parse(raw));
+// Handler voor OPTIONS (preflight requests voor CORS)
+export const OPTIONS: APIRoute = async () => {
+  return new Response(null, { headers: corsHeaders });
 };
 
-export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
-  if (request.headers.get('content-type')?.includes('application/json') !== true) {
-    return bad('Expected JSON body');
-  }
+// Handler voor GET requests (ophalen van comments)
+export const GET: APIRoute = async ({ request, locals }) => {
+  const kv = locals.runtime.env.bibbibib; // Toegang tot KV via locals
+  const url = new URL(request.url);
+  const slug = url.searchParams.get('slug');
 
-  const body = await request.json().catch(() => ({} as any));
-  const { slug, name, message, website } = body ?? {};
-
-  if (website) return bad('Spam detected', 422);
-  if (!slug) return bad('Missing slug');
-  if (typeof message !== 'string' || message.trim().length < 2) return bad('Message too short');
-
-  const cleanMsg = message.trim().slice(0, 1000);
-  const cleanName = (typeof name === 'string' ? name : '').trim().slice(0, 60) || 'Anoniem';
-
-  // Throttle: max 1 post / 30s / IP
-  const ip = request.headers.get('CF-Connecting-IP') || '0.0.0.0';
-  const ipKey = `rate:${hashIP(ip)}`;
-  const already = await env.bibbibib.get(ipKey);
-  if (already) return bad('Even rustig aan 😉', 429);
-  await env.bibbibib.put(ipKey, '1', { expirationTtl: 30 });
+  if (!slug) return badRequest('Missing slug');
 
   const key = `comments:${slug}`;
-  const now = new Date().toISOString();
-  const list: Comment[] = JSON.parse((await env.bibbibib.get(key)) || '[]');
+  const comments = await kv.get(key, { type: 'json' }) || [];
+  return jsonResponse(comments);
+};
+
+// Handler voor POST requests (plaatsen van een comment)
+export const POST: APIRoute = async ({ request, locals, clientAddress }) => {
+  const kv = locals.runtime.env.bibbibib;
+
+  const body = await request.json().catch(() => ({}));
+  const { slug, name, message, website } = body ?? {};
+
+  if (website) return badRequest('Spam detected', 422); // Honeypot
+  if (!slug) return badRequest('Missing slug');
+  if (typeof message !== 'string' || message.trim().length < 2) return badRequest('Message too short');
+
+  // Rate limiting
+  const ipHash = await hashIP(clientAddress);
+  const rateLimitKey = `rate:${ipHash}`;
+  if (await kv.get(rateLimitKey)) {
+    return badRequest('Je plaatst reacties te snel.', 429);
+  }
+  await kv.put(rateLimitKey, '1', { expirationTtl: 30 }); // 30 seconden cooldown
 
   const item: Comment = {
     id: crypto.randomUUID(),
     slug,
-    name: cleanName,
-    message: cleanMsg,
-    createdAt: now,
-    ipHash: hashIP(ip),
+    name: (String(name || 'Anoniem')).trim().slice(0, 60),
+    message: String(message).trim().slice(0, 1000),
+    createdAt: new Date().toISOString(),
   };
 
-  const MAX_PER_POST = 500;
-  const next = [...list, item].slice(-MAX_PER_POST);
+  const commentsKey = `comments:${slug}`;
+  const existingComments: Comment[] = await kv.get(commentsKey, { type: 'json' }) || [];
+  const newComments = [...existingComments, item].slice(-500); // Max 500 comments
 
-  await env.bibbibib.put(key, JSON.stringify(next), {
-    expirationTtl: 60 * 60 * 24 * 730, // 2 years
-  });
+  await kv.put(commentsKey, JSON.stringify(newComments));
 
-  return json(item, { status: 201 });
+  return jsonResponse(item, { status: 201 });
 };

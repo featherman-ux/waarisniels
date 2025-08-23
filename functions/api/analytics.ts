@@ -1,16 +1,40 @@
-export interface Env { bibbibib: KVNamespace }
+// src/pages/api/analytics.ts
+import type { APIRoute } from 'astro';
 
-export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
-  const evt = await request.json().catch(() => ({}));
-  const ts = Date.now();
-  const dayKey = new Date(ts).toISOString().slice(0, 10); // YYYY-MM-DD
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type',
+};
 
-  const raw = (await env.bibbibib.get(`analytics:${dayKey}`)) ?? '[]';
-  const arr = JSON.parse(raw);
-  arr.push({ ts, ...evt });
-  await env.bibbibib.put(`analytics:${dayKey}`, JSON.stringify(arr));
+export const OPTIONS: APIRoute = async () => {
+  return new Response(null, { headers: corsHeaders });
+};
+
+export const POST: APIRoute = async ({ request, locals }) => {
+  const kv = locals.runtime.env.bibbibib;
+  const eventData = await request.json().catch(() => ({}));
+
+  const timestamp = Date.now();
+  const dayKey = new Date(timestamp).toISOString().slice(0, 10); // Formaat: YYYY-MM-DD
+  const analyticsKey = `analytics:${dayKey}`;
+
+  // Haal de bestaande data voor vandaag op
+  const existingData: any[] = await kv.get(analyticsKey, { type: 'json' }) || [];
+
+  // Voeg de nieuwe gebeurtenis toe
+  existingData.push({
+    timestamp,
+    ...eventData,
+  });
+
+  // Sla de bijgewerkte lijst op
+  await kv.put(analyticsKey, JSON.stringify(existingData));
 
   return new Response(JSON.stringify({ ok: true }), {
-    headers: { 'content-type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+    headers: {
+      'Content-Type': 'application/json',
+      ...corsHeaders,
+    },
   });
 };

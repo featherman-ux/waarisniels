@@ -1,22 +1,49 @@
-export interface Env { bibbibib: KVNamespace }
+// src/pages/api/likes.ts
+import type { APIRoute } from 'astro';
 
-export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
-  const { searchParams } = new URL(request.url);
-  const key = String(searchParams.get('key') ?? 'site');
-  const current = Number((await env.bibbibib.get(`like:${key}`)) ?? 0);
-  return new Response(JSON.stringify({ count: current }), {
-    headers: { 'content-type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type',
+};
+
+export const OPTIONS: APIRoute = async () => {
+  return new Response(null, { headers: corsHeaders });
+};
+
+// Functie om het huidige aantal likes op te halen
+export const GET: APIRoute = async ({ request, locals }) => {
+  const kv = locals.runtime.env.bibbibib;
+  const url = new URL(request.url);
+  const key = url.searchParams.get('key') ?? 'site';
+  const likeKey = `like:${key}`;
+
+  const currentLikes = parseInt(await kv.get(likeKey) || '0', 10);
+
+  return new Response(JSON.stringify({ count: currentLikes }), {
+    headers: {
+      'Content-Type': 'application/json',
+      ...corsHeaders,
+    },
   });
 };
 
-export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
+// Functie om een like toe te voegen
+export const POST: APIRoute = async ({ request, locals }) => {
+  const kv = locals.runtime.env.bibbibib;
   const body = await request.json().catch(() => ({}));
-  const key = String(body.key ?? 'site');
-  const k = `like:${key}`;
-  const current = Number((await env.bibbibib.get(k)) ?? 0);
-  const next = current + 1;
-  await env.bibbibib.put(k, String(next));
-  return new Response(JSON.stringify({ count: next }), {
-    headers: { 'content-type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+  const key = body.key ?? 'site';
+  const likeKey = `like:${key}`;
+
+  const currentLikes = parseInt(await kv.get(likeKey) || '0', 10);
+  const nextLikes = currentLikes + 1;
+
+  await kv.put(likeKey, nextLikes.toString());
+
+  return new Response(JSON.stringify({ count: nextLikes }), {
+    headers: {
+      'Content-Type': 'application/json',
+      ...corsHeaders,
+    },
   });
 };

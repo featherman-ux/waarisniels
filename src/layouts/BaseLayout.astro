@@ -11,7 +11,7 @@ const { title, description = 'WaarIsNiels – reisblog & kaart' } = Astro.props;
 
 // Active-state helper for the navbar
 const path = Astro.url.pathname;
-const isActive = (p: string) => path === p || path.startsWith(p);
+const isActive = (p: string) => path === p || path.startsWith(p + '/');
 
 // Footer year
 const currentYear = new Date().getFullYear();
@@ -27,7 +27,6 @@ const currentYear = new Date().getFullYear();
     <title>{`${title} | WaarIsNiels`}</title>
     <meta name="description" content={description} />
 
-    <!-- OpenGraph / Twitter -->
     <meta property="og:title" content={`${title} | WaarIsNiels`} />
     <meta property="og:description" content={description} />
     <meta property="og:type" content="website" />
@@ -36,16 +35,13 @@ const currentYear = new Date().getFullYear();
     <meta name="twitter:title" content={`${title} | WaarIsNiels`} />
     <meta name="twitter:description" content={description} />
 
-    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
 
-    <!-- Page-specific head slot -->
     <slot name="head" />
   </head>
   <body class="bg-gray-50 text-gray-800 dark:bg-gray-900 dark:text-gray-200 antialiased">
-    <!-- Sticky navbar -->
     <header class="bg-white/90 backdrop-blur dark:bg-gray-800/90 shadow-md sticky top-0 z-50">
       <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
         <a href="/" class="text-2xl font-bold text-primary dark:text-primary-light">
@@ -55,32 +51,35 @@ const currentYear = new Date().getFullYear();
         <div class="flex items-center gap-3 sm:gap-5">
           <a
             href="/blog/"
-            aria-current={isActive('/blog/') ? 'page' : undefined}
-            class={`text-sm sm:text-base px-2 py-1 rounded transition-colors ${
-              isActive('/blog/')
+            aria-current={isActive('/blog') ? 'page' : undefined}
+            class:list={[
+              'text-sm sm:text-base px-2 py-1 rounded transition-colors',
+              isActive('/blog')
                 ? 'text-primary dark:text-primary-light underline underline-offset-4'
                 : 'text-gray-700 dark:text-gray-300 hover:text-primary dark:hover:text-primary-light'
-            }`}
+            ]}
           >Blog</a>
 
           <a
             href="/map/"
-            aria-current={isActive('/map/') ? 'page' : undefined}
-            class={`text-sm sm:text-base px-2 py-1 rounded transition-colors ${
-              isActive('/map/')
+            aria-current={isActive('/map') ? 'page' : undefined}
+            class:list={[
+              'text-sm sm:text-base px-2 py-1 rounded transition-colors',
+              isActive('/map')
                 ? 'text-primary dark:text-primary-light underline underline-offset-4'
                 : 'text-gray-700 dark:text-gray-300 hover:text-primary dark:hover:text-primary-light'
-            }`}
+            ]}
           >Kaart</a>
 
           <a
             href="/about/"
-            aria-current={isActive('/about/') ? 'page' : undefined}
-            class={`text-sm sm:text-base px-2 py-1 rounded transition-colors ${
-              isActive('/about/')
+            aria-current={isActive('/about') ? 'page' : undefined}
+            class:list={[
+              'text-sm sm:text-base px-2 py-1 rounded transition-colors',
+              isActive('/about')
                 ? 'text-primary dark:text-primary-light underline underline-offset-4'
                 : 'text-gray-700 dark:text-gray-300 hover:text-primary dark:hover:text-primary-light'
-            }`}
+            ]}
           >Over</a>
         </div>
       </nav>
@@ -99,30 +98,28 @@ const currentYear = new Date().getFullYear();
       </p>
     </footer>
 
-    <!-- Safe, non-blocking analytics ping: choose endpoint on the CLIENT -->
     <script is:inline>
       (async () => {
+        if (typeof window === 'undefined') return;
+
         try {
-          const ENDPOINT =
-            (location.hostname === 'localhost' && location.port === '4321')
-              ? 'http://localhost:8788/api/analytics'
-              : '/api/analytics';
+          const ENDPOINT = '/api/analytics';
 
           const evt = {
-            type: 'pageview',
             path: location.pathname,
             ref: document.referrer || null,
             ua: navigator.userAgent.slice(0, 120),
-            w: screen?.width, h: screen?.height,
+            w: screen.width,
+            h: screen.height,
           };
 
           fetch(ENDPOINT, {
             method: 'POST',
             headers: { 'content-type': 'application/json' },
             body: JSON.stringify(evt),
-            keepalive: true
+            keepalive: true,
           }).catch(() => {});
-        } catch {}
+        } catch (e) {}
       })();
     </script>
   </body>

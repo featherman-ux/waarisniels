@@ -1,0 +1,4 @@
+# wrangler.toml
+kv_namespaces = [
+  { binding = "bibbibib", id = "bibbibib" }
+]
