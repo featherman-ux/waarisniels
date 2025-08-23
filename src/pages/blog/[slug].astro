@@ -1,26 +1,16 @@
 ---
 // src/pages/blog/[slug].astro
 import BlogPostLayout from '../../layouts/BlogPostLayout.astro';
-import { getCollection, getEntry } from 'astro:content';
-import type { CollectionEntry } from 'astro:content';
+import { getEntry } from 'astro:content';
 
-// Build-time: tell Astro which slugs exist (exclude drafts)
-export async function getStaticPaths() {
-  const posts = await getCollection('blog', ({ data }) => data.draft !== true);
-  return posts.map(({ slug }) => ({ params: { slug } }));
-}
+export const prerender = false; // important for SSR
 
-interface Props { post: CollectionEntry<'blog'>; }
-
-// Runtime: resolve the post by slug (more reliable during dev/HMR)
 const { slug } = Astro.params;
-const post = await getEntry('blog', slug!);
+const post = slug ? await getEntry('blog', slug) : undefined;
 
 if (!post) {
-  console.error('[blog/[slug]] Available slugs:',
-    (await getCollection('blog')).map(p => p.slug));
-  throw new Error(`Blogpost niet gevonden voor slug "${slug}". Check bestandsnaam en draft:true.`);
+  // nice 404 instead of a crash
+  return new Response('Blogpost niet gevonden (check slug of draft:true).', { status: 404 });
 }
 ---
-
 <BlogPostLayout post={post} />

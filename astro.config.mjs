@@ -7,14 +7,9 @@ import cloudflare from '@astrojs/cloudflare';
 export default defineConfig({
   site: 'https://waarisniels.nl',
   base: '/',
-
-  // 👇 DIT IS DE BELANGRIJKSTE WIJZIGING
   output: 'server',
-
-  integrations: [
-    tailwind(),
-    preact(),
-  ],
-
+  // Remove the earlier string form; if you want to disable processing entirely, use the object form:
+  // image: { service: { entrypoint: 'astro/assets/services/noop' } },
+  integrations: [tailwind(), preact()],
   adapter: cloudflare(),
 });

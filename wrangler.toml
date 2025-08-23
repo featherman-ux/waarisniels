@@ -1,4 +1,17 @@
-# wrangler.toml
-kv_namespaces = [
-  { binding = "bibbibib", id = "bibbibib" }
-]
+# wrangler.toml — Astro SSR on Cloudflare Workers + KV
+name = "waarisniels"
+main = "dist/_worker.js"
+compatibility_date = "2025-05-25"
+compatibility_flags = ["nodejs_compat"]
+
+# KV namespaces (use your real IDs)
+[[kv_namespaces]]
+binding = "bibbibib"
+id = "adadbaa37ca743d5a6c3e3b2d311fb3c"
+preview_id = "adadbaa37ca743d5a6c3e3b2d311fb3c"
+
+# The Cloudflare adapter expects a KV called SESSION; reuse the same namespace
+[[kv_namespaces]]
+binding = "SESSION"
+id = "adadbaa37ca743d5a6c3e3b2d311fb3c"
+preview_id = "adadbaa37ca743d5a6c3e3b2d311fb3c"
