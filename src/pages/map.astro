@@ -100,59 +100,59 @@ const pageDescription = "Eenvoudige kaart met mijn route en stops (bus, motor, v
       try {
         const r = await fetch(ROUTE_URL, { cache: 'no-cache' });
         if (r.ok) {
-          const geo = await r.json();
+ const geo = await r.json();
 
-          // We bouwen een lege FeatureCollection en vullen hem met (eventueel) OSRM-gecorrigeerde geometrieën
-          const cooked = { type: 'FeatureCollection', features: [] };
+ // We bouwen een lege FeatureCollection en vullen hem met (eventueel) OSRM-gecorrigeerde geometrieën
+ const cooked = { type: 'FeatureCollection', features: [] };
 
-          // Sorteer op order als aanwezig (zodat popups netjes zijn)
-          const feats = Array.isArray(geo.features) ? [...geo.features] : [];
-          feats.sort((a,b) => (a?.properties?.order ?? 0) - (b?.properties?.order ?? 0));
+ // Sorteer op order als aanwezig (zodat popups netjes zijn)
+ const feats = Array.isArray(geo.features) ? [...geo.features] : [];
+ feats.sort((a,b) => (a?.properties?.order ?? 0) - (b?.properties?.order ?? 0));
 
-          for (const f of feats) {
-            const mode = f?.properties?.mode ?? 'bus';
-            const style = styleForMode(mode);
+ for (const f of feats) {
+   const mode = f?.properties?.mode ?? 'bus';
+   const style = styleForMode(mode);
 
-            let geom = f.geometry;
+   let geom = f.geometry;
 
-            // Alleen voor motor/bus proberen we OSRM als het een "rechte" 2-punt LineString is
-            const canRouteOverRoads =
-              (mode === 'motor' || mode === 'bus') &&
-              geom?.type === 'LineString' &&
-              Array.isArray(geom.coordinates) &&
-              geom.coordinates.length === 2 &&
-              typeof geom.coordinates[0]?.[0] === 'number';
+   // Alleen voor motor/bus proberen we OSRM als het een "rechte" 2-punt LineString is
+   const canRouteOverRoads =
+     (mode === 'motor' || mode === 'bus') &&
+     geom?.type === 'LineString' &&
+     Array.isArray(geom.coordinates) &&
+     geom.coordinates.length === 2 &&
+     typeof geom.coordinates[0]?.[0] === 'number';
 
-            if (canRouteOverRoads) {
-              try {
-                const roadGeom = await fetchRoadGeometry(geom.coordinates);
-                geom = roadGeom; // vervang door wegvolgende geometie
-              } catch (e) {
-                console.warn('OSRM route mislukt, gebruik rechte lijn:', f?.properties?.name, e);
-              }
-            }
+   if (canRouteOverRoads) {
+     try {
+       const roadGeom = await fetchRoadGeometry(geom.coordinates);
+       geom = roadGeom; // vervang door wegvolgende geometie
+     } catch (e) {
+       console.warn('OSRM route mislukt, gebruik rechte lijn:', f?.properties?.name, e);
+     }
+   }
 
-            cooked.features.push({
-              type: 'Feature',
-              properties: f.properties,
-              geometry: geom
-            });
+   cooked.features.push({
+     type: 'Feature',
+     properties: f.properties,
+     geometry: geom
+   });
 
-            // Direct tekenen (of je kunt 1 L.geoJSON op cooked doen; beide prima)
-          }
+   // Direct tekenen (of je kunt 1 L.geoJSON op cooked doen; beide prima)
+ }
 
-          const routeLayer = L.geoJSON(cooked, {
-            style: (feature) => styleForMode(feature?.properties?.mode),
-            onEachFeature: (feature, layer) => {
-              const name = feature?.properties?.name ?? 'Traject';
-              const mode = feature?.properties?.mode ?? 'onbekend';
-              const order = feature?.properties?.order;
-              const label = order? `${order}. ${name}` : name;
-              layer.bindPopup(`<strong>${label}</strong><br>Modus: ${mode}`);
-            }
-          }).addTo(map);
+ const routeLayer = L.geoJSON(cooked, {
+   style: (feature) => styleForMode(feature?.properties?.mode),
+   onEachFeature: (feature, layer) => {
+     const name = feature?.properties?.name ?? 'Traject';
+     const mode = feature?.properties?.mode ?? 'onbekend';
+     const order = feature?.properties?.order;
+     const label = order? `${order}. ${name}` : name;
+     layer.bindPopup(`<strong>${label}</strong><br>Modus: ${mode}`);
+   }
+ }).addTo(map);
 
-          try { bounds = routeLayer.getBounds(); } catch {}
+ try { bounds = routeLayer.getBounds(); } catch {}
         }
       } catch (e) {
         console.warn("Kon route.geojson niet laden", e);
@@ -162,21 +162,21 @@ const pageDescription = "Eenvoudige kaart met mijn route en stops (bus, motor, v
       try {
         const r = await fetch(PLACES_URL, { cache: 'no-cache' });
         if (r.ok) {
-          const places = await r.json();
-          const markers = [];
-          for (const p of places) {
-            if (typeof p.lat === 'number' && typeof p.lon === 'number') {
-              const m = L.marker([p.lat, p.lon]).addTo(map);
-              const title = p.name ? `<strong>${p.name}</strong>` : 'Stop';
-              const notes = p.notes ? `<br>${p.notes}` : '';
-              m.bindPopup(`${title}${notes}`);
-              markers.push(m);
-            }
-          }
-          if (!bounds && markers.length) {
-            const group = L.featureGroup(markers);
-            bounds = group.getBounds();
-          }
+ const places = await r.json();
+ const markers = [];
+ for (const p of places) {
+   if (typeof p.lat === 'number' && typeof p.lon === 'number') {
+     const m = L.marker([p.lat, p.lon]).addTo(map);
+     const title = p.name ? `<strong>${p.name}</strong>` : 'Stop';
+     const notes = p.notes ? `<br>${p.notes}` : '';
+     m.bindPopup(`${title}${notes}`);
+     markers.push(m);
+   }
+ }
+ if (!bounds && markers.length) {
+   const group = L.featureGroup(markers);
+   bounds = group.getBounds();
+ }
         }
       } catch (e) {
         console.warn("Kon places.json niet laden", e);

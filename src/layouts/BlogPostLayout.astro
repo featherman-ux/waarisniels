@@ -1,12 +1,15 @@
 ---
-// src/layouts/BlogPostLayout.astro
-import BaseLayout from './BaseLayout.astro';
 import type { CollectionEntry } from 'astro:content';
-import Comments from '../components/Comments.astro';
-import ViewCounter from '../components/ViewCounter.astro';
-import LikeButton from '../components/LikeButton.astro';
+import BaseLayout from './BaseLayout.astro';
 
-export interface Props { post: CollectionEntry<'blog'>; }
+// 1. Imports are updated to the new .jsx components
+import { Comments } from '../components/Comments.jsx';
+import { ViewCounter } from '../components/ViewCounter.jsx';
+import { LikeButton } from '../components/LikeButton.jsx';
+
+export interface Props {
+  post: CollectionEntry<'blog'>;
+}
 
 const { post } = Astro.props;
 const { title, description, pubDate, image, tags } = post.data;
@@ -15,11 +18,15 @@ const { Content } = await post.render();
 const dateStr = new Date(pubDate).toLocaleDateString('nl-NL', {
   year: 'numeric', month: 'long', day: 'numeric'
 });
+
+// 2. We prepare the props needed for our new components
+const currentPath = Astro.url.pathname;
+const siteUrl = import.meta.env.SITE;
 ---
+
 <BaseLayout title={title} description={description ?? title}>
   <style>
     :root { --orange:#ffb703; --blue:#023047; }
-
     .hero {
       position: relative; width: 100%;
       min-height: 240px; max-height: 420px;
@@ -30,54 +37,42 @@ const dateStr = new Date(pubDate).toLocaleDateString('nl-NL', {
     }
     .hero img { width:100%; height:100%; object-fit:cover; filter:brightness(.85); transform:scale(1.02); }
     .hero-grad { position:absolute; inset:0; background:linear-gradient(180deg, rgba(0,0,0,.05), rgba(0,0,0,.35)); }
-
     .meta-row { display:flex; flex-wrap:wrap; gap:.5rem .75rem; align-items:center; color:#475569; font-size:.9rem; }
-    .chip { background:#f1f5f9; border:1px solid #e5e7eb; color:#0f172a; padding:.2rem .55rem; border-radius:9999px; font-size:.78rem; font-weight:600; }
-
+    /* 4. The .chip style is removed from here because it's now in global.css */
     .prose-wrap { margin-top: 1rem; }
     .prose-wrap :where(img){ border-radius:12px; box-shadow:0 6px 18px rgba(0,0,0,.08) }
-
     .photo-grid, .photo-duo { display:grid; gap:.75rem; margin:1rem 0; }
     .photo-grid { grid-template-columns: repeat(auto-fill, minmax(180px,1fr)); }
     .photo-duo { grid-template-columns: repeat(2,1fr); }
     @media (min-width:768px){ .photo-grid, .photo-duo { gap:1rem; } }
-
     .sep { height:1px; background:#e5e7eb; margin:2rem 0; }
   </style>
 
   <article class="max-w-3xl mx-auto">
-    {image?.url ? (
+    {image?.url && (
       <figure class="hero">
-        <img
-          src={image.url}
-          alt={image?.alt ?? title}
-          loading="eager"
-          decoding="async"
-          sizes="(max-width: 768px) 100vw, 1024px"
-        />
+        <img src={image.url} alt={image?.alt ?? title} loading="eager" decoding="async" sizes="(max-width: 768px) 100vw, 1024px" />
         <div class="hero-grad" />
       </figure>
-    ) : null}
+    )}
 
     <header class="mb-4">
       <h1 class="text-4xl font-extrabold tracking-tight text-gray-900 dark:text-gray-100">
         {title}
       </h1>
-
       <div class="meta-row mt-2">
         <span>{dateStr}</span>
-        {tags && tags.length ? <span aria-hidden="true">•</span> : null}
-        {tags && tags.length ? (
+        {tags?.length && <span aria-hidden="true">•</span>}
+        {tags?.length && (
           <div style="display:flex; gap:.4rem; flex-wrap:wrap">
             {tags.map((t) => <span class="chip">{t}</span>)}
           </div>
-        ) : null}
+        )}
       </div>
 
-      <!-- Interactie: views + likes -->
       <div class="meta-row" style="gap:1rem; margin-top:.35rem">
-        <ViewCounter />
-        <LikeButton key={post.slug} />
+        <ViewCounter client:load path={currentPath} apiUrl={siteUrl} />
+        <LikeButton client:load likeKey={currentPath} apiUrl={siteUrl} />
       </div>
 
       {description && (
@@ -90,27 +85,7 @@ const dateStr = new Date(pubDate).toLocaleDateString('nl-NL', {
     </div>
 
     <div class="sep" />
-    <Comments slug={post.slug} title={title} />
+    <Comments client:load slug={post.slug} apiUrl={siteUrl} />
   </article>
 
-  <!-- Lightweight analytics ping -->
-  <script is:inline>
-    (async () => {
-      try {
-        const evt = {
-          type: 'pageview',
-          path: location.pathname,
-          ref: document.referrer || null,
-          ua: navigator.userAgent.slice(0,120),
-          w: screen?.width, h: screen?.height,
-        };
-        fetch('/api/analytics', {
-          method: 'POST',
-          headers: { 'content-type': 'application/json' },
-          body: JSON.stringify(evt),
-          keepalive: true
-        }).catch(()=>{});
-      } catch {}
-    })();
-  </script>
-</BaseLayout>
+  </BaseLayout>

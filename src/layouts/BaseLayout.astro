@@ -45,42 +45,42 @@ const currentYear = new Date().getFullYear();
     <header class="bg-white/90 backdrop-blur dark:bg-gray-800/90 shadow-md sticky top-0 z-50">
       <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
         <a href="/" class="text-2xl font-bold text-primary dark:text-primary-light">
-          WaarIsNiels?
+ WaarIsNiels?
         </a>
 
         <div class="flex items-center gap-3 sm:gap-5">
-          <a
-            href="/blog/"
-            aria-current={isActive('/blog') ? 'page' : undefined}
-            class:list={[
-              'text-sm sm:text-base px-2 py-1 rounded transition-colors',
-              isActive('/blog')
-                ? 'text-primary dark:text-primary-light underline underline-offset-4'
-                : 'text-gray-700 dark:text-gray-300 hover:text-primary dark:hover:text-primary-light'
-            ]}
-          >Blog</a>
+ <a
+   href="/blog/"
+   aria-current={isActive('/blog') ? 'page' : undefined}
+   class:list={[
+     'text-sm sm:text-base px-2 py-1 rounded transition-colors',
+     isActive('/blog')
+       ? 'text-primary dark:text-primary-light underline underline-offset-4'
+       : 'text-gray-700 dark:text-gray-300 hover:text-primary dark:hover:text-primary-light'
+   ]}
+ >Blog</a>
 
-          <a
-            href="/map/"
-            aria-current={isActive('/map') ? 'page' : undefined}
-            class:list={[
-              'text-sm sm:text-base px-2 py-1 rounded transition-colors',
-              isActive('/map')
-                ? 'text-primary dark:text-primary-light underline underline-offset-4'
-                : 'text-gray-700 dark:text-gray-300 hover:text-primary dark:hover:text-primary-light'
-            ]}
-          >Kaart</a>
+ <a
+   href="/map/"
+   aria-current={isActive('/map') ? 'page' : undefined}
+   class:list={[
+     'text-sm sm:text-base px-2 py-1 rounded transition-colors',
+     isActive('/map')
+       ? 'text-primary dark:text-primary-light underline underline-offset-4'
+       : 'text-gray-700 dark:text-gray-300 hover:text-primary dark:hover:text-primary-light'
+   ]}
+ >Kaart</a>
 
-          <a
-            href="/about/"
-            aria-current={isActive('/about') ? 'page' : undefined}
-            class:list={[
-              'text-sm sm:text-base px-2 py-1 rounded transition-colors',
-              isActive('/about')
-                ? 'text-primary dark:text-primary-light underline underline-offset-4'
-                : 'text-gray-700 dark:text-gray-300 hover:text-primary dark:hover:text-primary-light'
-            ]}
-          >Over</a>
+ <a
+   href="/about/"
+   aria-current={isActive('/about') ? 'page' : undefined}
+   class:list={[
+     'text-sm sm:text-base px-2 py-1 rounded transition-colors',
+     isActive('/about')
+       ? 'text-primary dark:text-primary-light underline underline-offset-4'
+       : 'text-gray-700 dark:text-gray-300 hover:text-primary dark:hover:text-primary-light'
+   ]}
+ >Over</a>
         </div>
       </nav>
     </header>
@@ -99,27 +99,25 @@ const currentYear = new Date().getFullYear();
     </footer>
 
     <script is:inline>
+      // Minimal, anonymous pageview/event ping
       (async () => {
         if (typeof window === 'undefined') return;
-
         try {
-          const ENDPOINT = '/api/analytics';
-
-          const evt = {
-            path: location.pathname,
-            ref: document.referrer || null,
-            ua: navigator.userAgent.slice(0, 120),
-            w: screen.width,
-            h: screen.height,
-          };
-
-          fetch(ENDPOINT, {
-            method: 'POST',
-            headers: { 'content-type': 'application/json' },
-            body: JSON.stringify(evt),
-            keepalive: true,
-          }).catch(() => {});
-        } catch (e) {}
+ const evt = {
+   type: 'pageview',
+   path: location.pathname,
+   ref: document.referrer || null,
+   ua: navigator.userAgent.slice(0, 120),
+   w: screen?.width,
+   h: screen?.height,
+ };
+ await fetch('/api/analytics', {
+   method: 'POST',
+   headers: { 'content-type': 'application/json' },
+   body: JSON.stringify(evt),
+   keepalive: true,
+ });
+        } catch {}
       })();
     </script>
   </body>

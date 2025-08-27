@@ -1,16 +1,45 @@
 ---
 // src/pages/blog/[slug].astro
-import BlogPostLayout from '../../layouts/BlogPostLayout.astro';
 import { getEntry } from 'astro:content';
+import BlogPostLayout from '../../layouts/BlogPostLayout.astro';
 
-export const prerender = false; // important for SSR
+// Import the new components
+import { LikeButton } from '../../components/LikeButton.jsx';
+import { ViewCounter } from '../../components/ViewCounter.jsx';
+import { Comments } from '../../components/Comments.jsx';
+
+// Import the global CSS file
+import '../../styles/global.css';
+
+export const prerender = false;
 
 const { slug } = Astro.params;
 const post = slug ? await getEntry('blog', slug) : undefined;
 
 if (!post) {
-  // nice 404 instead of a crash
-  return new Response('Blogpost niet gevonden (check slug of draft:true).', { status: 404 });
+  return new Response('Blogpost niet gevonden.', { status: 404 });
 }
+
+// Prepare props for the components
+const currentPath = Astro.url.pathname;
+const siteUrl = import.meta.env.SITE;
 ---
-<BlogPostLayout post={post} />
+
+<BlogPostLayout post={post}>
+  <div class="post-interactions">
+    <LikeButton client:load likeKey={currentPath} apiUrl={siteUrl} />
+    <ViewCounter client:load path={currentPath} apiUrl={siteUrl} />
+  </div>
+
+  <Comments client:load slug={slug} apiUrl={siteUrl} />
+</BlogPostLayout>
+
+<style>
+  /* You can add specific layout styles here */
+  .post-interactions {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    margin-bottom: 2rem;
+  }
+</style>

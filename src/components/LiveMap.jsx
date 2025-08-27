@@ -48,24 +48,24 @@ export default function LiveMap() {
 
       if (L && mapContainer.current) {
         if (!mapInstance.current) {
-          mapInstance.current = L.map(mapContainer.current).setView([lastPoint.lat, lastPoint.lon], 13);
-          L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-            attribution:
-              '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
-          }).addTo(mapInstance.current);
+ mapInstance.current = L.map(mapContainer.current).setView([lastPoint.lat, lastPoint.lon], 13);
+ L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+   attribution:
+     '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+ }).addTo(mapInstance.current);
 
-          polylineInstance.current = L.polyline(latLngs, { color: 'blue' }).addTo(mapInstance.current);
-          markerInstance.current = L.marker([lastPoint.lat, lastPoint.lon]).addTo(mapInstance.current);
+ polylineInstance.current = L.polyline(latLngs, { color: 'blue' }).addTo(mapInstance.current);
+ markerInstance.current = L.marker([lastPoint.lat, lastPoint.lon]).addTo(mapInstance.current);
 
-          if (latLngs.length > 1) {
-            mapInstance.current.fitBounds(polylineInstance.current.getBounds());
-          } else {
-            mapInstance.current.setView([lastPoint.lat, lastPoint.lon], 13);
-          }
+ if (latLngs.length > 1) {
+   mapInstance.current.fitBounds(polylineInstance.current.getBounds());
+ } else {
+   mapInstance.current.setView([lastPoint.lat, lastPoint.lon], 13);
+ }
         } else {
-          polylineInstance.current.setLatLngs(latLngs);
-          markerInstance.current.setLatLng([lastPoint.lat, lastPoint.lon]);
-          mapInstance.current.panTo([lastPoint.lat, lastPoint.lon]);
+ polylineInstance.current.setLatLngs(latLngs);
+ markerInstance.current.setLatLng([lastPoint.lat, lastPoint.lon]);
+ mapInstance.current.panTo([lastPoint.lat, lastPoint.lon]);
         }
       }
 
@@ -89,7 +89,7 @@ export default function LiveMap() {
       {error && <p class="text-center text-red-500 mt-2">{error}</p>}
       {lastUpdated && !error && (
         <p class="text-center text-sm text-gray-600 dark:text-gray-400 mt-2">
-          Last Updated: {lastUpdated}
+ Last Updated: {lastUpdated}
         </p>
       )}
     </div>

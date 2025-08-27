@@ -242,14 +242,14 @@ function lexer(str) {
       while (j < str.length) {
         var code = str.charCodeAt(j);
         if (
-          // `0-9`
-          code >= 48 && code <= 57 || // `A-Z`
-          code >= 65 && code <= 90 || // `a-z`
-          code >= 97 && code <= 122 || // `_`
-          code === 95
+ // `0-9`
+ code >= 48 && code <= 57 || // `A-Z`
+ code >= 65 && code <= 90 || // `a-z`
+ code >= 97 && code <= 122 || // `_`
+ code === 95
         ) {
-          name += str[j++];
-          continue;
+ name += str[j++];
+ continue;
         }
         break;
       }
@@ -268,20 +268,20 @@ function lexer(str) {
       }
       while (j < str.length) {
         if (str[j] === "\\") {
-          pattern += str[j++] + str[j++];
-          continue;
+ pattern += str[j++] + str[j++];
+ continue;
         }
         if (str[j] === ")") {
-          count--;
-          if (count === 0) {
-            j++;
-            break;
-          }
+ count--;
+ if (count === 0) {
+   j++;
+   break;
+ }
         } else if (str[j] === "(") {
-          count++;
-          if (str[j + 1] !== "?") {
-            throw new TypeError("Capturing groups are not allowed at ".concat(j));
-          }
+ count++;
+ if (str[j + 1] !== "?") {
+   throw new TypeError("Capturing groups are not allowed at ".concat(j));
+ }
         }
         pattern += str[j++];
       }
@@ -427,7 +427,7 @@ function regexpToFunction(re, keys, options) {
       var key = keys[i2 - 1];
       if (key.modifier === "*" || key.modifier === "+") {
         params[key.name] = m[i2].split(key.prefix + key.suffix).map(function(value) {
-          return decode(value, key);
+ return decode(value, key);
         });
       } else {
         params[key.name] = decode(m[i2], key);
@@ -504,19 +504,19 @@ function tokensToRegexp(tokens, keys, options) {
       var suffix = escapeString(encode(token.suffix));
       if (token.pattern) {
         if (keys)
-          keys.push(token);
+ keys.push(token);
         if (prefix || suffix) {
-          if (token.modifier === "+" || token.modifier === "*") {
-            var mod = token.modifier === "*" ? "?" : "";
-            route += "(?:".concat(prefix, "((?:").concat(token.pattern, ")(?:").concat(suffix).concat(prefix, "(?:").concat(token.pattern, "))*)").concat(suffix, ")").concat(mod);
-          } else {
-            route += "(?:".concat(prefix, "(").concat(token.pattern, ")").concat(suffix, ")").concat(token.modifier);
-          }
+ if (token.modifier === "+" || token.modifier === "*") {
+   var mod = token.modifier === "*" ? "?" : "";
+   route += "(?:".concat(prefix, "((?:").concat(token.pattern, ")(?:").concat(suffix).concat(prefix, "(?:").concat(token.pattern, "))*)").concat(suffix, ")").concat(mod);
+ } else {
+   route += "(?:".concat(prefix, "(").concat(token.pattern, ")").concat(suffix, ")").concat(token.modifier);
+ }
         } else {
-          if (token.modifier === "+" || token.modifier === "*") {
-            throw new TypeError('Can not repeat "'.concat(token.name, '" without a prefix and suffix'));
-          }
-          route += "(".concat(token.pattern, ")").concat(token.modifier);
+ if (token.modifier === "+" || token.modifier === "*") {
+   throw new TypeError('Can not repeat "'.concat(token.name, '" without a prefix and suffix'));
+ }
+ route += "(".concat(token.pattern, ")").concat(token.modifier);
         }
       } else {
         route += "(?:".concat(prefix).concat(suffix, ")").concat(token.modifier);
@@ -568,9 +568,9 @@ function* executeRequest(request) {
     if (matchResult && mountMatchResult) {
       for (const handler of route.middlewares.flat()) {
         yield {
-          handler,
-          params: matchResult.params,
-          path: mountMatchResult.path
+ handler,
+ params: matchResult.params,
+ path: mountMatchResult.path
         };
       }
     }
@@ -590,9 +590,9 @@ function* executeRequest(request) {
     if (matchResult && mountMatchResult && route.modules.length) {
       for (const handler of route.modules.flat()) {
         yield {
-          handler,
-          params: matchResult.params,
-          path: matchResult.path
+ handler,
+ params: matchResult.params,
+ path: matchResult.path
         };
       }
       break;
@@ -611,7 +611,7 @@ var pages_template_worker_default = {
       if (input !== void 0) {
         let url = input;
         if (typeof input === "string") {
-          url = new URL(input, request.url).toString();
+ url = new URL(input, request.url).toString();
         }
         request = new Request(url, init);
       }
@@ -619,28 +619,28 @@ var pages_template_worker_default = {
       if (result.done === false) {
         const { handler, params, path } = result.value;
         const context = {
-          request: new Request(request.clone()),
-          functionPath: path,
-          next,
-          params,
-          get data() {
-            return data;
-          },
-          set data(value) {
-            if (typeof value !== "object" || value === null) {
-              throw new Error("context.data must be an object");
-            }
-            data = value;
-          },
-          env,
-          waitUntil: workerContext.waitUntil.bind(workerContext),
-          passThroughOnException: /* @__PURE__ */ __name2(() => {
-            isFailOpen = true;
-          }, "passThroughOnException")
+ request: new Request(request.clone()),
+ functionPath: path,
+ next,
+ params,
+ get data() {
+   return data;
+ },
+ set data(value) {
+   if (typeof value !== "object" || value === null) {
+     throw new Error("context.data must be an object");
+   }
+   data = value;
+ },
+ env,
+ waitUntil: workerContext.waitUntil.bind(workerContext),
+ passThroughOnException: /* @__PURE__ */ __name2(() => {
+   isFailOpen = true;
+ }, "passThroughOnException")
         };
         const response = await handler(context);
         if (!(response instanceof Response)) {
-          throw new Error("Your Pages function should return a Response");
+ throw new Error("Your Pages function should return a Response");
         }
         return cloneResponse(response);
       } else if ("ASSETS") {
@@ -776,13 +776,13 @@ function wrapExportedHandler(worker) {
     fetch(request, env, ctx) {
       const dispatcher = /* @__PURE__ */ __name2(function(type, init) {
         if (type === "scheduled" && worker.scheduled !== void 0) {
-          const controller = new __Facade_ScheduledController__(
-            Date.now(),
-            init.cron ?? "",
-            () => {
-            }
-          );
-          return worker.scheduled(controller, env, ctx);
+ const controller = new __Facade_ScheduledController__(
+   Date.now(),
+   init.cron ?? "",
+   () => {
+   }
+ );
+ return worker.scheduled(controller, env, ctx);
         }
       }, "dispatcher");
       return __facade_invoke__(request, env, ctx, dispatcher, fetchDispatcher);
@@ -810,10 +810,10 @@ function wrapWorkerEntrypoint(klass) {
     #dispatcher = /* @__PURE__ */ __name2((type, init) => {
       if (type === "scheduled" && super.scheduled !== void 0) {
         const controller = new __Facade_ScheduledController__(
-          Date.now(),
-          init.cron ?? "",
-          () => {
-          }
+ Date.now(),
+ init.cron ?? "",
+ () => {
+ }
         );
         return super.scheduled(controller);
       }
@@ -948,13 +948,13 @@ function wrapExportedHandler2(worker) {
     fetch(request, env, ctx) {
       const dispatcher = /* @__PURE__ */ __name(function(type, init) {
         if (type === "scheduled" && worker.scheduled !== void 0) {
-          const controller = new __Facade_ScheduledController__2(
-            Date.now(),
-            init.cron ?? "",
-            () => {
-            }
-          );
-          return worker.scheduled(controller, env, ctx);
+ const controller = new __Facade_ScheduledController__2(
+   Date.now(),
+   init.cron ?? "",
+   () => {
+   }
+ );
+ return worker.scheduled(controller, env, ctx);
         }
       }, "dispatcher");
       return __facade_invoke__2(request, env, ctx, dispatcher, fetchDispatcher);
@@ -981,10 +981,10 @@ function wrapWorkerEntrypoint2(klass) {
     #dispatcher = /* @__PURE__ */ __name((type, init) => {
       if (type === "scheduled" && super.scheduled !== void 0) {
         const controller = new __Facade_ScheduledController__2(
-          Date.now(),
-          init.cron ?? "",
-          () => {
-          }
+ Date.now(),
+ init.cron ?? "",
+ () => {
+ }
         );
         return super.scheduled(controller);
       }
