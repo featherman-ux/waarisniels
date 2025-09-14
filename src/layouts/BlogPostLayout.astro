@@ -1,9 +1,7 @@
 ---
 import type { CollectionEntry } from 'astro:content';
 import BaseLayout from './BaseLayout.astro';
-
-// 1. Imports are updated to the new .jsx components
-import { Comments } from '../components/Comments.jsx';
+import Comments from '../components/Comments.jsx';
 import { ViewCounter } from '../components/ViewCounter.jsx';
 import { LikeButton } from '../components/LikeButton.jsx';
 
@@ -12,80 +10,62 @@ export interface Props {
 }
 
 const { post } = Astro.props;
+if (!post || !post.data) {
+  throw new Error('`post` or `post.data` is missing in BlogPostLayout.astro');
+}
+
 const { title, description, pubDate, image, tags } = post.data;
 const { Content } = await post.render();
 
 const dateStr = new Date(pubDate).toLocaleDateString('nl-NL', {
-  year: 'numeric', month: 'long', day: 'numeric'
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric',
 });
 
-// 2. We prepare the props needed for our new components
 const currentPath = Astro.url.pathname;
 const siteUrl = import.meta.env.SITE;
 ---
-
 <BaseLayout title={title} description={description ?? title}>
-  <style>
-    :root { --orange:#ffb703; --blue:#023047; }
-    .hero {
-      position: relative; width: 100%;
-      min-height: 240px; max-height: 420px;
-      border-radius: 14px; overflow: hidden;
-      margin: 0 0 1.25rem 0;
-      box-shadow: 0 10px 22px rgba(2,48,71,.12);
-      background: linear-gradient(120deg, var(--orange), var(--blue));
-    }
-    .hero img { width:100%; height:100%; object-fit:cover; filter:brightness(.85); transform:scale(1.02); }
-    .hero-grad { position:absolute; inset:0; background:linear-gradient(180deg, rgba(0,0,0,.05), rgba(0,0,0,.35)); }
-    .meta-row { display:flex; flex-wrap:wrap; gap:.5rem .75rem; align-items:center; color:#475569; font-size:.9rem; }
-    /* 4. The .chip style is removed from here because it's now in global.css */
-    .prose-wrap { margin-top: 1rem; }
-    .prose-wrap :where(img){ border-radius:12px; box-shadow:0 6px 18px rgba(0,0,0,.08) }
-    .photo-grid, .photo-duo { display:grid; gap:.75rem; margin:1rem 0; }
-    .photo-grid { grid-template-columns: repeat(auto-fill, minmax(180px,1fr)); }
-    .photo-duo { grid-template-columns: repeat(2,1fr); }
-    @media (min-width:768px){ .photo-grid, .photo-duo { gap:1rem; } }
-    .sep { height:1px; background:#e5e7eb; margin:2rem 0; }
-  </style>
-
   <article class="max-w-3xl mx-auto">
     {image?.url && (
       <figure class="hero">
-        <img src={image.url} alt={image?.alt ?? title} loading="eager" decoding="async" sizes="(max-width: 768px) 100vw, 1024px" />
+        <img
+          src={image.url}
+          alt={image.alt ?? title}
+          loading="eager"
+          decoding="async"
+          sizes="(max-width: 768px) 100vw, 1024px"
+        />
         <div class="hero-grad" />
       </figure>
     )}
 
     <header class="mb-4">
-      <h1 class="text-4xl font-extrabold tracking-tight text-gray-900 dark:text-gray-100">
-        {title}
-      </h1>
-      <div class="meta-row mt-2">
-        <span>{dateStr}</span>
-        {tags?.length && <span aria-hidden="true">•</span>}
-        {tags?.length && (
-          <div style="display:flex; gap:.4rem; flex-wrap:wrap">
-            {tags.map((t) => <span class="chip">{t}</span>)}
-          </div>
-        )}
-      </div>
+      <h1>{title}</h1>
+      <div>{dateStr}</div>
+      {tags?.length && (
+        <div class="flex flex-wrap gap-2 mt-2"> {/* Added a wrapper for better spacing */}
+          {tags.map((t) => (
+            <span class="chip" key={t}>{t}</span>
+          ))}
+        </div>
+      )}
 
-      <div class="meta-row" style="gap:1rem; margin-top:.35rem">
+      <div class="meta-row">
         <ViewCounter client:load path={currentPath} apiUrl={siteUrl} />
         <LikeButton client:load likeKey={currentPath} apiUrl={siteUrl} />
       </div>
 
-      {description && (
-        <p class="mt-2 text-gray-600 dark:text-gray-400">{description}</p>
-      )}
+      {description && <p class="mt-2 text-lg text-subtle">{description}</p>} {/* Example of using utility text */}
     </header>
 
-    <div class="prose-wrap prose prose-neutral dark:prose-invert max-w-none">
+    <section class="prose-wrap">
       <Content />
-    </div>
+    </section>
 
-    <div class="sep" />
-    <Comments client:load slug={post.slug} apiUrl={siteUrl} />
+    <footer>
+      <Comments client:load slug={post.slug} apiUrl={siteUrl} />
+    </footer>
   </article>
-
-  </BaseLayout>
+</BaseLayout>

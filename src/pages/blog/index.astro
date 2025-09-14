@@ -11,8 +11,10 @@ const posts = (await getCollection('blog', ({ data }) => data.draft !== true))
   <section class="container mx-auto px-6 py-10">
     <h1 class="text-3xl font-bold mb-6">Blog</h1>
     {posts.length ? (
-      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {posts.map((p) => <BlogPostPreview post={p} />)}
+      <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        {posts.map((p) => (
+          <BlogPostPreview key={p.slug} post={p} />
+        ))}
       </div>
     ) : (
       <p>Geen posts gepubliceerd.</p>

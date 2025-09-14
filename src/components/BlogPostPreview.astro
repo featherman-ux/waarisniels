@@ -1,5 +1,10 @@
 ---
-export interface Props { post: any }
+import type { CollectionEntry } from 'astro:content';
+
+export interface Props {
+  post: CollectionEntry<'blog'>;
+}
+
 const { post } = Astro.props;
 const { title, description, pubDate, image } = post.data;
 const href = `/blog/${post.slug}/`;
@@ -7,10 +12,12 @@ const href = `/blog/${post.slug}/`;
 
 <article class="rounded-lg border bg-white dark:bg-gray-800 p-4 shadow-sm hover:shadow-md transition">
   <a href={href} class="block">
-    {image?.url && <img src={image.url} alt={image?.alt ?? title} class="w-full h-44 object-cover rounded-md mb-3" />}
+    {image?.url && <img src={image.url} alt={image?.alt?? title} class="w-full h-44 object-cover rounded-md mb-3" />}
     <h3 class="text-xl font-semibold">{title}</h3>
     <p class="text-sm text-gray-500 mb-2">{new Date(pubDate).toLocaleDateString('nl-NL')}</p>
     {description && <p class="text-gray-700 dark:text-gray-300 line-clamp-3">{description}</p>}
-    <span class="inline-block mt-3 underline">Lees verder</span>
+    <span class="inline-block mt-3 text-primary dark:text-primary-light hover:underline">
+      Lees verder
+    </span>
   </a>
 </article>

@@ -1,15 +1,8 @@
 name = "waarisniels"
-main = "./dist/_worker.js"
-compatibility_date = "2025-08-27"
+pages_build_output_dir = "dist" # <-- DEZE REGEL IS CRUCIAAL
+
+compatibility_date = "2025-08-28"
 compatibility_flags = ["nodejs_compat"]
-
-# This tells the Worker where to find your static assets (CSS, JS, images)
-[site]
-bucket = "./dist"
-
-# This tells Wrangler how to build your project
-[build]
-command = "npm run build"
 
 [[kv_namespaces]]
 binding = "bibbibib"

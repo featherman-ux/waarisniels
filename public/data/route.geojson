@@ -33,7 +33,6 @@
       "properties": { "name": "Cartagena ✈ Quito", "mode": "flight", "order": 8 },
       "geometry": { "type": "LineString", "coordinates": [[-75.4790, 10.3910], [-78.4678, -0.1807]] }
     },
-
     { "type": "Feature",
       "properties": { "name": "Quito ➜ Quilotoa", "mode": "motor", "order": 9 },
       "geometry": { "type": "LineString", "coordinates": [[-78.4678, -0.1807], [-78.9010, -0.8640]] }
@@ -46,7 +45,6 @@
       "properties": { "name": "Isinliví ➜ Quito", "mode": "motor", "order": 11 },
       "geometry": { "type": "LineString", "coordinates": [[-78.8450, -0.5539], [-78.4678, -0.1807]] }
     },
-
     { "type": "Feature",
       "properties": { "name": "Quito ✈ Santa Cruz (Puerto Ayora)", "mode": "flight", "order": 12 },
       "geometry": { "type": "LineString", "coordinates": [[-78.4678, -0.1807], [-90.3510, -0.7390]] }
@@ -66,6 +64,18 @@
     { "type": "Feature",
       "properties": { "name": "San Cristóbal ✈ Guayaquil", "mode": "flight", "order": 16 },
       "geometry": { "type": "LineString", "coordinates": [[-89.6100, -0.9030], [-79.9220, -2.1700]] }
+    },
+    { "type": "Feature",
+      "properties": { "name": "Guayaquil ➜ Máncora", "mode": "bus", "order": 17 },
+      "geometry": { "type": "LineString", "coordinates": [[-79.9220, -2.1700], [-81.053, -4.106]] }
+    },
+    { "type": "Feature",
+      "properties": { "name": "Máncora ➜ Huanchaco", "mode": "bus", "order": 18 },
+      "geometry": { "type": "LineString", "coordinates": [[-81.053, -4.106], [-79.141, -8.105]] }
+    },
+    { "type": "Feature",
+      "properties": { "name": "Huanchaco ➜ Huaraz", "mode": "bus", "order": 19 },
+      "geometry": { "type": "LineString", "coordinates": [[-79.141, -8.105], [-77.534, -9.528]] }
     }
   ]
 }

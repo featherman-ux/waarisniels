@@ -3,7 +3,8 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { getCollection } from 'astro:content';
 import BlogPostPreview from '../components/BlogPostPreview.astro';
-import HomePopup from '../components/HomePopup.astro'; // ⬅️ popup import
+import HomePopup from '../components/HomePopup.astro';
+import { VibeWidget } from '../components/VibeWidget.jsx'; // ⬅️ WIDGET GEÏMPORTEERD
 
 const latestPosts = (await getCollection('blog', ({ data }) => data.draft !== true))
   .sort((a, b) => new Date(b.data.pubDate).valueOf() - new Date(a.data.pubDate).valueOf())
@@ -14,14 +15,26 @@ const latestPosts = (await getCollection('blog', ({ data }) => data.draft !== tr
   <style>
     :root { --orange:#ffb703; --blue:#023047; }
     .hero {
-      position: relative; width: 100%;
+      position: relative; /* Behoud deze */
+      width: 100%;
       min-height: 350px;
       max-height: 500px;
       overflow: hidden; border-radius: 0.75rem;
       margin: 0.75rem auto 1.25rem;
       box-shadow: 0 8px 16px rgba(0,0,0,0.1);
     }
-    .hero img { width: 100%; height: 100%; object-fit: cover; filter: brightness(.7); transform: scale(1.02); }
+    
+    .hero img {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      filter: brightness(.7);
+      transform: scale(1.02);
+    }
+    
     .hero-text { position: absolute; inset: 0; display: grid; place-items: center; color: #fff; text-align: center; padding: 0 1rem; }
     .hero-text h1 { font-size: 2.3rem; margin: 0 0 .4rem; line-height: 1.2; }
     .hero-text p { font-size: 1.05rem; margin: 0; opacity: .95; }
@@ -36,26 +49,25 @@ const latestPosts = (await getCollection('blog', ({ data }) => data.draft !== tr
     @media (min-width: 1024px){ .grid-posts { grid-template-columns: repeat(3,1fr); } }
   </style>
 
-  <!-- Hero-afbeelding -->
+  <!-- 👇 HIER IS DE WIDGET TOEGEVOEGD 👇 -->
+  <VibeWidget client:load />
+
   <section class="hero">
-    <img src="/images/orange-car.jpg" alt="Oranje auto op de weg" />
+    <img src="/images/homepage.jpeg" alt="Nieuwe hero-afbeelding voor de homepage" />
     <div class="hero-text">
       <div>
         <h1>Waar is Niels?</h1>
-        <p>Website in herontwikkeling – stap voor stap terug online. De eerste blogposts staan live!!!!! Crazy times</p>
+        <p>Werkende site!!!!! Met nieuwe updates!!!! </p>
       </div>
     </div>
   </section>
 
-  <!-- ⬇️ Popup (tonen op homepage, 1x per persoon) -->
   <HomePopup />
 
-  <!-- Link naar kaart -->
   <div class="map-link">
     <a href="/map">Bekijk de kaart met mijn reisroute</a>
   </div>
 
-  <!-- Laatste blogposts -->
   <section class="posts">
     <h2>Laatste blogposts</h2>
     {latestPosts.length > 0 ? (

@@ -4,7 +4,7 @@
   "exclude": ["dist"],
   "compilerOptions": {
     "jsx": "react-jsx",
-    "jsxImportSource": "preact",
+    "jsxImportSource": "react", // <-- Wijzig "preact" in "react"
     "types": ["@cloudflare/workers-types"]
   }
 }

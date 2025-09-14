@@ -1,13 +1,21 @@
-// astro.config.mjs
 import { defineConfig } from 'astro/config';
 import tailwind from '@astrojs/tailwind';
-import preact from '@astrojs/preact';
+import mdx from '@astrojs/mdx';
+import sitemap from '@astrojs/sitemap';
+import react from '@astrojs/react';
 import cloudflare from '@astrojs/cloudflare';
 
 export default defineConfig({
   site: 'https://waarisniels.nl',
-  base: '/',
-  output: 'server',     // SSR on Cloudflare Worker
-  integrations: [tailwind(), preact()],
-  adapter: cloudflare(),// @astrojs/cloudflare
+  output: 'server',
+  adapter: cloudflare(),
+  integrations: [
+    tailwind(),
+    mdx({ extension: '.mdx' }),
+    sitemap(),
+    react(),
+  ],
+  markdown: {
+    syntaxHighlight: 'shiki',
+  },
 });

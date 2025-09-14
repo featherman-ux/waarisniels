@@ -1,0 +1,288 @@
+---
+// src/pages/analytics-dashboard.astro
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+<BaseLayout title="Ultimate Analytics Dashboard">
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css"
+    slot="head"
+  />
+  <script src="https://cdn.jsdelivr.net/npm/apexcharts" slot="head"></script>
+
+  <style>
+    .dashboard-container {
+      font-family: 'Inter', sans-serif;
+      background: #f1f5f9;
+      min-height: 100vh;
+    }
+    .stat-card {
+      background: #fff;
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+    .stat-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+    }
+    .apexcharts-tooltip {
+      background: #fff !important;
+      border: 1px solid #e2e8f0 !important;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08) !important;
+    }
+    #view-map {
+      border-radius: 0.75rem;
+      overflow: hidden;
+    }
+  </style>
+
+  <main class="dashboard-container p-6 md:p-10 lg:p-16">
+    <header class="text-center mb-12">
+      <h1 class="text-4xl font-bold text-[#023047] mb-2">
+        📊 Ultimate Real-Time Dashboard
+      </h1>
+      <p class="text-gray-600">
+        Live inzichten: wereldwijde bezoekers, devices, trends en top-posts
+      </p>
+    </header>
+
+    <!-- KPI Cards -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+      <div id="kpi-total-views" class="stat-card">
+        <div class="text-gray-500 text-sm">Totaal Views</div>
+        <div class="text-3xl font-extrabold text-[#023047]">…</div>
+      </div>
+      <div id="kpi-top-post" class="stat-card">
+        <div class="text-gray-500 text-sm">Populairste Post</div>
+        <div class="text-2xl font-extrabold text-[#023047]">…</div>
+      </div>
+      <div id="kpi-top-country" class="stat-card">
+        <div class="text-gray-500 text-sm">Top Land</div>
+        <div class="text-3xl font-extrabold text-[#023047]">…</div>
+      </div>
+      <div id="kpi-live-event" class="stat-card">
+        <div class="text-gray-500 text-sm">Laatste Bezoek</div>
+        <div class="text-3xl font-extrabold text-[#023047]">…</div>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-12">
+      <div class="stat-card col-span-1 h-96">
+        <h2 class="text-xl font-semibold text-[#023047] mb-4">
+          🌍 Views per Land
+        </h2>
+        <div id="view-map" class="h-full"></div>
+      </div>
+      <div class="col-span-2 grid grid-rows-2 gap-6">
+        <div class="stat-card h-80">
+          <h2 class="text-xl font-semibold text-[#023047] mb-4">
+            📈 Views Trend (30 dagen)
+          </h2>
+          <div id="time-series-chart" class="h-full"></div>
+        </div>
+        <div class="stat-card h-80 grid grid-cols-2 gap-6">
+          <div>
+            <h2 class="text-xl font-semibold text-[#023047] mb-4">
+              📱 Apparaten
+            </h2>
+            <div id="device-chart" class="h-40"></div>
+          </div>
+          <div>
+            <h2 class="text-xl font-semibold text-[#023047] mb-4">
+              🔗 Verkeersbronnen
+            </h2>
+            <div id="referrers-chart" class="h-40"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="stat-card mb-12">
+      <h2 class="text-xl font-semibold text-[#023047] mb-4">
+        🏆 Top 10 Posts
+      </h2>
+      <div id="popular-posts" class="space-y-2"></div>
+    </div>
+  </main>
+
+  <script type="module">
+    import * as L from 'https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet-src.esm.js';
+    const COLORS = {
+      primary: '#023047',
+      secondary: '#ffb703',
+      accent: '#fb8500'
+    };
+
+    const fmt = n =>
+      n > 999
+        ? `${(n / 1000).toFixed(1)}k`
+        : n.toString();
+    const ago = d => {
+      if (!d) return 'N/A';
+      const s = Math.floor((Date.now() - new Date(d)) / 1000);
+      if (s < 60) return `${s}s geleden`;
+      const m = Math.floor(s / 60);
+      if (m < 60) return `${m}m geleden`;
+      const h = Math.floor(m / 60);
+      return h < 24 ? `${h}u geleden` : `${Math.floor(h / 24)}d geleden`;
+    };
+
+    async function fetchData() {
+      const res = await fetch('/api/view');
+      return res.ok ? res.json() : { allViewsData: {}, latestEvents: [] };
+    }
+
+    function renderKPIs(total, posts, countries, latest) {
+      document.getElementById(
+        'kpi-total-views'
+      ).innerHTML = `<div class="text-gray-500 text-sm">Totaal Views</div><div class="text-3xl font-extrabold text-[#023047]">${fmt(
+        total
+      )}</div>`;
+      document.getElementById(
+        'kpi-top-post'
+      ).innerHTML = `<div class="text-gray-500 text-sm">Populairste Post</div><div class="text-2xl font-extrabold text-[#023047]">${posts[0]?.title ||
+        'N/A'}</div>`;
+      document.getElementById(
+        'kpi-top-country'
+      ).innerHTML = `<div class="text-gray-500 text-sm">Top Land</div><div class="text-3xl font-extrabold text-[#023047]">${Object.entries(
+        countries
+      )
+        .sort((a, b) => b[1] - a[1])[0]?.[0] || 'N/A'}</div>`;
+      document.getElementById(
+        'kpi-live-event'
+      ).innerHTML = `<div class="text-gray-500 text-sm">Laatste Bezoek</div><div class="text-3xl font-extrabold text-[#023047]">${ago(
+        latest?.timestamp
+      )}</div>`;
+    }
+
+    function renderTimeSeries(data) {
+      const dates = Object.keys(data)
+        .sort()
+        .slice(-30);
+      const series = dates.map(d => data[d]);
+      new ApexCharts(
+        document.getElementById('time-series-chart'),
+        {
+          chart: { type: 'area', toolbar: { show: false }, zoom: { enabled: false } },
+          series: [{ name: 'Views', data: series }],
+          xaxis: { categories: dates, labels: { style: { colors: '#64748b' } } },
+          yaxis: { labels: { style: { colors: '#64748b' } } },
+          colors: [COLORS.primary],
+          stroke: { curve: 'smooth', width: 2 },
+          fill: { type: 'gradient', gradient: { opacityFrom: 0.6, opacityTo: 0.05 } },
+          grid: { borderColor: '#e2e8f0', strokeDashArray: 4 },
+          dataLabels: { enabled: false }
+        }
+      ).render();
+    }
+
+    function renderDeviceChart(data) {
+      new ApexCharts(
+        document.getElementById('device-chart'),
+        {
+          chart: { type: 'donut', height: 200 },
+          series: Object.values(data),
+          labels: Object.keys(data),
+          colors: [COLORS.primary, COLORS.secondary, COLORS.accent],
+          legend: { position: 'bottom' },
+          stroke: { colors: ['#fff'] }
+        }
+      ).render();
+    }
+
+    function renderReferrersChart(data) {
+      const sorted = Object.entries(data)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 7);
+      new ApexCharts(
+        document.getElementById('referrers-chart'),
+        {
+          chart: { type: 'bar', height: 200 },
+          series: [{ data: sorted.map(([, v]) => v) }],
+          xaxis: { categories: sorted.map(([k]) => k), labels: { style: { colors: '#64748b' } } },
+          plotOptions: { bar: { borderRadius: 4 } },
+          colors: [COLORS.secondary],
+          grid: { borderColor: '#e2e8f0', strokeDashArray: 4 }
+        }
+      ).render();
+    }
+
+    function renderMap(countries) {
+      const map = L.map('view-map', { zoomControl: false }).setView([20, 0], 2);
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png').addTo(map);
+      fetch('https://cdn.jsdelivr.net/npm/countries-coordinates@1.0.3/countries.json')
+        .then(r => r.json())
+        .then(coords => {
+          for (const [code, v] of Object.entries(countries)) {
+            const info = coords[code.toUpperCase()];
+            if (!info) continue;
+            const radius = Math.sqrt(v) * 50000;
+            L.circle([info.latitude, info.longitude], {
+              radius,
+              color: COLORS.secondary,
+              fillColor: COLORS.secondary,
+              fillOpacity: 0.6,
+              weight: 1
+            })
+              .addTo(map)
+              .bindPopup(`<b>${info.name}</b><br>${fmt(v)} views`);
+          }
+        });
+    }
+
+    function renderPopular(posts) {
+      const container = document.getElementById('popular-posts');
+      container.innerHTML = posts
+        .slice(0, 10)
+        .map(
+          (p, i) => `
+        <div class="flex justify-between items-center p-3 border border-gray-200 rounded-lg">
+          <div>${i + 1}. ${p.title}</div>
+          <div class="font-bold text-[#023047]">${fmt(p.views)}</div>
+        </div>`
+        )
+        .join('');
+    }
+
+    async function init() {
+      const { allViewsData, latestEvents } = await fetchData();
+      const posts = Object.entries(allViewsData).map(([path, d]) => ({
+        title: path,
+        views: d.total || 0
+      }));
+      posts.sort((a, b) => b.views - a.views);
+
+      const total = posts.reduce((sum, p) => sum + p.views, 0);
+      const countries = Object.entries(allViewsData).reduce((acc, [, d]) => {
+        for (const [c, cnt] of Object.entries(d.countries || {})) acc[c] = (acc[c] || 0) + cnt;
+        return acc;
+      }, {});
+      const devices = Object.entries(allViewsData).reduce((acc, [, d]) => {
+        for (const [dev, cnt] of Object.entries(d.devices || {})) acc[dev] = (acc[dev] || 0) + cnt;
+        return acc;
+      }, {});
+      const referrers = Object.entries(allViewsData).reduce((acc, [, d]) => {
+        for (const [r, cnt] of Object.entries(d.referrers || {})) acc[r] = (acc[r] || 0) + cnt;
+        return acc;
+      }, {});
+      const perDay = Object.entries(allViewsData).reduce((acc, [, d]) => {
+        (d.timestamps || []).forEach(ts => {
+          const day = ts.split('T')[0];
+          acc[day] = (acc[day] || 0) + 1;
+        });
+        return acc;
+      }, {});
+
+      renderKPIs(total, posts, countries, latestEvents[0]);
+      renderTimeSeries(perDay);
+      renderDeviceChart(devices);
+      renderReferrersChart(referrers);
+      renderMap(countries);
+      renderPopular(posts);
+    }
+
+    document.addEventListener('DOMContentLoaded', init);
+  </script>
+</BaseLayout>

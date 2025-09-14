@@ -1,0 +1,50 @@
+---
+export interface Props {
+  type: 'youtube' | 'local';
+  src: string;
+  title?: string;
+}
+
+const { type, src, title } = Astro.props;
+---
+
+{type === 'youtube' && (
+  <div class="video-wrapper">
+    <iframe 
+      src={src.replace('watch?v=', 'embed/')}
+      title={title || 'YouTube video'}
+      frameborder="0"
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+      allowfullscreen>
+    </iframe>
+  </div>
+)}
+
+{type === 'local' && (
+  <div class="video-wrapper">
+    <video controls>
+      <source src={src} type="video/mp4">
+      Je browser ondersteunt geen video element.
+    </video>
+  </div>
+)}
+
+<style>
+  .video-wrapper {
+    position: relative;
+    width: 100%;
+    height: 0;
+    padding-bottom: 56.25%; /* 16:9 aspect ratio */
+    margin: 1rem 0;
+  }
+  
+  .video-wrapper iframe,
+  .video-wrapper video {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 8px;
+  }
+</style>

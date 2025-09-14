@@ -1,28 +1,29 @@
-import { useState, useEffect } from 'preact/hooks';
+import React, { useState, useEffect } from 'react';
 
 export function LikeButton({ likeKey, apiUrl }) {
   const [count, setCount] = useState(0);
   const endpoint = `${apiUrl}/api/like`;
 
-  // Runs once to get the initial like count
+  // Fetch initial like count
   useEffect(() => {
-    if (!likeKey || !endpoint) return;
+    if (!likeKey) return;
+
     fetch(`${endpoint}?key=${encodeURIComponent(likeKey)}`)
-      .then(res => res.json())
-      .then(data => setCount(data.count ?? 0))
-      .catch(err => console.error("Error fetching likes:", err));
+      .then((res) => res.json())
+      .then((data) => setCount(data.count ?? 0))
+      .catch((err) => console.error("Error fetching likes:", err));
   }, [likeKey, endpoint]);
 
-  // Runs when the button is clicked
+  // Handle button click
   const handleLike = () => {
     fetch(endpoint, {
       method: 'POST',
-      headers: { 'content-type': 'application/json' },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ key: likeKey }),
     })
-      .then(res => res.json())
-      .then(data => setCount(data.count ?? 0))
-      .catch(err => console.error("Error posting like:", err));
+      .then((res) => res.json())
+      .then((data) => setCount(data.count ?? 0))
+      .catch((err) => console.error("Error posting like:", err));
   };
 
   return (

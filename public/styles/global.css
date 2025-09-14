@@ -1,13 +1,39 @@
-.photo-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 10px;
-  margin: 1rem 0;
-}
+/* src/styles/global.css */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-.photo-grid img {
-  width: 100%;
-  height: auto;
-  border-radius: 8px;
-  object-fit: cover;
+@layer components {
+  /* Voor LikeButton en ViewCounter */
+  .chip {
+    @apply bg-slate-100 border border-slate-200 text-slate-900 py-1 px-3 rounded-full text-sm font-semibold cursor-pointer;
+  }
+
+  /* Voor Comments component */
+  .comments {
+    @apply mt-8;
+  }
+  #c-form {
+    @apply grid gap-2 mb-4;
+  }
+  .c-item {
+    @apply p-3 border border-slate-200 rounded-lg my-2 bg-white;
+  }
+  .c-head {
+    @apply text-slate-600 mb-1;
+  }
+  
+  /* Voor de hero image op de homepage */
+  /* Aangepast van .hero-image img naar .hero img */
+  .hero img { 
+    @apply object-cover;
+  }
+
+  /* Voor je foto-gallerij */
+  .photo-grid {
+    @apply grid grid-cols-[repeat(auto-fit,minmax(220px,1fr))] gap-2.5 my-4;
+  }
+  .photo-grid img {
+    @apply w-full h-auto rounded-lg object-cover;
+  }
 }
