@@ -1,10 +1,9 @@
-// Enhanced View Counter API - src/pages/api/view.ts
 import type { APIContext } from 'astro';
 import { jsonResponse } from './_utils';
 
 export const prerender = false;
 
-// --- Helper functions (no change) ---
+// --- Helper Functions from your original file (no changes) ---
 function getDeviceType(ua: string | null): 'desktop' | 'mobile' | 'tablet' {
   if (!ua) return 'desktop';
   const userAgent = ua.toLowerCase();
@@ -26,7 +25,21 @@ function getReferrerHost(ref: string | null): string {
   }
 }
 
-// --- GET Function (Fixed with try/catch) ---
+// --- NEW HELPER: Safely get and parse JSON from KV ---
+async function safeGetJson(kv: KVNamespace, key: string, defaultValue: any = {}) {
+  try {
+    const raw = await kv.get(key);
+    if (!raw) return defaultValue;
+    return JSON.parse(raw);
+  } catch (e) {
+    console.error(`Failed to parse JSON from KV key: ${key}. Data may be corrupt.`, e);
+    // Data is corrupt, return the default and let the code overwrite it later
+    return defaultValue;
+  }
+}
+
+
+// --- FIXED GET Function ---
 export async function GET(context: APIContext) {
   const kv = context.locals?.runtime?.env?.ANALYTICS_KV as KVNamespace | undefined;
   if (!kv) {
@@ -34,19 +47,20 @@ export async function GET(context: APIContext) {
     return jsonResponse({ error: 'ANALYTICS_KV not bound' }, 500);
   }
 
-  // --- FIX: Added try/catch to handle KV errors ---
   try {
-    const allViewsData = (await kv.get('views_all_data', 'json')) ?? {};
-    const latestEvents = (await kv.get('views_latest_events', 'json')) ?? [];
+    // FIX: Replaced .get('json') with our new safe helper
+    const allViewsData = await safeGetJson(kv, 'views_all_data', {});
+    const latestEvents = await safeGetJson(kv, 'views_latest_events', []);
     
-    const dailyData = {};
+    const dailyData: { [key: string]: any } = {};
     const today = new Date();
     for (let i = 0; i < 30; i++) {
       const date = new Date(today);
       date.setDate(date.getDate() - i);
       const dateStr = date.toISOString().slice(0, 10);
-      // This .get('json') call could fail
-      const dayData = await kv.get(`analytics:daily:${dateStr}`, 'json');
+      
+      // FIX: Also replaced this .get('json') with our helper
+      const dayData = await safeGetJson(kv, `analytics:daily:${dateStr}`, null);
       if (dayData) {
         dailyData[dateStr] = dayData;
       }
@@ -60,7 +74,7 @@ export async function GET(context: APIContext) {
   }
 }
 
-// --- POST Function (Fixed with try/catch) ---
+// --- FIXED POST Function ---
 export async function POST(context: APIContext) {
   const kv = context.locals?.runtime?.env?.ANALYTICS_KV as KVNamespace | undefined;
   if (!kv) {
@@ -68,12 +82,10 @@ export async function POST(context: APIContext) {
     return jsonResponse({ error: 'ANALYTICS_KV not bound' }, 500);
   }
 
-  // --- FIX: Added try/catch to handle all KV operations ---
   try {
     const { path, referrer } = await context.request.json().catch(() => ({} as any));
     if (!path) return jsonResponse({ error: 'Missing path' }, 400);
 
-    // ... (All your data collection logic is fine) ...
     const country = context.request.headers.get('cf-ipcountry') ?? 'XX';
     const city = context.request.headers.get('cf-ipcity') ?? 'Unknown';
     const region = context.request.headers.get('cf-region') ?? 'Unknown';
@@ -95,8 +107,8 @@ export async function POST(context: APIContext) {
     else if (userAgent.includes('Android')) os = 'Android';
     else if (userAgent.includes('iOS')) os = 'iOS';
 
-    // All these KV calls are now safely inside the try block
-    const allViewsData = (await kv.get('views_all_data', 'json')) ?? {};
+    // FIX: All .get('json') calls replaced with our robust helper
+    const allViewsData = await safeGetJson(kv, 'views_all_data', {});
     let postData = allViewsData[path];
     
     if (typeof postData === 'number' || !postData) {
@@ -110,7 +122,7 @@ export async function POST(context: APIContext) {
         operatingSystems: {},
         referrers: {},
         timestamps: [],
-        uniqueVisitors: new Set(),
+        uniqueVisitors: [], // Always initialize as array, since Set can't be JSON'd
         visitDurations: [],
         bounceRate: 0
       };
@@ -118,7 +130,6 @@ export async function POST(context: APIContext) {
 
     postData.total += 1;
     postData.countries[country] = (postData.countries[country] || 0) + 1;
-    // ... (etc. ... all your counter logic) ...
     postData.cities[city] = (postData.cities[city] || 0) + 1;
     postData.regions[region] = (postData.regions[region] || 0) + 1;
     postData.devices[device] = (postData.devices[device] || 0) + 1;
@@ -136,16 +147,17 @@ export async function POST(context: APIContext) {
     });
 
     const visitorId = `${ip}_${userAgent.slice(0, 50)}`;
-    if (!postData.uniqueVisitors.has(visitorId)) {
-      postData.uniqueVisitors.add(visitorId);
+    // Make sure uniqueVisitors is an array before checking
+    if (!Array.isArray(postData.uniqueVisitors)) {
+        postData.uniqueVisitors = [];
     }
-    if (postData.uniqueVisitors instanceof Set) {
-      postData.uniqueVisitors = Array.from(postData.uniqueVisitors);
+    if (!postData.uniqueVisitors.includes(visitorId)) {
+      postData.uniqueVisitors.push(visitorId);
     }
 
     allViewsData[path] = postData;
 
-    const latestEvents = (await kv.get('views_latest_events', 'json')) ?? [];
+    const latestEvents = await safeGetJson(kv, 'views_latest_events', []);
     latestEvents.unshift({
       path,
       country,
@@ -163,7 +175,7 @@ export async function POST(context: APIContext) {
 
     const day = timestamp.slice(0, 10);
     const dailyKey = `analytics:daily:${day}`;
-    const dailyData = await kv.get(dailyKey, 'json') || { 
+    const dailyData = await safeGetJson(kv, dailyKey, { 
       events: 0, 
       countries: {}, 
       cities: {},
@@ -172,7 +184,7 @@ export async function POST(context: APIContext) {
       operatingSystems: {},
       referrers: {},
       pages: {} 
-    };
+    });
     
     dailyData.events += 1;
     dailyData.countries[country] = (dailyData.countries[country] || 0) + 1;
@@ -187,7 +199,7 @@ export async function POST(context: APIContext) {
 
     return jsonResponse({ 
       views: postData.total,
-      uniqueVisitors: Array.isArray(postData.uniqueVisitors) ? postData.uniqueVisitors.length : 0
+      uniqueVisitors: postData.uniqueVisitors.length
     });
 
   } catch (error) {
