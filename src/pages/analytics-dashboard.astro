@@ -9,23 +9,35 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     slot="head"
   />
   <script src="https://cdn.jsdelivr.net/npm/apexcharts" slot="head"></script>
-
   <style>
     .dashboard-container {
       font-family: 'Inter', sans-serif;
-      background: #f1f5f9;
+      background: linear-gradient(135deg,#f1f5f9 0%,#e3e7ed 100%);
       min-height: 100vh;
     }
     .stat-card {
-      background: #fff;
-      border-radius: 0.75rem;
-      padding: 1.5rem;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      background: rgba(255,255,255,0.95);
+      border-radius: 1rem;
+      padding: 2rem 1.5rem;
+      box-shadow: 0 8px 32px rgba(34, 66, 108, 0.16);
       transition: transform 0.3s, box-shadow 0.3s;
+      position: relative;
+      overflow: visible;
     }
     .stat-card:hover {
-      transform: translateY(-6px);
-      box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+      transform: scale(1.05) translateY(-6px);
+      box-shadow: 0 16px 48px rgba(34, 66, 108, 0.25);
+    }
+    .stat-card::after {
+      content: '';
+      display: block;
+      position: absolute;
+      right: 1rem; bottom: 1rem;
+      width: 30px; height: 30px;
+      background: linear-gradient(135deg,#ffb70333,#02304722);
+      border-radius: 50%;
+      filter: blur(8px) opacity(0.6);
+      z-index: 0;
     }
     .apexcharts-tooltip {
       background: #fff !important;
@@ -33,82 +45,91 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08) !important;
     }
     #view-map {
-      border-radius: 0.75rem;
+      border-radius: 1rem;
       overflow: hidden;
+      box-shadow: 0 4px 24px #02304718;
+    }
+    .main-title { 
+      background: linear-gradient(90deg,#023047,#ffb703,#fb8500 90%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .main-desc {
+      opacity: 0.85;
+    }
+    .kpi-label {
+      color: #64748b;
+      font-weight: 600;
+      font-size: 1.05rem;
+      margin-bottom: 2px;
+    }
+    .kpi-number {
+      font-size: 2.5rem;
+      font-weight: 900;
+      color: #023047;
     }
   </style>
 
-  <main class="dashboard-container p-6 md:p-10 lg:p-16">
-    <header class="text-center mb-12">
-      <h1 class="text-4xl font-bold text-[#023047] mb-2">
+  <main class="dashboard-container p-6 md:p-12 xl:p-20">
+    <!-- Floating Decorative Orbs -->
+    <div style="position:absolute;top:6%;left:6%;width:80px;height:80px;background:linear-gradient(110deg,#ffb703 40%,#fb8500 100%);border-radius:50%;filter:blur(32px);opacity:0.25;"></div>
+    <div style="position:absolute;bottom:5%;right:6%;width:70px;height:70px;background:linear-gradient(110deg,#023047 40%,#ffb703 100%);border-radius:50%;filter:blur(32px);opacity:0.18;"></div>
+
+    <header class="text-center mb-16">
+      <h1 class="text-5xl font-black main-title mb-3 tracking-tight">
         📊 Ultimate Real-Time Dashboard
       </h1>
-      <p class="text-gray-600">
-        Live inzichten: wereldwijde bezoekers, devices, trends en top-posts
+      <p class="main-desc text-lg">
+        Live inzichten: Wereldwijde bezoekers, devices, trends, top-posts<br>
+        <span style="color:#fb8500;">Nu mooier, sneller en data-rijker!</span>
       </p>
     </header>
-
-    <!-- KPI Cards -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-      <div id="kpi-total-views" class="stat-card">
-        <div class="text-gray-500 text-sm">Totaal Views</div>
-        <div class="text-3xl font-extrabold text-[#023047]">…</div>
+    
+    <!-- KPIs -->
+    <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 mb-16">
+      <div id="kpi-total-views" class="stat-card shadow-xl"></div>
+      <div id="kpi-top-post" class="stat-card shadow-xl"></div>
+      <div id="kpi-top-country" class="stat-card shadow-xl"></div>
+      <div id="kpi-live-event" class="stat-card shadow-xl"></div>
+    </section>
+    
+    <!-- Main Charts + Map -->
+    <section class="grid grid-cols-1 lg:grid-cols-3 gap-10 mb-16">
+      <div class="stat-card col-span-1 h-96 !p-0 relative">
+        <h2 class="text-xl font-bold text-[#023047] mb-4 px-4 pt-4">🌍 Views per Land</h2>
+        <div id="view-map" class="h-[340px]"></div>
       </div>
-      <div id="kpi-top-post" class="stat-card">
-        <div class="text-gray-500 text-sm">Populairste Post</div>
-        <div class="text-2xl font-extrabold text-[#023047]">…</div>
-      </div>
-      <div id="kpi-top-country" class="stat-card">
-        <div class="text-gray-500 text-sm">Top Land</div>
-        <div class="text-3xl font-extrabold text-[#023047]">…</div>
-      </div>
-      <div id="kpi-live-event" class="stat-card">
-        <div class="text-gray-500 text-sm">Laatste Bezoek</div>
-        <div class="text-3xl font-extrabold text-[#023047]">…</div>
-      </div>
-    </div>
-
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-12">
-      <div class="stat-card col-span-1 h-96">
-        <h2 class="text-xl font-semibold text-[#023047] mb-4">
-          🌍 Views per Land
-        </h2>
-        <div id="view-map" class="h-full"></div>
-      </div>
-      <div class="col-span-2 grid grid-rows-2 gap-6">
+      <div class="col-span-2 grid grid-rows-2 gap-8">
         <div class="stat-card h-80">
-          <h2 class="text-xl font-semibold text-[#023047] mb-4">
+          <h2 class="text-xl font-bold text-[#023047] mb-4">
             📈 Views Trend (30 dagen)
           </h2>
           <div id="time-series-chart" class="h-full"></div>
         </div>
-        <div class="stat-card h-80 grid grid-cols-2 gap-6">
+        <div class="stat-card h-80 grid grid-cols-2 gap-8">
           <div>
-            <h2 class="text-xl font-semibold text-[#023047] mb-4">
-              📱 Apparaten
-            </h2>
+            <h2 class="text-xl font-bold text-[#023047] mb-4">📱 Apparaten</h2>
             <div id="device-chart" class="h-40"></div>
           </div>
           <div>
-            <h2 class="text-xl font-semibold text-[#023047] mb-4">
-              🔗 Verkeersbronnen
-            </h2>
+            <h2 class="text-xl font-bold text-[#023047] mb-4">🔗 Verkeersbronnen</h2>
             <div id="referrers-chart" class="h-40"></div>
           </div>
         </div>
       </div>
-    </div>
-
-    <div class="stat-card mb-12">
-      <h2 class="text-xl font-semibold text-[#023047] mb-4">
-        🏆 Top 10 Posts
-      </h2>
+    </section>
+    
+    <!-- Top Posts -->
+    <div class="stat-card mb-16 px-6 py-7 border border-[#e2e8f0]">
+      <h2 class="text-xl font-bold text-[#023047] mb-4">🏆 Top 10 Posts</h2>
       <div id="popular-posts" class="space-y-2"></div>
     </div>
   </main>
 
   <script type="module">
     import * as L from 'https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet-src.esm.js';
+    
     const COLORS = {
       primary: '#023047',
       secondary: '#ffb703',
@@ -116,9 +137,8 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     };
 
     const fmt = n =>
-      n > 999
-        ? `${(n / 1000).toFixed(1)}k`
-        : n.toString();
+      n > 999 ? `${(n / 1000).toFixed(1)}k` : n.toString();
+
     const ago = d => {
       if (!d) return 'N/A';
       const s = Math.floor((Date.now() - new Date(d)) / 1000);
@@ -135,43 +155,36 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     }
 
     function renderKPIs(total, posts, countries, latest) {
-      document.getElementById(
-        'kpi-total-views'
-      ).innerHTML = `<div class="text-gray-500 text-sm">Totaal Views</div><div class="text-3xl font-extrabold text-[#023047]">${fmt(
-        total
-      )}</div>`;
-      document.getElementById(
-        'kpi-top-post'
-      ).innerHTML = `<div class="text-gray-500 text-sm">Populairste Post</div><div class="text-2xl font-extrabold text-[#023047]">${posts[0]?.title ||
-        'N/A'}</div>`;
-      document.getElementById(
-        'kpi-top-country'
-      ).innerHTML = `<div class="text-gray-500 text-sm">Top Land</div><div class="text-3xl font-extrabold text-[#023047]">${Object.entries(
-        countries
-      )
-        .sort((a, b) => b[1] - a[1])[0]?.[0] || 'N/A'}</div>`;
-      document.getElementById(
-        'kpi-live-event'
-      ).innerHTML = `<div class="text-gray-500 text-sm">Laatste Bezoek</div><div class="text-3xl font-extrabold text-[#023047]">${ago(
-        latest?.timestamp
-      )}</div>`;
+      document.getElementById('kpi-total-views').innerHTML =
+        `<div class="kpi-label">Totaal Views</div>
+         <div class="kpi-number">${fmt(total)}</div>`;
+
+      document.getElementById('kpi-top-post').innerHTML =
+        `<div class="kpi-label">Populairste Post</div>
+         <div class="kpi-number" style="font-size:2rem;">${posts[0]?.title || 'N/A'}</div>`;
+
+      document.getElementById('kpi-top-country').innerHTML =
+        `<div class="kpi-label">Top Land</div>
+         <div class="kpi-number">${Object.entries(countries).sort((a, b) => b[1] - a[1])[0]?.[0] || 'N/A'}</div>`;
+
+      document.getElementById('kpi-live-event').innerHTML =
+        `<div class="kpi-label">Laatste Bezoek</div>
+         <div class="kpi-number">${ago(latest?.timestamp)}</div>`;
     }
 
     function renderTimeSeries(data) {
-      const dates = Object.keys(data)
-        .sort()
-        .slice(-30);
+      const dates = Object.keys(data).sort().slice(-30);
       const series = dates.map(d => data[d]);
       new ApexCharts(
         document.getElementById('time-series-chart'),
         {
           chart: { type: 'area', toolbar: { show: false }, zoom: { enabled: false } },
           series: [{ name: 'Views', data: series }],
-          xaxis: { categories: dates, labels: { style: { colors: '#64748b' } } },
-          yaxis: { labels: { style: { colors: '#64748b' } } },
+          xaxis: { categories: dates, labels: { style: { colors: '#64748b', fontWeight:600 } } },
+          yaxis: { labels: { style: { colors: '#64748b', fontWeight:600 } } },
           colors: [COLORS.primary],
-          stroke: { curve: 'smooth', width: 2 },
-          fill: { type: 'gradient', gradient: { opacityFrom: 0.6, opacityTo: 0.05 } },
+          stroke: { curve: 'smooth', width: 3 },
+          fill: { type: 'gradient', gradient: { opacityFrom: 0.5, opacityTo: 0.10 } },
           grid: { borderColor: '#e2e8f0', strokeDashArray: 4 },
           dataLabels: { enabled: false }
         }
@@ -186,7 +199,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
           series: Object.values(data),
           labels: Object.keys(data),
           colors: [COLORS.primary, COLORS.secondary, COLORS.accent],
-          legend: { position: 'bottom' },
+          legend: { position: 'bottom', fontWeight:600 },
           stroke: { colors: ['#fff'] }
         }
       ).render();
@@ -201,8 +214,11 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         {
           chart: { type: 'bar', height: 200 },
           series: [{ data: sorted.map(([, v]) => v) }],
-          xaxis: { categories: sorted.map(([k]) => k), labels: { style: { colors: '#64748b' } } },
-          plotOptions: { bar: { borderRadius: 4 } },
+          xaxis: {
+            categories: sorted.map(([k]) => k),
+            labels: { style: { colors: '#64748b', fontWeight:600 } }
+          },
+          plotOptions: { bar: { borderRadius: 8 } },
           colors: [COLORS.secondary],
           grid: { borderColor: '#e2e8f0', strokeDashArray: 4 }
         }
@@ -238,9 +254,9 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         .slice(0, 10)
         .map(
           (p, i) => `
-        <div class="flex justify-between items-center p-3 border border-gray-200 rounded-lg">
-          <div>${i + 1}. ${p.title}</div>
-          <div class="font-bold text-[#023047]">${fmt(p.views)}</div>
+        <div class="flex justify-between items-center p-4 bg-[#f1f5fa] rounded-lg shadow mb-1">
+          <div><strong>${i + 1}.</strong> ${p.title}</div>
+          <div class="font-extrabold text-[#023047]">${fmt(p.views)}</div>
         </div>`
         )
         .join('');
@@ -248,25 +264,30 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
     async function init() {
       const { allViewsData, latestEvents } = await fetchData();
+      
       const posts = Object.entries(allViewsData).map(([path, d]) => ({
-        title: path,
+        title: path.replace(/^\/blog\//, ""),
         views: d.total || 0
       }));
       posts.sort((a, b) => b.views - a.views);
 
       const total = posts.reduce((sum, p) => sum + p.views, 0);
+
       const countries = Object.entries(allViewsData).reduce((acc, [, d]) => {
         for (const [c, cnt] of Object.entries(d.countries || {})) acc[c] = (acc[c] || 0) + cnt;
         return acc;
       }, {});
+
       const devices = Object.entries(allViewsData).reduce((acc, [, d]) => {
         for (const [dev, cnt] of Object.entries(d.devices || {})) acc[dev] = (acc[dev] || 0) + cnt;
         return acc;
       }, {});
+
       const referrers = Object.entries(allViewsData).reduce((acc, [, d]) => {
         for (const [r, cnt] of Object.entries(d.referrers || {})) acc[r] = (acc[r] || 0) + cnt;
         return acc;
       }, {});
+
       const perDay = Object.entries(allViewsData).reduce((acc, [, d]) => {
         (d.timestamps || []).forEach(ts => {
           const day = ts.split('T')[0];
@@ -279,10 +300,3 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       renderTimeSeries(perDay);
       renderDeviceChart(devices);
       renderReferrersChart(referrers);
-      renderMap(countries);
-      renderPopular(posts);
-    }
-
-    document.addEventListener('DOMContentLoaded', init);
-  </script>
-</BaseLayout>

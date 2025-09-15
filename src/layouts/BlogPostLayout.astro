@@ -1,15 +1,18 @@
 ---
+// src/layouts/BlogPostLayout.astro
 import type { CollectionEntry } from 'astro:content';
 import BaseLayout from './BaseLayout.astro';
 import Comments from '../components/Comments.jsx';
 import { ViewCounter } from '../components/ViewCounter.jsx';
 import { LikeButton } from '../components/LikeButton.jsx';
+import { AIChatBot } from '../components/AIComponents.jsx';
 
 export interface Props {
   post: CollectionEntry<'blog'>;
 }
 
 const { post } = Astro.props;
+
 if (!post || !post.data) {
   throw new Error('`post` or `post.data` is missing in BlogPostLayout.astro');
 }
@@ -18,54 +21,66 @@ const { title, description, pubDate, image, tags } = post.data;
 const { Content } = await post.render();
 
 const dateStr = new Date(pubDate).toLocaleDateString('nl-NL', {
-  year: 'numeric',
-  month: 'long',
-  day: 'numeric',
+  year: 'numeric', month: 'long', day: 'numeric',
 });
 
 const currentPath = Astro.url.pathname;
 const siteUrl = import.meta.env.SITE;
 ---
 <BaseLayout title={title} description={description ?? title}>
-  <article class="max-w-3xl mx-auto">
+  <article class="max-w-3xl mx-auto p-6 prose prose-lg dark:prose-invert">
     {image?.url && (
-      <figure class="hero">
+      <figure class="hero rounded-lg overflow-hidden relative mb-6">
         <img
           src={image.url}
           alt={image.alt ?? title}
           loading="eager"
           decoding="async"
           sizes="(max-width: 768px) 100vw, 1024px"
+          class="w-full h-auto object-cover"
         />
-        <div class="hero-grad" />
+        <div class="hero-grad absolute inset-0 bg-gradient-to-t from-black/60"></div>
       </figure>
     )}
 
-    <header class="mb-4">
-      <h1>{title}</h1>
-      <div>{dateStr}</div>
+    <header class="mb-6">
+      <h1 class="font-extrabold text-4xl text-[#023047] mb-2">{title}</h1>
+      <p class="text-gray-500 mb-4">{dateStr}</p>
       {tags?.length && (
-        <div class="flex flex-wrap gap-2 mt-2"> {/* Added a wrapper for better spacing */}
+        <div class="flex flex-wrap gap-2 mb-6">
           {tags.map((t) => (
             <span class="chip" key={t}>{t}</span>
           ))}
         </div>
       )}
 
-      <div class="meta-row">
+      <div class="flex items-center gap-4 mb-4">
         <ViewCounter client:load path={currentPath} apiUrl={siteUrl} />
         <LikeButton client:load likeKey={currentPath} apiUrl={siteUrl} />
       </div>
 
-      {description && <p class="mt-2 text-lg text-subtle">{description}</p>} {/* Example of using utility text */}
+      {description && <p class="text-lg text-subtle">{description}</p>}
     </header>
 
-    <section class="prose-wrap">
+    <section class="prose-wrap mb-12">
       <Content />
     </section>
 
     <footer>
       <Comments client:load slug={post.slug} apiUrl={siteUrl} />
     </footer>
+
+    {/* AI Chatbot floating widget */}
+    <AIChatBot apiUrl={siteUrl} client:load />
   </article>
 </BaseLayout>
+
+<style>
+  /* Add subtle improvements: larger headings, comfortable reading width */
+  article.prose-wrap :global(p) {
+    line-height: 1.7;
+  }
+  figure.hero-grad {
+    pointer-events: none;
+  }
+</style>

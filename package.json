@@ -7,8 +7,7 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "astro": "astro",
-    "postbuild": "printf '_worker.js\n' > dist/.assetsignore"
+    "astro": "astro"
   },
   "dependencies": {
     "@astrojs/mdx": "^4.3.5",
@@ -19,6 +18,7 @@
     "@types/react": "^19.1.13",
     "@types/react-dom": "^19.1.9",
     "astro": "^5.13.4",
+    "framer-motion": "^12.23.12",
     "leaflet": "^1.9.4",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",

@@ -1,15 +1,19 @@
 name = "waarisniels"
-pages_build_output_dir = "dist" # <-- DEZE REGEL IS CRUCIAAL
-
+pages_build_output_dir = "dist"
 compatibility_date = "2025-08-28"
 compatibility_flags = ["nodejs_compat"]
 
+# Fixed KV namespace binding - use consistent naming
 [[kv_namespaces]]
-binding = "bibbibib"
+binding = "ANALYTICS_KV"  # This matches what your API endpoints expect
 id = "adadbaa37ca743d5a6c3e3b2d311fb3c"
 preview_id = "adadbaa37ca743d5a6c3e3b2d311fb3c"
 
+# Optional: Keep session binding if needed
 [[kv_namespaces]]
 binding = "SESSION"
-id = "adadbaa37ca743d5a6c3e3b2d311fb3c"
+id = "adadbaa37ca743d5a6c3e3b2d311fb3c" 
 preview_id = "adadbaa37ca743d5a6c3e3b2d311fb3c"
+
+[ai]
+binding = "AI"

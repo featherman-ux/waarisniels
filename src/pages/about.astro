@@ -1,91 +1,134 @@
 ---
-// src/pages/about.astro
 import BaseLayout from '../layouts/BaseLayout.astro';
 
 const pageTitle = "Over Niels";
-const pageDescription = "Leer meer over mij en het verhaal achter Waar is Niels?";
+const pageDescription = "Lees meer over mij en het verhaal achter Waar is Niels?";
 ---
 
 <BaseLayout title={pageTitle} description={pageDescription}>
   <style>
-    :root {
-      --orange: #ffb703;
-      --blue:   #023047;
+    :root { 
+      --orange: #ffb703; 
+      --blue: #4f46e5; /* <-- Updated to the blue from Kaart.astro */
     }
+
     header.hero {
-      background: var(--orange);
+      background: var(--blue);
       color: #fff;
       text-align: center;
       padding: 3rem 1.5rem;
       margin-bottom: 2rem;
-      border-radius: 0.75rem;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      border-radius: .75rem;
+      box-shadow: 0 4px 12px rgba(0,0,0,.1);
     }
+
+    /* Updated: Removed font-family, adjusted size for Inter */
     header.hero h1 {
-      font-size: 2rem;
-      margin: 0 0 0.5rem;
-    }
-    header.hero p {
+      font-size: 2.5rem;
+      font-weight: 700;
       margin: 0;
-      font-size: 1rem;
-      opacity: 0.95;
     }
-    .container {
+
+    /* Updated: Removed font-family, adjusted size/weight for Inter */
+    .card h2 {
+      color: var(--blue);
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-top: 0;
+    }
+
+    /* Kept the cool grid layout */
+    main.container {
       max-width: 900px;
       margin: 0 auto;
       padding: 0 1.5rem 2rem;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
     }
+
     .card {
       background: #fff;
       border: 1px solid #e5e7eb;
       border-radius: 12px;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
-      padding: 1.25rem 1.5rem;
-      margin-bottom: 1.5rem;
+      box-shadow: 0 4px 12px rgba(0,0,0,.08);
+      padding: 1.5rem 2rem;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
-    .card h2 {
-      color: var(--blue);
-      margin: 0 0 0.5rem;
-      font-size: 1.5rem;
+
+    /* Kept the hover effect */
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 6px 16px rgba(0,0,0,.12);
     }
-    .card p {
-      line-height: 1.6;
-      color: #374151;
+
+    /* First card still spans both columns */
+    .card:first-child {
+      grid-column: 1 / -1;
     }
+
     .btn-row {
       margin-top: 1rem;
     }
+    
+    /* Updated: Buttons now use the new blue for better contrast */
     .btn-row a {
       display: inline-block;
       background: var(--blue);
-      color: #fff;
-      text-decoration: none;
-      padding: 0.6rem 0.9rem;
-      margin-right: 0.75rem;
+      color: #fff; /* White text on blue is readable */
+      padding: .6rem 1rem;
+      margin-right: .75rem;
+      margin-top: .5rem; 
       border-radius: 8px;
-      font-weight: 600;
+      text-decoration: none;
+      font-weight: 600; /* 600 weight from Inter */
+      transition: filter 0.2s ease, transform 0.2s ease;
     }
+    
     .btn-row a:hover {
-      filter: brightness(1.05);
+      filter: brightness(1.1); /* Simple hover for the new blue */
+      transform: scale(1.03);
+    }
+    
+    .hero-img {
+      width: 100%;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,.1);
+      margin-top: 1.5rem;
+      margin-bottom: 1rem;
+    }
+
+    /* Kept the responsive layout */
+    @media (max-width: 640px) {
+      main.container {
+        grid-template-columns: 1fr; /* Stack on mobile */
+      }
+      
+      header.hero h1 {
+        font-size: 2.25rem;
+      }
+
+      .card {
+        padding: 1.5rem;
+      }
     }
   </style>
 
   <header class="hero">
     <h1>{pageTitle}</h1>
-    <p>Deze site is in herontwikkeling – maar hier lees je alvast wat meer over mij.</p>
+    <p>Deze site wordt herbouwd—maar hier lees je alvast wat over mij.</p>
   </header>
 
   <main class="container">
     <section class="card">
       <h2>Wie ben ik?</h2>
-      <p>
-        Ik ben Niels, bijzonder mooie gast. Op deze plek deel ik mijn avonturen
-        door Zuid‑Amerika en andere plekken op de wereld. Omdat ik onlangs de website per ongeluk
-        om zeep hielp, is alles nog in heropbouw – maar ik werk hard aan een betere versie.
-      </p>
-
-      <img src="/images/over.JPG" alt="Een foto van Niels" class="w-full h-auto rounded-lg mt-4" />
-
+      <p>Ik ben Niels, mooie baas en codeerheld. Ik deel hier mijn avonturen in Zuid-Amerika en daarbuiten.</p>
+      <img
+        src="/images/over.JPG"
+        alt="Niels onderweg"
+        class="hero-img"
+        loading="lazy"
+      />
       <div class="btn-row">
         <a href="/blog/">Laatste blogposts</a>
         <a href="/map/">Live kaart</a>
@@ -94,22 +137,15 @@ const pageDescription = "Leer meer over mij en het verhaal achter Waar is Niels?
 
     <section class="card">
       <h2>Wat is Waar is Niels?</h2>
-      <p>
-        Waar is Niels? is een persoonlijke reisblog met een interactieve kaart, blogposts en een
-        tijdlijn van mijn tochten. Het doel is om vrienden, familie en stalkers
-        eenvoudig te laten volgen waar ik ben en wat ik beleef. Omdat de site opnieuw opgebouwd
-        wordt, kan er tijdelijk content ontbreken.
-      </p>
+      <p>Een persoonlijke reisblog met interactieve kaart, AI-features en real-time updates voor vrienden en familie.</p>
     </section>
 
     <section class="card">
-      <h2>Contact opnemen</h2>
-      <p>
-        Wil je poen mailen of me naar de 1 miljoen volgers helpen? Klik op een van de knoppen hieronder!!
-      </p>
+      <h2>Contact</h2>
+      <p>Mail me of volg me op Instagram!</p>
       <div class="btn-row">
         <a href="mailto:veerman.niels@gmail.com">Mail</a>
-        <a href="https://instagram.com/n.veerman" target="_blank" rel="noopener noreferrer">Instagram</a>
+        <a href="https://instagram.com/n.veerman" target="_blank" rel="noopener">Instagram</a>
       </div>
     </section>
   </main>
