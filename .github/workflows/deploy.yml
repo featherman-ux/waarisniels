@@ -1,50 +1,35 @@
-name: Deploy to GitHub Pages
+name: Deploy to Cloudflare Pages
 
 on:
   push:
     branches:
-      - main
-  workflow_dispatch:
-
-permissions:
-  contents: read
-  pages: write
-  id-token: write
+      - main  # Runs every time you push to your main branch
 
 jobs:
-  build:
+  deploy:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      deployments: write # Required for the Cloudflare Action
     steps:
-      - name: Checkout your repository
+      - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Install Node.js
         uses: actions/setup-node@v4
         with:
- node-version: '20'
-
-      # --- ADD THIS STEP ---
-      - name: Create CNAME file
-        run: echo "waarisniels.nl" > ./public/CNAME
+          node-version: '20'
 
       - name: Install dependencies
         run: npm install
 
-      - name: Build your site
-        run: npm run build
+      - name: Build site
+        run: npm run build  # This runs "astro build" and creates the /dist folder
 
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/pages-action@v1
         with:
- path: ./dist
-
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: 41e06ef76f253fc7135939d93e4e12df
+          projectName: "waarisniels"
+          directory: "dist"
