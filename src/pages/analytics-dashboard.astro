@@ -28,7 +28,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       min-height: 100vh;
       position: relative;
       overflow-x: hidden;
-      padding: 3rem 1.5rem; /* Added padding for smaller screens */
+      padding: 3rem 1.5rem;
     }
     .dark .dashboard-container-wrapper {
       background: var(--bg-dark);
@@ -74,20 +74,31 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     }
     .dark .kpi-label { color: var(--text-secondary-dark); }
     .kpi-number {
-      font-size: 2.75rem;
+      font-size: 2.75rem; /* Base size for numbers */
       font-weight: 900;
       color: var(--text-primary-light);
+      line-height: 1.2;
     }
     .dark .kpi-number { color: var(--text-primary-dark); }
 
+    /* FIX: Specific smaller sizes for text-based KPIs */
+    .kpi-text-lg {
+      font-size: 1.5rem; /* 24px */
+      font-weight: 700;
+    }
+    .kpi-text-xl {
+      font-size: 1.25rem; /* 20px */
+      font-weight: 700;
+    }
+    
     #view-map {
       height: 100%;
       width: 100%;
-      border-radius: 0.5rem; /* Match inner radius */
+      border-radius: 0.5rem; 
       overflow: hidden;
     }
     
-    /* Chart Dark Mode */
+    /* Chart Dark Mode Styles */
     .dark .apexcharts-tooltip { background: #1e293b !important; border: 1px solid #334155 !important; }
     .dark .apexcharts-tooltip-title, .dark .apexcharts-tooltip-text { color: #f1f5f9 !important; }
     .dark .apexcharts-text, .dark .apexcharts-xaxis-label, .dark .apexcharts-yaxis-label { fill: var(--text-secondary-dark) !important; }
@@ -107,7 +118,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         <svg id="theme-toggle-light-icon" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
         <svg id="theme-toggle-dark-icon" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
       </button>
-
+      
       <div class="glass-card mb-12 p-4 flex items-center justify-between shadow-none border-0">
         <div class="flex items-center space-x-4">
           <img src="/images/niels.jpg" alt="Niels Veerman" class="w-12 h-12 rounded-full border-2 border-white/50 shadow-lg"/>
@@ -128,7 +139,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
       <section class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
         <div class="glass-card p-6 flex items-center space-x-4">
-          <div class="p-3 bg-blue-100 dark:bg-blue-900/50 rounded-lg">
+          <div class="p-3 bg-blue-100 dark:bg-blue-900/50 rounded-lg shrink-0">
             <svg class="w-6 h-6 text-blue-600 dark:text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
           </div>
           <div>
@@ -137,7 +148,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
           </div>
         </div>
         <div class="glass-card p-6 flex items-center space-x-4">
-          <div class="p-3 bg-yellow-100 dark:bg-yellow-900/50 rounded-lg">
+          <div class="p-3 bg-yellow-100 dark:bg-yellow-900/50 rounded-lg shrink-0">
             <svg class="w-6 h-6 text-yellow-600 dark:text-yellow-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09ZM18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 0 0-2.456 2.456Z"/></svg>
           </div>
           <div>
@@ -146,7 +157,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
           </div>
         </div>
         <div class="glass-card p-6 flex items-center space-x-4">
-          <div class="p-3 bg-orange-100 dark:bg-orange-900/50 rounded-lg">
+          <div class="p-3 bg-orange-100 dark:bg-orange-900/50 rounded-lg shrink-0">
             <svg class="w-6 h-6 text-orange-600 dark:text-orange-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
           </div>
           <div>
@@ -166,31 +177,31 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         </div>
         <div class="glass-card p-8">
           <div class="flex items-center space-x-3 mb-2">
-            <svg class="w-6 h-6 text-slate-400" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m3.75 13.5 10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75Z" /></svg>
+           <svg class="w-6 h-6 text-slate-400" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m3.75 13.5 10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75Z" /></svg>
             <h2 class="kpi-label">Top Spike</h2>
           </div>
-          <div id="kpi-trend-highlight" class="kpi-number text-lg text-primary-light dark:text-primary-dark">N/A</div>
+          <div id="kpi-trend-highlight" class="kpi-number kpi-text-lg truncate text-primary-light dark:text-primary-dark">N/A</div>
         </div>
-        <div class="glass-card p-8">
+         <div class="glass-card p-8">
           <div class="flex items-center space-x-3 mb-2">
             <svg class="w-6 h-6 text-slate-400" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M11.48 3.499a.562.562 0 0 1 1.04 0l2.125 5.111a.563.563 0 0 0 .475.31h5.404a.562.562 0 0 1 .321.988l-4.368 3.14a.563.563 0 0 0-.218.66l1.64 5.111a.563.563 0 0 1-.864.614l-4.368-3.14a.563.563 0 0 0-.652 0l-4.368 3.14a.563.563 0 0 1-.864-.614l1.64-5.111a.563.563 0 0 0-.218-.66l-4.368-3.14a.563.563 0 0 1 .321-.988h5.404a.563.563 0 0 0 .475-.31L11.48 3.5Z" /></svg>
             <h2 class="kpi-label">Populairste Post</h2>
           </div>
-          <div id="kpi-top-post" class="kpi-number text-xl truncate text-primary-light dark:text-primary-dark" title="Loading...">Loading...</div>
+          <div id="kpi-top-post" class="kpi-number kpi-text-xl truncate text-primary-light dark:text-primary-dark" title="Loading...">Loading...</div>
         </div>
         <div class="glass-card p-8">
           <div class="flex items-center space-x-3 mb-2">
             <svg class="w-6 h-6 text-slate-400" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 0 0 8.716-6.747M12 21a9.004 9.004 0 0 1-8.716-6.747M12 21c1.35 0 2.463-.153 3.561-.438m-7.122 0A8.966 8.966 0 0 1 12 2.25c1.35 0 2.463.153 3.561.438m0 13.062a8.966 8.966 0 0 1-7.122 0M12 2.25c-4.602 0-8.48 3.067-9.807 7.218c.06.054.12.11.18.168m19.254 0a8.966 8.966 0 0 0-9.807-7.218c.06-.054.12-.11.18-.168M3 12h18M12 2.25V12m0 9.75V12" /></svg>
             <h2 class="kpi-label">Top Land</h2>
           </div>
-          <div id="kpi-top-country" class="kpi-number text-primary-light dark:text-primary-dark">N/A</div>
+          <div id="kpi-top-country" class="kpi-number kpi-text-lg truncate text-primary-light dark:text-primary-dark">N/A</div>
         </div>
         <div class="glass-card p-8">
             <div class="flex items-center space-x-3 mb-2">
             <svg class="w-6 h-6 text-slate-400" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" /></svg>
             <h2 class="kpi-label">Laatste Bezoek</h2>
           </div>
-          <div id="kpi-live-event" class="kpi-number text-primary-light dark:text-primary-dark">N/A</div>
+          <div id="kpi-live-event" class="kpi-number kpi-text-lg text-primary-light dark:text-primary-dark">N/A</div>
         </div>
       </section>
 
@@ -224,11 +235,11 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
       <footer class="text-center mt-16 pt-8 border-t border-slate-300 dark:border-slate-700">
         <p class="text-secondary-light dark:text-secondary-dark">Data provided by Niels Veerman's serverless functions.</p>
-        <div class="flex justify-center space-x-4 mt-4">
-          <a href="https://github.com/featherman-ux" class="text-slate-500 hover:text-orange-500 transition">GitHub</a>
-          <a href="https://www.linkedin.com/in/nielsveerman/" class="text-slate-500 hover:text-orange-500 transition">LinkedIn</a>
-          <a href="/about" class="text-slate-500 hover:text-orange-500 transition">About</a>
-        </div>
+         <div class="flex justify-center space-x-4 mt-4">
+           <a href="https://github.com/featherman-ux" target="_blank" rel="noopener" class="text-slate-500 hover:text-orange-500 transition">GitHub</a>
+           <a href="#" class="text-slate-500 hover:text-orange-500 transition">LinkedIn</a>
+           <a href="/about" class="text-slate-500 hover:text-orange-500 transition">About</a>
+         </div>
       </footer>
 
     </main>
@@ -275,8 +286,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       function animationStep(timestamp) {
         if (!startTime) startTime = timestamp;
         const progress = Math.min((timestamp - startTime) / duration, 1);
-        // Apply ease-out quad timing function
-        const easeOutProgress = progress * (2 - progress);
+        const easeOutProgress = progress * (2 - progress); // ease-out quad
         const currentValue = Math.floor(easeOutProgress * (endValue - startValue) + startValue);
         
         element.textContent = fmt(currentValue);
@@ -290,7 +300,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       requestAnimationFrame(animationStep);
     }
     
-    // --- NEW: Dark Mode Toggle Logic (Moved from BaseLayout) ---
+    // --- NEW: Dark Mode Toggle Logic ---
     const themeToggle = document.getElementById('theme-toggle');
     const lightIcon = document.getElementById('theme-toggle-light-icon');
     const darkIcon = document.getElementById('theme-toggle-dark-icon');
@@ -300,14 +310,15 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       lightIcon?.classList.toggle('hidden', !isDark);
       darkIcon?.classList.toggle('hidden', isDark);
       localStorage.setItem('theme', isDark ? 'dark' : 'light');
+      
       // Force leaflet map to redraw tiles for dark mode
       if(mapInstance) mapInstance.invalidateSize();
       
       // Force charts to redraw with new theme options
-      const themeOpts = getChartThemeOptions();
-      if (timeSeriesChart) timeSeriesChart.updateOptions(themeOpts.time);
-      if (deviceChart) deviceChart.updateOptions(themeOpts.device);
-      if (referrersChart) referrersChart.updateOptions(themeOpts.referrers);
+      const chartTheme = getChartTheme();
+      if (timeSeriesChart) timeSeriesChart.updateOptions(chartTheme.time);
+      if (deviceChart) deviceChart.updateOptions(chartTheme.device);
+      if (referrersChart) referrersChart.updateOptions(chartTheme.referrers);
     }
     
     // Check saved preference on load
@@ -320,35 +331,19 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
 
     // --- API Data Fetching ---
-    async function fetchData() {
+    async function fetchData(endpoint) {
       try {
-        const res = await fetch('/api/view');
+        const res = await fetch(endpoint);
         if (!res.ok) { 
-          console.error('Failed to fetch analytics data');
+          console.error(`Failed to fetch from ${endpoint}`);
           return null; 
         }
         return res.json();
       } catch (e) {
-        console.error('Fetch error:', e);
+        console.error(`Fetch error for ${endpoint}:`, e);
         return null;
       }
     }
-    
-    async function fetchAiInsight(promptData) {
-      try {
-        // This function would call your /api/ai-summary endpoint.
-        // For now, we use a simple rule-based insight.
-        const topReferrer = Object.entries(promptData.referrers).sort((a,b) => b[1] - a[1])[0];
-        if (topReferrer && topReferrer[0].includes('Search Engine') && topReferrer[1] > 5) {
-          return "Traffic from Search Engines is strong! Your SEO is working.";
-        }
-        return "Site traffic is stable. Keep up the great posts!";
-
-      } catch (e) {
-        return "Could not generate insight.";
-      }
-    }
-
 
     // --- Render Functions ---
     
@@ -361,52 +356,51 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       const topCountryEntry = Object.entries(countries).sort((a,b)=>b[1]-a[1])[0];
       const topCountryValue = topCountryEntry ? `${topCountryEntry[0]} (${fmt(topCountryEntry[1])})` : 'N/A';
       
-      // Update Total Views (with animation)
-      animateCountUp(document.querySelector("#kpi-total-views"), total);
+      // Animate the main numeric KPI
+      animateCountUp(document.querySelector("#kpi-total-views .kpi-number"), total);
 
-      // Update Top Spike
-      const spikeEl = document.querySelector("#kpi-trend-highlight");
+      // Set the text for the other KPIs
+      const spikeEl = document.querySelector("#kpi-trend-highlight .kpi-number");
       if (spikeEl) spikeEl.textContent = spike.v > 0 ? `${fmt(spike.v)} (${spike.day})` : 'N/A';
       
-      // Update Top Post
-      const postEl = document.querySelector("#kpi-top-post");
+      const postEl = document.querySelector("#kpi-top-post .kpi-number");
       if (postEl) {
         postEl.textContent = posts[0]?.title || 'N/A';
-        postEl.title = posts[0]?.title || 'N/A'; // Add tooltip for long titles
+        postEl.title = posts[0]?.title || 'N/A'; 
       }
 
-      // Update Top Country
-      const countryEl = document.querySelector("#kpi-top-country");
+      const countryEl = document.querySelector("#kpi-top-country .kpi-number");
       if (countryEl) countryEl.textContent = topCountryValue;
 
-      // Update Last Event
-      const eventEl = document.querySelector("#kpi-live-event");
+      const eventEl = document.querySelector("#kpi-live-event .kpi-number");
       if (eventEl) eventEl.textContent = ago(latest?.timestamp);
     }
 
     // Chart Theme Helper
-    function getChartThemeOptions() {
+    function getChartTheme() {
       const isDark = document.documentElement.classList.contains('dark');
       const labelColor = isDark ? '#94a3b8' : '#64748b';
       const gridColor = isDark ? '#334155' : '#e2e8f0';
       const theme = isDark ? 'dark' : 'light';
       
+      const baseLabelStyle = { style: { colors: labelColor, fontWeight: 600 } };
+      
       return {
         time: {
           tooltip: { theme },
           grid: { borderColor: gridColor },
-          xaxis: { labels: { style: { colors: labelColor }}},
-          yaxis: { labels: { style: { colors: labelColor }}}
+          xaxis: { categories: [], labels: baseLabelStyle },
+          yaxis: { labels: baseLabelStyle }
         },
         device: {
           tooltip: { theme },
-          legend:{ labels: { colors: [labelColor] } }
+          legend:{ labels: { colors: [labelColor] }, fontWeight: 600, position: 'bottom' }
         },
         referrers: {
           tooltip: { theme },
           grid: { borderColor: gridColor },
-          xaxis: { labels: { style: { colors: labelColor }}},
-          yaxis: { labels: { style: { colors: labelColor }}}
+          xaxis: { categories: [], labels: baseLabelStyle },
+          yaxis: { labels: baseLabelStyle }
         }
       };
     }
@@ -414,13 +408,13 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     function renderTimeSeries(data) {
       const dates = Object.keys(data).sort().slice(-30);
       const series = [{ name:'Views', data:dates.map(d=>data[d] || 0) }];
-      const themeOpts = getChartThemeOptions().time;
+      const themeOpts = getChartTheme().time;
       
       const opts = {
         ...themeOpts,
+        series,
+        xaxis: { ...themeOpts.xaxis, categories: dates },
         chart:{ type:'area', toolbar:{ show:false }, animations: { easing: 'easeOut', speed: 400 } },
-        series, 
-        xaxis:{ categories:dates, labels: { style: { colors: themeOpts.yaxis.labels.style.colors, fontWeight:600 } } },
         colors:[COLORS.primary],
         stroke:{ curve:'smooth', width:3 }, 
         fill:{ type:'gradient', gradient:{ opacityFrom:0.5, opacityTo:0.1 } },
@@ -437,15 +431,15 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     function renderDeviceChart(data) {
       const labels = Object.keys(data);
       const series = Object.values(data);
-      const themeOpts = getChartThemeOptions().device;
+      const themeOpts = getChartTheme().device;
       
       const opts = { 
         ...themeOpts,
-        chart:{ type:'donut', height:200 }, 
         series, 
         labels, 
+        chart:{ type:'donut', height:200 }, 
         colors:[COLORS.primary, COLORS.secondary, COLORS.accent],
-        legend: { ...themeOpts.legend, position:'bottom', fontWeight:600 }
+        legend: { ...themeOpts.legend }
       };
       if (!deviceChart) {
         deviceChart = new ApexCharts(document.getElementById('device-chart'), opts);
@@ -459,13 +453,13 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       const sorted = Object.entries(data).sort((a,b)=>b[1]-a[1]).slice(0,7);
       const categories = sorted.map(([k])=>k);
       const series = [{ data:sorted.map(([,v])=>v) }];
-      const themeOpts = getChartThemeOptions().referrers;
+      const themeOpts = getChartTheme().referrers;
 
       const opts = { 
         ...themeOpts,
-        chart:{ type:'bar', height:200 }, 
         series, 
-        xaxis:{ ...themeOpts.xaxis, categories }, 
+        chart:{ type:'bar', height:200 }, 
+        xaxis: { ...themeOpts.xaxis, categories },
         colors:[COLORS.secondary], 
         plotOptions:{ bar:{ borderRadius:6, horizontal: true } },
       };
@@ -477,7 +471,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       }
     }
 
-    // --- FIXED MAP FUNCTION ---
+    // --- FIXED MAP FUNCTION (Redraws circles on update) ---
     function renderMap(countries) {
       if (!coordinateData) return; // Wait for coordinates
 
@@ -492,10 +486,10 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
       // Draw new circles
       Object.entries(countries).forEach(([code,v])=>{
-        const info = coordinateData[code.toUpperCase()];
+        const info = coordinateData.get(code.toUpperCase()); // <-- Use .get() on the Map
         if (!info) return; // Skip if no coordinate match
         
-        const circle = L.circle([info.latitude, info.longitude], {
+        const circle = L.circle([info.lat, info.lng], { // <-- Use info.lat, info.lng
           radius: Math.sqrt(v)*40000,
           color: COLORS.secondary,
           fillColor: COLORS.secondary,
@@ -541,7 +535,6 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         Object.entries(d.devices||{}).forEach(([dvc,v])=>devices[dvc]=(devices[dvc]||0) + (v||0));
         Object.entries(d.referrers||{}).forEach(([r,v])=>referrers[r]=(referrers[r]||0) + (v||0));
         
-        // This is our robust data parser from the previous fix
         (d.timestamps || []).forEach(ts => {
           const timestampString = (typeof ts === 'object' && ts !== null) ? ts.time : ts;
           if (timestampString && typeof timestampString === 'string') {
@@ -562,28 +555,37 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       // --- NEW: Update AI Insights ---
       const insightData = { referrers, topPost: postsArr[0] };
       fetchAiInsight(insightData).then(insight => {
-         document.getElementById('insight-ai').textContent = insight;
+         const el = document.getElementById('insight-ai');
+         if (el) el.textContent = insight;
       });
        // Update the other insight cards
-      document.getElementById('insight-trend').textContent = `Top post is "${postsArr[0].title}".`;
+      const trendEl = document.getElementById('insight-trend');
+      if (trendEl && postsArr[0]) trendEl.textContent = `Top post is "${postsArr[0].title}".`;
       const topCountry = Object.entries(countries).sort((a,b)=>b[1]-a[1])[0];
-      document.getElementById('insight-spike').textContent = `Top traffic source is ${topCountry[0]}.`;
+      const spikeEl = document.getElementById('insight-spike');
+      if (spikeEl && topCountry) spikeEl.textContent = `Top traffic source is ${topCountry[0]}.`;
     }
 
     // Main initialization: polling only
     async function init() {
       // First, fetch the map data and store it so we only do it once
       try {
-        // --- THIS IS THE FIXED URL ---
-        const res = await fetch('https://cdn.jsdelivr.net/npm/countries-coordinates@1.0.3/dist/countries.json');
+        // --- THIS IS THE FIXED URL for a reliable data source ---
+        const res = await fetch('https://unpkg.com/world-countries@5.0.0/data/countries.json');
         if (!res.ok) throw new Error('Failed to fetch coordinate file');
-        coordinateData = await res.json();
+        const countryData = await res.json();
+        // Convert the giant array to a fast Map lookup
+        coordinateData = new Map(countryData.map(c => [
+          c.cca2, // The 2-letter code (e.g., "PE")
+          { name: c.name.common, lat: c.latlng[0], lng: c.latlng[1] } // The data we need
+        ]));
+
       } catch (e) {
          console.error("CRITICAL: Failed to load map coordinates. Map will not work.", e);
       }
       
       // Now, fetch the first set of analytics data
-      const initialData = await fetchData();
+      const initialData = await fetchData('/api/view');
       if (initialData) {
         updateDashboard(initialData);
       }
@@ -591,7 +593,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       // Keep polling for new data every 15 seconds
       setInterval(async () => {
         console.log('Fetching fresh dashboard data...');
-        const fresh = await fetchData();
+        const fresh = await fetchData('/api/view');
         if (fresh) updateDashboard(fresh);
       }, 15000);
     }
