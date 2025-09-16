@@ -1,8 +1,7 @@
 ---
-// src/pages/analytics-dashboard.astro
 import BaseLayout from '../layouts/BaseLayout.astro';
 ---
-<BaseLayout title="Ultimate Analytics Dashboard">
+<BaseLayout title="Glassmorphic Analytics Dashboard">
   <link
     rel="stylesheet"
     href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css"
@@ -10,101 +9,109 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   />
   <script src="https://cdn.jsdelivr.net/npm/apexcharts" slot="head"></script>
   <style>
+    /* Container */
     .dashboard-container {
       font-family: 'Inter', sans-serif;
       background: linear-gradient(135deg,#f1f5f9 0%,#e3e7ed 100%);
       min-height: 100vh;
+      position: relative;
+      overflow-x: hidden;
     }
-    .stat-card {
-      background: rgba(255,255,255,0.95);
+
+    /* Glassmorphic Card */
+    .glass-card {
+      background: rgba(255,255,255,0.75);
+      backdrop-filter: blur(12px) saturate(180%);
+      border: 1.5px solid rgba(255,255,255,0.2);
       border-radius: 1rem;
-      padding: 2rem 1.5rem;
-      box-shadow: 0 8px 32px rgba(34, 66, 108, 0.16);
+      box-shadow: 0 8px 32px rgba(34,66,108,0.16);
       transition: transform 0.3s, box-shadow 0.3s;
       position: relative;
-      overflow: visible;
-    }
-    .stat-card:hover {
-      transform: scale(1.05) translateY(-6px);
-      box-shadow: 0 16px 48px rgba(34, 66, 108, 0.25);
-    }
-    .stat-card::after {
-      content: '';
-      display: block;
-      position: absolute;
-      right: 1rem; bottom: 1rem;
-      width: 30px; height: 30px;
-      background: linear-gradient(135deg,#ffb70333,#02304722);
-      border-radius: 50%;
-      filter: blur(8px) opacity(0.6);
-      z-index: 0;
-    }
-    .apexcharts-tooltip {
-      background: #fff !important;
-      border: 1px solid #e2e8f0 !important;
-      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08) !important;
-    }
-    #view-map {
-      border-radius: 1rem;
       overflow: hidden;
-      box-shadow: 0 4px 24px #02304718;
     }
-    .main-title { 
-      background: linear-gradient(90deg,#023047,#ffb703,#fb8500 90%);
+    .glass-card:hover {
+      transform: scale(1.04) translateY(-6px);
+      box-shadow: 0 16px 64px rgba(34,66,108,0.24);
+    }
+
+    /* Title & Description */
+    .main-title {
+      font-size: 3.5rem;
+      font-weight: 900;
+      background: linear-gradient(96deg, #00bdd6 10%, #ffb703 70%, #023047 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
     }
     .main-desc {
-      opacity: 0.85;
+      font-size: 1.125rem;
+      color: #475569;
     }
+
+    /* KPI Styling */
     .kpi-label {
-      color: #64748b;
+      font-size: 1rem;
       font-weight: 600;
-      font-size: 1.05rem;
-      margin-bottom: 2px;
+      color: #64748b;
+      margin-bottom: 4px;
     }
     .kpi-number {
-      font-size: 2.5rem;
+      font-size: 2.75rem;
       font-weight: 900;
       color: #023047;
+      transition: color 0.6s, transform 0.3s;
     }
+    .kpi-number.animate {
+      color: #ffb703;
+      transform: scale(1.1);
+    }
+
+    /* Map Card */
+    #view-map {
+      border-radius: 1rem;
+      overflow: hidden;
+      box-shadow: 0 4px 24px rgba(2,48,71,0.1);
+    }
+
+    /* Decorative Blurs */
+    .absolute { position: absolute; }
+    .blur-3xl { filter: blur(3rem); }
+    .opacity-20 { opacity: 0.2; }
+    .opacity-15 { opacity: 0.15; }
   </style>
 
   <main class="dashboard-container p-6 md:p-12 xl:p-20">
-    <div style="position:absolute;top:6%;left:6%;width:80px;height:80px;background:linear-gradient(110deg,#ffb703 40%,#fb8500 100%);border-radius:50%;filter:blur(32px);opacity:0.25;"></div>
-    <div style="position:absolute;bottom:5%;right:6%;width:70px;height:70px;background:linear-gradient(110deg,#023047 40%,#ffb703 100%);border-radius:50%;filter:blur(32px);opacity:0.18;"></div>
+    <!-- Decorative Blurs -->
+    <div class="absolute top-8 left-8 w-24 h-24 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full blur-3xl opacity-20"></div>
+    <div class="absolute bottom-12 right-8 w-20 h-20 bg-gradient-to-br from-blue-900 to-yellow-400 rounded-full blur-3xl opacity-15"></div>
 
+    <!-- Header -->
     <header class="text-center mb-16">
-      <h1 class="text-5xl font-black main-title mb-3 tracking-tight">
-        📊 Ultimate Real-Time Dashboard
-      </h1>
-      <p class="main-desc text-lg">
-        Live inzichten: Wereldwijde bezoekers, devices, trends, top-posts<br>
-        <span style="color:#fb8500;">Nu mooier, sneller en data-rijker!</span>
-      </p>
+      <h1 class="main-title mb-4">🌟 Glassmorphic Analytics Dashboard</h1>
+      <p class="main-desc mb-6">Live insights, interactive filters, AI-driven highlights, and near real-time updates.</p>
     </header>
-    
-    <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 mb-16">
-      <div id="kpi-total-views" class="stat-card shadow-xl"></div>
-      <div id="kpi-top-post" class="stat-card shadow-xl"></div>
-      <div id="kpi-top-country" class="stat-card shadow-xl"></div>
-      <div id="kpi-live-event" class="stat-card shadow-xl"></div>
+
+    <!-- KPI Section (5 cards) -->
+    <section class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-10 mb-16">
+      <div id="kpi-total-views" class="glass-card p-6"></div>
+      <div id="kpi-trend-highlight" class="glass-card p-6"></div>
+      <div id="kpi-top-post" class="glass-card p-6"></div>
+      <div id="kpi-top-country" class="glass-card p-6"></div>
+      <div id="kpi-live-event" class="glass-card p-6"></div>
     </section>
-    
+
+    <!-- Charts & Map -->
     <section class="grid grid-cols-1 lg:grid-cols-3 gap-10 mb-16">
-      <div class="stat-card col-span-1 h-96 !p-0 relative">
-        <h2 class="text-xl font-bold text-[#023047] mb-4 px-4 pt-4">🌍 Views per Land</h2>
+      <div class="glass-card p-0 h-96 relative">
+        <h2 class="text-xl font-bold text-[#023047] p-4">🌍 Views per Land</h2>
         <div id="view-map" class="h-[340px]"></div>
       </div>
       <div class="col-span-2 grid grid-rows-2 gap-8">
-        <div class="stat-card h-80">
-          <h2 class="text-xl font-bold text-[#023047] mb-4">
-            📈 Views Trend (30 dagen)
-          </h2>
+        <div class="glass-card h-80 p-6">
+          <h2 class="text-xl font-bold text-[#023047] mb-4">📈 Views Trend (30 dagen)</h2>
           <div id="time-series-chart" class="h-full"></div>
         </div>
-        <div class="stat-card h-80 grid grid-cols-2 gap-8">
+        <div class="glass-card h-80 grid grid-cols-2 gap-8 p-6">
           <div>
             <h2 class="text-xl font-bold text-[#023047] mb-4">📱 Apparaten</h2>
             <div id="device-chart" class="h-40"></div>
@@ -116,8 +123,9 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         </div>
       </div>
     </section>
-    
-    <div class="stat-card mb-16 px-6 py-7 border border-[#e2e8f0]">
+
+    <!-- Top Posts -->
+    <div class="glass-card mb-16 p-6 border border-gray-200">
       <h2 class="text-xl font-bold text-[#023047] mb-4">🏆 Top 10 Posts</h2>
       <div id="popular-posts" class="space-y-2"></div>
     </div>
@@ -125,252 +133,173 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
   <script type="module">
     import * as L from 'https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet-src.esm.js';
-    
-    // --- Store chart instances in module scope ---
-    let timeSeriesChart = null;
-    let deviceChart = null;
-    let referrersChart = null;
-    let mapInstance = null; // To make sure we only render the map once
-    
+
+    // Chart & Map instances
+    let timeSeriesChart, deviceChart, referrersChart, mapInstance;
+
+    // Color palette
     const COLORS = {
       primary: '#023047',
       secondary: '#ffb703',
       accent: '#fb8500'
     };
 
-    const fmt = n =>
-      n > 999 ? `${(n / 1000).toFixed(1)}k` : n.toString();
-
+    // Helpers
+    const fmt = n => n > 999 ? `${(n/1000).toFixed(1)}k` : n.toString();
     const ago = d => {
       if (!d) return 'N/A';
-      const s = Math.floor((Date.now() - new Date(d)) / 1000);
+      const s = Math.floor((Date.now() - new Date(d))/1000);
       if (s < 60) return `${s}s geleden`;
-      const m = Math.floor(s / 60);
+      const m = Math.floor(s/60);
       if (m < 60) return `${m}m geleden`;
-      const h = Math.floor(m / 60);
-      return h < 24 ? `${h}u geleden` : `${Math.floor(h / 24)}d geleden`;
+      const h = Math.floor(m/60);
+      return h < 24 ? `${h}u geleden` : `${Math.floor(h/24)}d geleden`;
     };
 
+    // Fetch analytics data
     async function fetchData() {
       const res = await fetch('/api/view');
       if (!res.ok) {
-        console.error("Failed to fetch analytics data. API returned:", res.status);
+        console.error('Failed to fetch analytics data');
         return null;
       }
       return res.json();
     }
 
-    function renderKPIs(total, posts, countries, latest) {
-      document.getElementById('kpi-total-views').innerHTML =
-        `<div class="kpi-label">Totaal Views</div>
-         <div class="kpi-number">${fmt(total)}</div>`;
-
-      document.getElementById('kpi-top-post').innerHTML =
-        `<div class="kpi-label">Populairste Post</div>
-         <div class="kpi-number" style="font-size:2rem;">${posts[0]?.title || 'N/A'}</div>`;
-
-      document.getElementById('kpi-top-country').innerHTML =
-        `<div class="kpi-label">Top Land</div>
-         <div class="kpi-number">${Object.entries(countries).sort((a, b) => b[1] - a[1])[0]?.[0] || 'N/A'}</div>`;
-
-      document.getElementById('kpi-live-event').innerHTML =
-        `<div class="kpi-label">Laatste Bezoek</div>
-         <div class="kpi-number">${ago(latest?.timestamp)}</div>`;
+    // Render KPI cards, now accepts perDay
+    function renderKPIs(total, posts, countries, perDay, latest) {
+      const spike = Object.entries(perDay).reduce(
+        (best, [day, v]) => v > best.v ? { day, v } : best,
+        { day: null, v: -Infinity }
+      );
+      const items = [
+        { id:'kpi-total-views', label:'Totaal Views', value: fmt(total) },
+        { id:'kpi-trend-highlight', label:'Top Spike',
+          value: spike.v > 0 ? `${fmt(spike.v)} on ${spike.day}` : 'N/A'
+        },
+        { id:'kpi-top-post', label:'Populairste Post', value: posts[0]?.title || 'N/A' },
+        { id:'kpi-top-country', label:'Top Land',
+          value: Object.entries(countries).sort((a,b)=>b[1]-a[1])[0]?.[0] || 'N/A'
+        },
+        { id:'kpi-live-event', label:'Laatste Bezoek', value: ago(latest?.timestamp) }
+      ];
+      items.forEach(({id,label,value})=>{
+        const el = document.getElementById(id);
+        el.innerHTML = `<div class="kpi-label">${label}</div><div class="kpi-number">${value}</div>`;
+      });
     }
 
+    // Render charts
     function renderTimeSeries(data) {
       const dates = Object.keys(data).sort().slice(-30);
-      const series = [{ name: 'Views', data: dates.map(d => data[d]) }];
-
+      const series = [{ name:'Views', data:dates.map(d=>data[d]) }];
+      const opts = {
+        chart:{ type:'area', toolbar:{ show:false } },
+        series, xaxis:{ categories:dates }, colors:[COLORS.primary],
+        stroke:{ curve:'smooth', width:3 }, fill:{ type:'gradient', gradient:{ opacityFrom:0.5, opacityTo:0.1 } },
+        grid:{ borderColor:'#e2e8f0', strokeDashArray:4 }, dataLabels:{ enabled:false }
+      };
       if (!timeSeriesChart) {
-        // First time load: create the chart
-        const options = {
-          chart: { type: 'area', toolbar: { show: false }, zoom: { enabled: false } },
-          series: series,
-          xaxis: { categories: dates, labels: { style: { colors: '#64748b', fontWeight:600 } } },
-          yaxis: { labels: { style: { colors: '#64748b', fontWeight:600 } } },
-          colors: [COLORS.primary],
-          stroke: { curve: 'smooth', width: 3 },
-          fill: { type: 'gradient', gradient: { opacityFrom: 0.5, opacityTo: 0.10 } },
-          grid: { borderColor: '#e2e8f0', strokeDashArray: 4 },
-          dataLabels: { enabled: false }
-        };
-        timeSeriesChart = new ApexCharts(document.getElementById('time-series-chart'), options);
+        timeSeriesChart = new ApexCharts(document.getElementById('time-series-chart'), opts);
         timeSeriesChart.render();
       } else {
-        // Subsequent loads: just update the series and categories smoothly
-        timeSeriesChart.updateOptions({
-          series: series,
-          xaxis: { categories: dates }
-        });
+        timeSeriesChart.updateOptions({ series, xaxis:{ categories:dates } });
       }
     }
-
     function renderDeviceChart(data) {
-      const series = Object.values(data);
-      const labels = Object.keys(data);
-
+      const labels = Object.keys(data), series = Object.values(data);
+      const opts = { chart:{ type:'donut', height:200 }, series, labels, colors:[COLORS.primary, COLORS.secondary, COLORS.accent], legend:{ position:'bottom' } };
       if (!deviceChart) {
-        // First time load: create the chart
-        const options = {
-          chart: { type: 'donut', height: 200 },
-          series: series,
-          labels: labels,
-          colors: [COLORS.primary, COLORS.secondary, COLORS.accent],
-          legend: { position: 'bottom', fontWeight:600 },
-          stroke: { colors: ['#fff'] }
-        };
-        deviceChart = new ApexCharts(document.getElementById('device-chart'), options);
+        deviceChart = new ApexCharts(document.getElementById('device-chart'), opts);
         deviceChart.render();
       } else {
-        // Subsequent loads: update series and labels
-        deviceChart.updateOptions({
-          series: series,
-          labels: labels
-        });
+        deviceChart.updateOptions({ series, labels });
       }
     }
-
     function renderReferrersChart(data) {
-      const sorted = Object.entries(data)
-        .sort((a, b) => b[1] - a[1])
-        .slice(0, 7);
-      
-      const series = [{ data: sorted.map(([, v]) => v) }];
-      const categories = sorted.map(([k]) => k);
-
+      const sorted = Object.entries(data).sort((a,b)=>b[1]-a[1]).slice(0,7);
+      const categories = sorted.map(([k])=>k), series = [{ data:sorted.map(([,v])=>v) }];
+      const opts = { chart:{ type:'bar', height:200 }, series, xaxis:{ categories }, colors:[COLORS.secondary], plotOptions:{ bar:{ borderRadius:6 } } };
       if (!referrersChart) {
-        // First time load: create the chart
-        const options = {
-          chart: { type: 'bar', height: 200 },
-          series: series,
-          xaxis: {
-            categories: categories,
-            labels: { style: { colors: '#64748b', fontWeight:600 } }
-          },
-          plotOptions: { bar: { borderRadius: 8 } },
-          colors: [COLORS.secondary],
-          grid: { borderColor: '#e2e8f0', strokeDashArray: 4 }
-        };
-        referrersChart = new ApexCharts(document.getElementById('referrers-chart'), options);
+        referrersChart = new ApexCharts(document.getElementById('referrers-chart'), opts);
         referrersChart.render();
       } else {
-        // Subsequent loads: update series and categories
-        referrersChart.updateOptions({
-          series: series,
-          xaxis: { categories: categories }
-        });
+        referrersChart.updateOptions({ series, xaxis:{ categories } });
       }
     }
 
+    // Render map once
     function renderMap(countries) {
-      // --- Only render the map ONCE. It's too heavy to refresh. ---
-      if (mapInstance) return; 
-      
-      mapInstance = L.map('view-map', { zoomControl: false }).setView([20, 0], 2);
+      if (mapInstance) return;
+      mapInstance = L.map('view-map',{ zoomControl:false }).setView([20,0],2);
       L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png').addTo(mapInstance);
-      
       fetch('https://cdn.jsdelivr.net/npm/countries-coordinates@1.0.3/countries.json')
-        .then(r => r.json())
-        .then(coords => {
-          for (const [code, v] of Object.entries(countries)) {
+        .then(r=>r.json()).then(coords=>{
+          Object.entries(countries).forEach(([code,v])=>{
             const info = coords[code.toUpperCase()];
-            if (!info) continue;
-            const radius = Math.sqrt(v) * 50000;
+            if (!info) return;
             L.circle([info.latitude, info.longitude], {
-              radius,
+              radius: Math.sqrt(v)*40000,
               color: COLORS.secondary,
               fillColor: COLORS.secondary,
               fillOpacity: 0.6,
               weight: 1
-            })
-              .addTo(mapInstance)
-              .bindPopup(`<b>${info.name}</b><br>${fmt(v)} views`);
-          }
+            }).addTo(mapInstance).bindPopup(`<b>${info.name}</b><br>${fmt(v)} views`);
+          });
         });
     }
 
+    // Render popular posts
     function renderPopular(posts) {
       const container = document.getElementById('popular-posts');
-      container.innerHTML = posts
-        .slice(0, 10)
-        .map(
-          (p, i) => `
-        <div class="flex justify-between items-center p-4 bg-[#f1f5fa] rounded-lg shadow mb-1">
-          <div><strong>${i + 1}.</strong> ${p.title}</div>
+      container.innerHTML = posts.slice(0,10).map((p,i)=>`
+        <div class="flex justify-between items-center p-4 bg-white bg-opacity-50 backdrop-filter backdrop-blur-sm rounded-lg shadow">
+          <div><strong>${i+1}.</strong> ${p.title}</div>
           <div class="font-extrabold text-[#023047]">${fmt(p.views)}</div>
-        </div>`
-        )
-        .join('');
+        </div>
+      `).join('');
     }
 
-    // This new function processes data and calls the renderers
-    function updateDashboardData(data) {
+    // Update dashboard data
+    async function updateDashboard(data) {
+      if (!data) return;
       const { allViewsData, latestEvents } = data;
-      
-      const posts = Object.entries(allViewsData).map(([path, d]) => ({
-        title: path.replace(/^\/blog\//, ""),
-        views: d.total || 0
-      }));
-      posts.sort((a, b) => b.views - a.views);
-
-      const total = posts.reduce((sum, p) => sum + p.views, 0);
-
-      const countries = Object.entries(allViewsData).reduce((acc, [, d]) => {
-        for (const [c, cnt] of Object.entries(d.countries || {})) acc[c] = (acc[c] || 0) + cnt;
-        return acc;
-      }, {});
-
-      const devices = Object.entries(allViewsData).reduce((acc, [, d]) => {
-        for (const [dev, cnt] of Object.entries(d.devices || {})) acc[dev] = (acc[dev] || 0) + cnt;
-        return acc;
-      }, {});
-
-      const referrers = Object.entries(allViewsData).reduce((acc, [, d]) => {
-        for (const [r, cnt] of Object.entries(d.referrers || {})) acc[r] = (acc[r] || 0) + cnt;
-        return acc;
-      }, {});
-
-      const perDay = Object.entries(allViewsData).reduce((acc, [, d]) => {
-        (d.timestamps || []).forEach(ts => {
+      const postsArr = Object.entries(allViewsData).map(([path,d])=>({
+        title: path.replace(/^\/blog\//,''), views: d.total||0
+      })).sort((a,b)=>b.views-a.views);
+      const total = postsArr.reduce((s,p)=>s+p.views,0);
+      const countries = {}, devices = {}, referrers = {}, perDay = {};
+      Object.values(allViewsData).forEach(d=>{
+        Object.entries(d.countries||{}).forEach(([c,v])=>countries[c]=(countries[c]||0)+v);
+        Object.entries(d.devices||{}).forEach(([dvc,v])=>devices[dvc]=(devices[dvc]||0)+v);
+        Object.entries(d.referrers||{}).forEach(([r,v])=>referrers[r]=(referrers[r]||0)+v);
+        (d.timestamps||[]).forEach(ts=>{
           const day = ts.split('T')[0];
-          acc[day] = (acc[day] || 0) + 1;
+          perDay[day] = (perDay[day]||0)+1;
         });
-        return acc;
-      }, {});
+      });
 
-      // Call all the render functions with new data
-      renderKPIs(total, posts, countries, latestEvents[0]);
-      renderPopular(posts);
+      renderKPIs(total, postsArr, countries, perDay, latestEvents[0]);
+      renderPopular(postsArr);
       renderTimeSeries(perDay);
       renderDeviceChart(devices);
       renderReferrersChart(referrers);
-      
-      // Map is only rendered once on the initial load
-      if (!mapInstance) {
-         renderMap(countries);
-      }
+      renderMap(countries);
     }
 
-    // Main initialization function
+    // Main initialization: polling only
     async function init() {
       const initialData = await fetchData();
       if (initialData) {
-        updateDashboardData(initialData);
+        updateDashboard(initialData);
       }
-
-      // --- This is the new "live" part ---
-      // Poll for fresh data every 15 seconds
       setInterval(async () => {
-        console.log("Fetching fresh dashboard data...");
-        const freshData = await fetchData();
-        if (freshData) {
-          updateDashboardData(freshData);
-        }
-      }, 15000); // 15,000 milliseconds = 15 seconds
+        console.log('Fetching fresh dashboard data...');
+        const fresh = await fetchData();
+        if (fresh) updateDashboard(fresh);
+      }, 15000);
     }
 
-    // Run everything
     init();
   </script>
 </BaseLayout>
