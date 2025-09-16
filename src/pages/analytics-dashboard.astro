@@ -274,7 +274,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         Object.entries(d.devices||{}).forEach(([dvc,v])=>devices[dvc]=(devices[dvc]||0)+v);
         Object.entries(d.referrers||{}).forEach(([r,v])=>referrers[r]=(referrers[r]||0)+v);
         (d.timestamps||[]).forEach(ts=>{
-          const day = ts.split('T')[0];
+          const day = ts.time.split('T')[0]; // <-- This is the fix
           perDay[day] = (perDay[day]||0)+1;
         });
       });

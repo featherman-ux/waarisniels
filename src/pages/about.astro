@@ -9,140 +9,134 @@ const pageDescription = "Lees meer over mij en het verhaal achter Waar is Niels?
   <style>
     :root { 
       --orange: #ffb703; 
-      --blue: #4f46e5; /* <-- Updated to the blue from Kaart.astro */
+      --blue: #4f46e5;
+      --gap: 1.5rem;
     }
 
+    /* Hero */
     header.hero {
       background: var(--blue);
       color: #fff;
       text-align: center;
-      padding: 3rem 1.5rem;
-      margin-bottom: 2rem;
+      padding: 4rem 1.5rem;
+      margin-bottom: var(--gap);
       border-radius: .75rem;
       box-shadow: 0 4px 12px rgba(0,0,0,.1);
     }
-
-    /* Updated: Removed font-family, adjusted size for Inter */
     header.hero h1 {
-      font-size: 2.5rem;
+      font-size: 2.75rem;
       font-weight: 700;
+      margin: 0 0 0.5rem;
+    }
+    header.hero p {
+      font-size: 1.125rem;
       margin: 0;
+      opacity: 0.9;
     }
 
-    /* Updated: Removed font-family, adjusted size/weight for Inter */
-    .card h2 {
-      color: var(--blue);
-      font-size: 1.5rem;
-      font-weight: 700;
-      margin-top: 0;
-    }
-
-    /* Kept the cool grid layout */
+    /* Grid */
     main.container {
       max-width: 900px;
       margin: 0 auto;
       padding: 0 1.5rem 2rem;
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 1.5rem;
+      gap: var(--gap);
+    }
+    @media (max-width: 640px) {
+      main.container { grid-template-columns: 1fr; }
     }
 
+    /* Card */
     .card {
       background: #fff;
       border: 1px solid #e5e7eb;
       border-radius: 12px;
       box-shadow: 0 4px 12px rgba(0,0,0,.08);
-      padding: 1.5rem 2rem;
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      padding: 2rem;
+      transition: transform .2s, box-shadow .2s;
+      display: flex;
+      flex-direction: column;
     }
-
-    /* Kept the hover effect */
     .card:hover {
       transform: translateY(-4px);
       box-shadow: 0 6px 16px rgba(0,0,0,.12);
     }
+    .card:first-child { grid-column: 1 / -1; }
 
-    /* First card still spans both columns */
-    .card:first-child {
-      grid-column: 1 / -1;
+    .card h2 {
+      color: var(--blue);
+      font-size: 1.75rem;
+      font-weight: 700;
+      margin-top: 0;
+      margin-bottom: 1rem;
     }
-
-    .btn-row {
-      margin-top: 1rem;
-    }
-    
-    /* Updated: Buttons now use the new blue for better contrast */
-    .btn-row a {
-      display: inline-block;
-      background: var(--blue);
-      color: #fff; /* White text on blue is readable */
-      padding: .6rem 1rem;
-      margin-right: .75rem;
-      margin-top: .5rem; 
-      border-radius: 8px;
-      text-decoration: none;
-      font-weight: 600; /* 600 weight from Inter */
-      transition: filter 0.2s ease, transform 0.2s ease;
-    }
-    
-    .btn-row a:hover {
-      filter: brightness(1.1); /* Simple hover for the new blue */
-      transform: scale(1.03);
-    }
-    
-    .hero-img {
-      width: 100%;
-      border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0,0,0,.1);
-      margin-top: 1.5rem;
+    .card p {
+      line-height: 1.6;
       margin-bottom: 1rem;
     }
 
-    /* Kept the responsive layout */
-    @media (max-width: 640px) {
-      main.container {
-        grid-template-columns: 1fr; /* Stack on mobile */
-      }
-      
-      header.hero h1 {
-        font-size: 2.25rem;
-      }
+    /* Image */
+    .hero-img {
+      width: 60%;
+      max-width: 300px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,.1);
+      margin: 1rem auto;
+      display: block;
+    }
 
-      .card {
-        padding: 1.5rem;
-      }
+    /* Buttons */
+    .btn-row {
+      margin-top: auto;
+    }
+    .btn-row a {
+      display: inline-block;
+      background: var(--blue);
+      color: #fff;
+      padding: .6rem 1rem;
+      margin: 0 .5rem .5rem 0;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 600;
+      transition: filter .2s, transform .2s;
+    }
+    .btn-row a:hover {
+      filter: brightness(1.1);
+      transform: scale(1.03);
     }
   </style>
 
   <header class="hero">
     <h1>{pageTitle}</h1>
-    <p>Deze site wordt herbouwd—maar hier lees je alvast wat over mij.</p>
+    <p>De perfecte pagina om mijn narcisme te voeden!</p>
   </header>
 
   <main class="container">
-    <section class="card">
+    <article class="card">
       <h2>Wie ben ik?</h2>
-      <p>Ik ben Niels, mooie baas en codeerheld. Ik deel hier mijn avonturen in Zuid-Amerika en daarbuiten.</p>
-      <img
-        src="/images/over.JPG"
-        alt="Niels onderweg"
-        class="hero-img"
-        loading="lazy"
-      />
+      <p>Hi, ik ben Niels – data- en code enthousiasteling, reiziger en verhalenverteller. Deze site documenteert mijn avonturen in Zuid-Amerika en technologische projecten die ik achter de schermen bouw.</p>
+      <p>Drie redenen voor deze site:</p>
+      <ul>
+        <li>Mijn reisupdates delen op mijn eigen, gepersonaliseerde platform.</li>
+        <li>Een technisch visitekaartje creëren voor toekomstige sollicitaties in data & IT.</li>
+        <li>Creatief bezig zijn tijdens regenachtige dagen.</li>
+      </ul>
+      <img src="/images/over.JPG" alt="Niels onderweg" class="hero-img" loading="lazy" />
       <div class="btn-row">
         <a href="/blog/">Laatste blogposts</a>
         <a href="/map/">Live kaart</a>
       </div>
-    </section>
+    </article>
 
     <section class="card">
       <h2>Wat is Waar is Niels?</h2>
-      <p>Een persoonlijke reisblog met interactieve kaart, AI-features en real-time updates voor vrienden en familie.</p>
+      <p>‘Waar is Niels?’ is mijn persoonlijke reisblog met een interactieve wereldkaart, AI-features en near real-time updates, speciaal voor vrienden, familie en stalkers.</p>
     </section>
 
     <section class="card">
       <h2>Contact</h2>
-      <p>Mail me of volg me op Instagram!</p>
+      <p>Website nodig? Stuur een mail! Of check veermandev.nl !!! (in aanbouw) & help me naar de 50.000 volgers! nog maar 1 of 2 te gaan!</p>
       <div class="btn-row">
         <a href="mailto:veerman.niels@gmail.com">Mail</a>
         <a href="https://instagram.com/n.veerman" target="_blank" rel="noopener">Instagram</a>
