@@ -1,4 +1,5 @@
 ---
+// src/pages/analytics-dashboard.astro
 import BaseLayout from '../layouts/BaseLayout.astro';
 ---
 <BaseLayout title="Glassmorphic Analytics Dashboard">
@@ -81,17 +82,14 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   </style>
 
   <main class="dashboard-container p-6 md:p-12 xl:p-20">
-    <!-- Decorative Blurs -->
     <div class="absolute top-8 left-8 w-24 h-24 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full blur-3xl opacity-20"></div>
     <div class="absolute bottom-12 right-8 w-20 h-20 bg-gradient-to-br from-blue-900 to-yellow-400 rounded-full blur-3xl opacity-15"></div>
 
-    <!-- Header -->
     <header class="text-center mb-16">
       <h1 class="main-title mb-4">🌟 Glassmorphic Analytics Dashboard</h1>
       <p class="main-desc mb-6">Live insights, interactive filters, AI-driven highlights, and near real-time updates.</p>
     </header>
 
-    <!-- KPI Section (5 cards) -->
     <section class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-10 mb-16">
       <div id="kpi-total-views" class="glass-card p-6"></div>
       <div id="kpi-trend-highlight" class="glass-card p-6"></div>
@@ -100,7 +98,6 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       <div id="kpi-live-event" class="glass-card p-6"></div>
     </section>
 
-    <!-- Charts & Map -->
     <section class="grid grid-cols-1 lg:grid-cols-3 gap-10 mb-16">
       <div class="glass-card p-0 h-96 relative">
         <h2 class="text-xl font-bold text-[#023047] p-4">🌍 Views per Land</h2>
@@ -124,7 +121,6 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       </div>
     </section>
 
-    <!-- Top Posts -->
     <div class="glass-card mb-16 p-6 border border-gray-200">
       <h2 class="text-xl font-bold text-[#023047] mb-4">🏆 Top 10 Posts</h2>
       <div id="popular-posts" class="space-y-2"></div>
@@ -145,7 +141,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     };
 
     // Helpers
-    const fmt = n => n > 999 ? `${(n/1000).toFixed(1)}k` : n.toString();
+    const fmt = n => (n > 999 ? `${(n/1000).toFixed(1)}k` : String(n));
     const ago = d => {
       if (!d) return 'N/A';
       const s = Math.floor((Date.now() - new Date(d))/1000);
@@ -169,33 +165,40 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     // Render KPI cards, now accepts perDay
     function renderKPIs(total, posts, countries, perDay, latest) {
       const spike = Object.entries(perDay).reduce(
-        (best, [day, v]) => v > best.v ? { day, v } : best,
+        (best, [day, v]) => (v > best.v ? { day, v } : best),
         { day: null, v: -Infinity }
       );
+      
+      const topCountryEntry = Object.entries(countries).sort((a,b)=>b[1]-a[1])[0];
+
       const items = [
         { id:'kpi-total-views', label:'Totaal Views', value: fmt(total) },
         { id:'kpi-trend-highlight', label:'Top Spike',
-          value: spike.v > 0 ? `${fmt(spike.v)} on ${spike.day}` : 'N/A'
+          value: spike.v > 0 ? `${fmt(spike.v)} views on ${spike.day}` : 'N/A'
         },
         { id:'kpi-top-post', label:'Populairste Post', value: posts[0]?.title || 'N/A' },
         { id:'kpi-top-country', label:'Top Land',
-          value: Object.entries(countries).sort((a,b)=>b[1]-a[1])[0]?.[0] || 'N/A'
+          value: topCountryEntry ? `${topCountryEntry[0]} (${fmt(topCountryEntry[1])})` : 'N/A'
         },
         { id:'kpi-live-event', label:'Laatste Bezoek', value: ago(latest?.timestamp) }
       ];
       items.forEach(({id,label,value})=>{
         const el = document.getElementById(id);
-        el.innerHTML = `<div class="kpi-label">${label}</div><div class="kpi-number">${value}</div>`;
+        if (el) {
+          el.innerHTML = `<div class="kpi-label">${label}</div><div class="kpi-number">${value}</div>`;
+        }
       });
     }
 
     // Render charts
     function renderTimeSeries(data) {
       const dates = Object.keys(data).sort().slice(-30);
-      const series = [{ name:'Views', data:dates.map(d=>data[d]) }];
+      const series = [{ name:'Views', data:dates.map(d=>data[d] || 0) }];
       const opts = {
-        chart:{ type:'area', toolbar:{ show:false } },
-        series, xaxis:{ categories:dates }, colors:[COLORS.primary],
+        chart:{ type:'area', toolbar:{ show:false }, animations: { easing: 'easeOut', speed: 400 } },
+        series, xaxis:{ categories:dates, labels: { style: { colors: '#64748b', fontWeight:600 } } },
+        yaxis: { labels: { style: { colors: '#64748b', fontWeight:600 } } },
+        colors:[COLORS.primary],
         stroke:{ curve:'smooth', width:3 }, fill:{ type:'gradient', gradient:{ opacityFrom:0.5, opacityTo:0.1 } },
         grid:{ borderColor:'#e2e8f0', strokeDashArray:4 }, dataLabels:{ enabled:false }
       };
@@ -207,8 +210,9 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       }
     }
     function renderDeviceChart(data) {
-      const labels = Object.keys(data), series = Object.values(data);
-      const opts = { chart:{ type:'donut', height:200 }, series, labels, colors:[COLORS.primary, COLORS.secondary, COLORS.accent], legend:{ position:'bottom' } };
+      const labels = Object.keys(data);
+      const series = Object.values(data);
+      const opts = { chart:{ type:'donut', height:200 }, series, labels, colors:[COLORS.primary, COLORS.secondary, COLORS.accent], legend:{ position:'bottom', fontWeight:600 } };
       if (!deviceChart) {
         deviceChart = new ApexCharts(document.getElementById('device-chart'), opts);
         deviceChart.render();
@@ -218,8 +222,9 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     }
     function renderReferrersChart(data) {
       const sorted = Object.entries(data).sort((a,b)=>b[1]-a[1]).slice(0,7);
-      const categories = sorted.map(([k])=>k), series = [{ data:sorted.map(([,v])=>v) }];
-      const opts = { chart:{ type:'bar', height:200 }, series, xaxis:{ categories }, colors:[COLORS.secondary], plotOptions:{ bar:{ borderRadius:6 } } };
+      const categories = sorted.map(([k])=>k);
+      const series = [{ data:sorted.map(([,v])=>v) }];
+      const opts = { chart:{ type:'bar', height:200 }, series, xaxis:{ categories, labels: { style: { colors: '#64748b', fontWeight:600 } } }, colors:[COLORS.secondary], plotOptions:{ bar:{ borderRadius:6 } }, grid:{ borderColor:'#e2e8f0', strokeDashArray: 4 }};
       if (!referrersChart) {
         referrersChart = new ApexCharts(document.getElementById('referrers-chart'), opts);
         referrersChart.render();
@@ -230,11 +235,13 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
     // Render map once
     function renderMap(countries) {
-      if (mapInstance) return;
+      if (mapInstance) return; // Only render map once
       mapInstance = L.map('view-map',{ zoomControl:false }).setView([20,0],2);
       L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png').addTo(mapInstance);
+      
       fetch('https://cdn.jsdelivr.net/npm/countries-coordinates@1.0.3/countries.json')
-        .then(r=>r.json()).then(coords=>{
+        .then(r=>r.json())
+        .then(coords=>{
           Object.entries(countries).forEach(([code,v])=>{
             const info = coords[code.toUpperCase()];
             if (!info) return;
@@ -246,7 +253,8 @@ import BaseLayout from '../layouts/BaseLayout.astro';
               weight: 1
             }).addTo(mapInstance).bindPopup(`<b>${info.name}</b><br>${fmt(v)} views`);
           });
-        });
+        })
+        .catch(e => console.error("Failed to load map coordinates:", e)); // Added safety catch
     }
 
     // Render popular posts
@@ -260,26 +268,42 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       `).join('');
     }
 
-    // Update dashboard data
-    async function updateDashboard(data) {
-      if (!data) return;
+    // Process all data and call renderers
+    function updateDashboard(data) {
+      if (!data || !data.allViewsData) {
+        console.warn("Update called with no data. API might be empty or failing.");
+        return; 
+      }
+      
       const { allViewsData, latestEvents } = data;
       const postsArr = Object.entries(allViewsData).map(([path,d])=>({
-        title: path.replace(/^\/blog\//,''), views: d.total||0
+        title: path.replace(/^\/blog\//,''), views: d?.total||0 // Safety check for 'd'
       })).sort((a,b)=>b.views-a.views);
+      
       const total = postsArr.reduce((s,p)=>s+p.views,0);
       const countries = {}, devices = {}, referrers = {}, perDay = {};
-      Object.values(allViewsData).forEach(d=>{
-        Object.entries(d.countries||{}).forEach(([c,v])=>countries[c]=(countries[c]||0)+v);
-        Object.entries(d.devices||{}).forEach(([dvc,v])=>devices[dvc]=(devices[dvc]||0)+v);
-        Object.entries(d.referrers||{}).forEach(([r,v])=>referrers[r]=(referrers[r]||0)+v);
-        (d.timestamps||[]).forEach(ts=>{
-          const day = ts.time.split('T')[0]; // <-- This is the fix
-          perDay[day] = (perDay[day]||0)+1;
-        });
-      });
 
-      renderKPIs(total, postsArr, countries, perDay, latestEvents[0]);
+      // This is the loop for all aggregated data
+      Object.values(allViewsData).forEach(d => {
+        // Extra safety check: ensure 'd' is a valid object
+        if (typeof d !== 'object' || d === null) return; 
+
+        Object.entries(d.countries||{}).forEach(([c,v])=>countries[c]=(countries[c]||0) + (v||0));
+        Object.entries(d.devices||{}).forEach(([dvc,v])=>devices[dvc]=(devices[dvc]||0) + (v||0));
+        Object.entries(d.referrers||{}).forEach(([r,v])=>referrers[r]=(referrers[r]||0) + (v||0));
+        
+        // This is the fix for mixed/bad data from our last error
+        (d.timestamps || []).forEach(ts => {
+          const timestampString = (typeof ts === 'object' && ts !== null) ? ts.time : ts;
+          if (timestampString && typeof timestampString === 'string') {
+            const day = timestampString.split('T')[0];
+            perDay[day] = (perDay[day] || 0) + 1;
+          }
+        });
+      }); // <-- THIS WAS THE MISSING CLOSING BRACE/PARENTHESIS
+
+      // Now we call the render functions (outside the loop)
+      renderKPIs(total, postsArr, countries, perDay, latestEvents ? latestEvents[0] : null);
       renderPopular(postsArr);
       renderTimeSeries(perDay);
       renderDeviceChart(devices);
@@ -293,6 +317,8 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       if (initialData) {
         updateDashboard(initialData);
       }
+      
+      // Keep polling for new data
       setInterval(async () => {
         console.log('Fetching fresh dashboard data...');
         const fresh = await fetchData();
@@ -300,6 +326,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       }, 15000);
     }
 
+    // Run it
     init();
   </script>
 </BaseLayout>
