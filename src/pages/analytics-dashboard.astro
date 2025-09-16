@@ -81,7 +81,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     }
     .dark .kpi-number { color: var(--text-primary-dark); }
 
-    /* FIX: Specific smaller sizes for text-based KPIs */
+    /* Specific smaller sizes for text-based KPIs */
     .kpi-text-lg {
       font-size: 1.5rem; /* 24px */
       font-weight: 700;
@@ -213,16 +213,16 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         <div class="col-span-2 space-y-8">
           <div class="glass-card h-80 p-6">
             <h2 class="text-2xl font-bold text-primary-light dark:text-primary-dark mb-4 tracking-tight">📈 Views Trend (30 dagen)</h2>
-            <div id="time-series-chart" class="h-full"></div>
+            <div id="time-series-chart" class="h-[calc(100%-48px)]"></div>
           </div>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-8 h-80">
             <div class="glass-card p-6">
               <h2 class="text-2xl font-bold text-primary-light dark:text-primary-dark mb-4 tracking-tight">📱 Apparaten</h2>
-              <div id="device-chart" class="h-40"></div>
+              <div id="device-chart" class="h-[calc(100%-48px)] flex justify-center"></div>
             </div>
             <div class="glass-card p-6">
               <h2 class="text-2xl font-bold text-primary-light dark:text-primary-dark mb-4 tracking-tight">🔗 Verkeersbronnen</h2>
-              <div id="referrers-chart" class="h-40"></div>
+              <div id="referrers-chart" class="h-[calc(100%-48px)]"></div>
             </div>
           </div>
         </div>
@@ -241,7 +241,6 @@ import BaseLayout from '../layouts/BaseLayout.astro';
            <a href="/about" class="text-slate-500 hover:text-orange-500 transition">About</a>
          </div>
       </footer>
-
     </main>
   </div>
 
@@ -344,6 +343,17 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         return null;
       }
     }
+    
+    // --- THIS FUNCTION NOW CALLS YOUR REAL AI ENDPOINT ---
+    async function fetchAiInsight() {
+      try {
+        const data = await fetchData('/api/ai-summary');
+        return data.insight || "AI Insight not available.";
+      } catch (e) {
+        return "Could not generate insight.";
+      }
+    }
+
 
     // --- Render Functions ---
     
@@ -357,22 +367,22 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       const topCountryValue = topCountryEntry ? `${topCountryEntry[0]} (${fmt(topCountryEntry[1])})` : 'N/A';
       
       // Animate the main numeric KPI
-      animateCountUp(document.querySelector("#kpi-total-views .kpi-number"), total);
+      animateCountUp(document.querySelector("#kpi-total-views"), total);
 
       // Set the text for the other KPIs
-      const spikeEl = document.querySelector("#kpi-trend-highlight .kpi-number");
+      const spikeEl = document.querySelector("#kpi-trend-highlight");
       if (spikeEl) spikeEl.textContent = spike.v > 0 ? `${fmt(spike.v)} (${spike.day})` : 'N/A';
       
-      const postEl = document.querySelector("#kpi-top-post .kpi-number");
+      const postEl = document.querySelector("#kpi-top-post");
       if (postEl) {
         postEl.textContent = posts[0]?.title || 'N/A';
         postEl.title = posts[0]?.title || 'N/A'; 
       }
 
-      const countryEl = document.querySelector("#kpi-top-country .kpi-number");
+      const countryEl = document.querySelector("#kpi-top-country");
       if (countryEl) countryEl.textContent = topCountryValue;
 
-      const eventEl = document.querySelector("#kpi-live-event .kpi-number");
+      const eventEl = document.querySelector("#kpi-live-event");
       if (eventEl) eventEl.textContent = ago(latest?.timestamp);
     }
 
@@ -459,7 +469,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         ...themeOpts,
         series, 
         chart:{ type:'bar', height:200 }, 
-        xaxis: { ...themeOpts.xaxis, categories },
+        xaxis: { ...themeOpts.xaxis, categories }, 
         colors:[COLORS.secondary], 
         plotOptions:{ bar:{ borderRadius:6, horizontal: true } },
       };
@@ -535,6 +545,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         Object.entries(d.devices||{}).forEach(([dvc,v])=>devices[dvc]=(devices[dvc]||0) + (v||0));
         Object.entries(d.referrers||{}).forEach(([r,v])=>referrers[r]=(referrers[r]||0) + (v||0));
         
+        // This is our robust data parser from the previous fix
         (d.timestamps || []).forEach(ts => {
           const timestampString = (typeof ts === 'object' && ts !== null) ? ts.time : ts;
           if (timestampString && typeof timestampString === 'string') {
@@ -553,8 +564,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       renderMap(countries); // This will now redraw circles on every update
 
       // --- NEW: Update AI Insights ---
-      const insightData = { referrers, topPost: postsArr[0] };
-      fetchAiInsight(insightData).then(insight => {
+      fetchAiInsight().then(insight => {
          const el = document.getElementById('insight-ai');
          if (el) el.textContent = insight;
       });
@@ -570,14 +580,15 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     async function init() {
       // First, fetch the map data and store it so we only do it once
       try {
-        // --- THIS IS THE FIXED URL for a reliable data source ---
-        const res = await fetch('https://unpkg.com/world-countries@5.0.0/data/countries.json');
+        // --- THIS IS THE NEW, RELIABLE, FIXED URL ---
+        const res = await fetch('https://raw.githubusercontent.com/joshuabradley/List-of-Countries-and-their-Latitude-Longitude-Coordinates/master/countries.json');
         if (!res.ok) throw new Error('Failed to fetch coordinate file');
-        const countryData = await res.json();
-        // Convert the giant array to a fast Map lookup
-        coordinateData = new Map(countryData.map(c => [
-          c.cca2, // The 2-letter code (e.g., "PE")
-          { name: c.name.common, lat: c.latlng[0], lng: c.latlng[1] } // The data we need
+        const countryDataArray = await res.json();
+        
+        // --- NEW: Convert the array to a fast Map lookup ---
+        coordinateData = new Map(countryDataArray.map(c => [
+          c.code, // The 2-letter code (e.g., "PE")
+          { name: c.name, lat: c.latitude, lng: c.longitude }
         ]));
 
       } catch (e) {
