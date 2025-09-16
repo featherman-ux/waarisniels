@@ -81,14 +81,16 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     }
     .dark .kpi-number { color: var(--text-primary-dark); }
 
-    /* Specific smaller sizes for text-based KPIs */
+    /* FIX: Specific smaller sizes for text-based KPIs */
     .kpi-text-lg {
       font-size: 1.5rem; /* 24px */
       font-weight: 700;
+      line-height: 2rem;
     }
     .kpi-text-xl {
       font-size: 1.25rem; /* 20px */
       font-weight: 700;
+      line-height: 1.75rem;
     }
     
     #view-map {
@@ -187,42 +189,42 @@ import BaseLayout from '../layouts/BaseLayout.astro';
             <svg class="w-6 h-6 text-slate-400" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M11.48 3.499a.562.562 0 0 1 1.04 0l2.125 5.111a.563.563 0 0 0 .475.31h5.404a.562.562 0 0 1 .321.988l-4.368 3.14a.563.563 0 0 0-.218.66l1.64 5.111a.563.563 0 0 1-.864.614l-4.368-3.14a.563.563 0 0 0-.652 0l-4.368 3.14a.563.563 0 0 1-.864-.614l1.64-5.111a.563.563 0 0 0-.218-.66l-4.368-3.14a.563.563 0 0 1 .321-.988h5.404a.563.563 0 0 0 .475-.31L11.48 3.5Z" /></svg>
             <h2 class="kpi-label">Populairste Post</h2>
           </div>
-          <div id="kpi-top-post" class="kpi-number kpi-text-xl truncate text-primary-light dark:text-primary-dark" title="Loading...">Loading...</div>
+           <div id="kpi-top-post" class="kpi-number kpi-text-xl truncate text-primary-light dark:text-primary-dark" title="Loading...">Loading...</div>
         </div>
         <div class="glass-card p-8">
           <div class="flex items-center space-x-3 mb-2">
             <svg class="w-6 h-6 text-slate-400" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 0 0 8.716-6.747M12 21a9.004 9.004 0 0 1-8.716-6.747M12 21c1.35 0 2.463-.153 3.561-.438m-7.122 0A8.966 8.966 0 0 1 12 2.25c1.35 0 2.463.153 3.561.438m0 13.062a8.966 8.966 0 0 1-7.122 0M12 2.25c-4.602 0-8.48 3.067-9.807 7.218c.06.054.12.11.18.168m19.254 0a8.966 8.966 0 0 0-9.807-7.218c.06-.054.12-.11.18-.168M3 12h18M12 2.25V12m0 9.75V12" /></svg>
             <h2 class="kpi-label">Top Land</h2>
           </div>
-          <div id="kpi-top-country" class="kpi-number kpi-text-lg truncate text-primary-light dark:text-primary-dark">N/A</div>
+           <div id="kpi-top-country" class="kpi-number kpi-text-lg truncate text-primary-light dark:text-primary-dark">N/A</div>
         </div>
         <div class="glass-card p-8">
             <div class="flex items-center space-x-3 mb-2">
             <svg class="w-6 h-6 text-slate-400" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" /></svg>
             <h2 class="kpi-label">Laatste Bezoek</h2>
           </div>
-          <div id="kpi-live-event" class="kpi-number kpi-text-lg text-primary-light dark:text-primary-dark">N/A</div>
+           <div id="kpi-live-event" class="kpi-number kpi-text-lg text-primary-light dark:text-primary-dark">N/A</div>
         </div>
       </section>
 
       <section class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-16">
         <div class="glass-card p-6 col-span-1 min-h-[24rem] h-full relative">
           <h2 class="text-2xl font-bold text-primary-light dark:text-primary-dark mb-4 tracking-tight">🌍 Views per Land</h2>
-          <div id="view-map" class="h-[calc(100%-48px)] rounded-lg overflow-hidden"></div>
+          <div id="view-map" class="h-[calc(24rem-4.5rem)] rounded-lg overflow-hidden"></div>
         </div>
         <div class="col-span-2 space-y-8">
           <div class="glass-card h-80 p-6">
             <h2 class="text-2xl font-bold text-primary-light dark:text-primary-dark mb-4 tracking-tight">📈 Views Trend (30 dagen)</h2>
-            <div id="time-series-chart" class="h-[calc(100%-48px)]"></div>
+             <div id="time-series-chart" class="h-[calc(20rem-4.5rem)]"></div>
           </div>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-8 h-80">
             <div class="glass-card p-6">
               <h2 class="text-2xl font-bold text-primary-light dark:text-primary-dark mb-4 tracking-tight">📱 Apparaten</h2>
-              <div id="device-chart" class="h-[calc(100%-48px)] flex justify-center"></div>
+               <div id="device-chart" class="h-[calc(20rem-4.5rem)] flex justify-center"></div>
             </div>
             <div class="glass-card p-6">
               <h2 class="text-2xl font-bold text-primary-light dark:text-primary-dark mb-4 tracking-tight">🔗 Verkeersbronnen</h2>
-              <div id="referrers-chart" class="h-[calc(100%-48px)]"></div>
+               <div id="referrers-chart" class="h-[calc(20rem-4.5rem)]"></div>
             </div>
           </div>
         </div>
@@ -241,6 +243,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
            <a href="/about" class="text-slate-500 hover:text-orange-500 transition">About</a>
          </div>
       </footer>
+
     </main>
   </div>
 
@@ -277,15 +280,15 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       const startValueText = element.textContent.replace(/[k,]/g, '') || '0';
       const startValue = parseFloat(startValueText) || 0;
 
-      if (startValue === endValue) return; // No change
+      if (startValue === endValue) return;
 
-      const duration = 1200; // Animation duration in ms
+      const duration = 1200; 
       let startTime = null;
 
       function animationStep(timestamp) {
         if (!startTime) startTime = timestamp;
         const progress = Math.min((timestamp - startTime) / duration, 1);
-        const easeOutProgress = progress * (2 - progress); // ease-out quad
+        const easeOutProgress = progress * (2 - progress); 
         const currentValue = Math.floor(easeOutProgress * (endValue - startValue) + startValue);
         
         element.textContent = fmt(currentValue);
@@ -293,7 +296,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         if (progress < 1) {
           requestAnimationFrame(animationStep);
         } else {
-          element.textContent = fmt(endValue); // Ensure it lands on the exact final number
+          element.textContent = fmt(endValue); 
         }
       }
       requestAnimationFrame(animationStep);
@@ -310,17 +313,14 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       darkIcon?.classList.toggle('hidden', isDark);
       localStorage.setItem('theme', isDark ? 'dark' : 'light');
       
-      // Force leaflet map to redraw tiles for dark mode
       if(mapInstance) mapInstance.invalidateSize();
       
-      // Force charts to redraw with new theme options
       const chartTheme = getChartTheme();
       if (timeSeriesChart) timeSeriesChart.updateOptions(chartTheme.time);
       if (deviceChart) deviceChart.updateOptions(chartTheme.device);
       if (referrersChart) referrersChart.updateOptions(chartTheme.referrers);
     }
     
-    // Check saved preference on load
     const prefersDark = localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches);
     setDarkMode(prefersDark);
 
@@ -366,10 +366,8 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       const topCountryEntry = Object.entries(countries).sort((a,b)=>b[1]-a[1])[0];
       const topCountryValue = topCountryEntry ? `${topCountryEntry[0]} (${fmt(topCountryEntry[1])})` : 'N/A';
       
-      // Animate the main numeric KPI
       animateCountUp(document.querySelector("#kpi-total-views"), total);
 
-      // Set the text for the other KPIs
       const spikeEl = document.querySelector("#kpi-trend-highlight");
       if (spikeEl) spikeEl.textContent = spike.v > 0 ? `${fmt(spike.v)} (${spike.day})` : 'N/A';
       
@@ -447,7 +445,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         ...themeOpts,
         series, 
         labels, 
-        chart:{ type:'donut', height:200 }, 
+        chart:{ type:'donut', height:'100%' }, // FIX: Use percentage height
         colors:[COLORS.primary, COLORS.secondary, COLORS.accent],
         legend: { ...themeOpts.legend }
       };
@@ -468,7 +466,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       const opts = { 
         ...themeOpts,
         series, 
-        chart:{ type:'bar', height:200 }, 
+        chart:{ type:'bar', height:'100%' }, // FIX: Use percentage height
         xaxis: { ...themeOpts.xaxis, categories }, 
         colors:[COLORS.secondary], 
         plotOptions:{ bar:{ borderRadius:6, horizontal: true } },
@@ -515,10 +513,11 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     // Render popular posts (updated styles)
     function renderPopular(posts) {
       const container = document.getElementById('popular-posts');
+      if (!container) return;
       container.innerHTML = posts.slice(0,10).map((p,i)=>`
         <div class="flex justify-between items-center p-4 bg-white/50 dark:bg-slate-800/30 backdrop-filter backdrop-blur-sm rounded-lg shadow-inner">
-          <div class="truncate text-primary-light dark:text-primary-dark"><strong>${i+1}.</strong> ${p.title}</div>
-          <div class="font-extrabold text-primary-light dark:text-primary-dark ml-4">${fmt(p.views)}</div>
+          <div class="truncate text-primary-light dark:text-primary-dark pr-4"><strong>${i+1}.</strong> ${p.title}</div>
+          <div class="font-extrabold text-primary-light dark:text-primary-dark ml-4 shrink-0">${fmt(p.views)}</div>
         </div>
       `).join('');
     }
@@ -580,14 +579,14 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     async function init() {
       // First, fetch the map data and store it so we only do it once
       try {
-        // --- THIS IS THE NEW, RELIABLE, FIXED URL ---
-        const res = await fetch('https://raw.githubusercontent.com/joshuabradley/List-of-Countries-and-their-Latitude-Longitude-Coordinates/master/countries.json');
+        // --- THIS IS THE FIXED, RELIABLE URL ---
+        const res = await fetch('https://cdn.jsdelivr.net/gh/joshuabradley/List-of-Countries-and-their-Latitude-Longitude-Coordinates@master/countries.json');
         if (!res.ok) throw new Error('Failed to fetch coordinate file');
         const countryDataArray = await res.json();
         
         // --- NEW: Convert the array to a fast Map lookup ---
         coordinateData = new Map(countryDataArray.map(c => [
-          c.code, // The 2-letter code (e.g., "PE")
+          c.code, // The 2-letter code (e.g., "PE" or "US")
           { name: c.name, lat: c.latitude, lng: c.longitude }
         ]));
 
