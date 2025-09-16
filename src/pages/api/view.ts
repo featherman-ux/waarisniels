@@ -1,4 +1,3 @@
-// Enhanced View Counter API - src/pages/api/view.ts
 import type { APIContext } from 'astro';
 import { jsonResponse } from './_utils';
 
@@ -26,23 +25,22 @@ function getReferrerHost(ref: string | null): string {
   }
 }
 
-// --- UPDATED HELPER: Safely get AND merge JSON from KV ---
-async function safeGetJson(kv: KVNamespace, key: string, defaultValue: any = {}) {
-  let data = defaultValue;
+// --- NEW FIXED HELPER: Safely gets and parses JSON from KV ---
+async function safeGetJson(kv: KVNamespace, key: string, defaultValue: any) {
+  const raw = await kv.get(key);
+  if (!raw) {
+    return defaultValue; // Return the default if nothing is found
+  }
   try {
-    const raw = await kv.get(key);
-    if (raw) {
-      // Merge the parsed data on top of the default, just in case new keys were added
-      data = { ...defaultValue, ...JSON.parse(raw) };
-    }
+    return JSON.parse(raw); // Return the parsed data
   } catch (e) {
     console.error(`Failed to parse JSON from KV key: ${key}. Data may be corrupt. Resetting key.`, e);
-    // If it's corrupt, delete the bad key and just return the default
-    await kv.delete(key);
+    await kv.delete(key); // Delete the corrupt data
+    return defaultValue; // Return the default
   }
-  return data;
 }
 
+// Default "shapes" for our database objects
 const dailyDataDefaults = { 
   events: 0, 
   countries: {}, 
@@ -64,11 +62,10 @@ const postDataDefaults = {
   operatingSystems: {},
   referrers: {},
   timestamps: [],
-  uniqueVisitors: [], // Always store as array
+  uniqueVisitors: [], // Always store as an array
   visitDurations: [],
   bounceRate: 0
 };
-
 
 // --- FIXED GET Function ---
 export async function GET(context: APIContext) {
@@ -79,6 +76,7 @@ export async function GET(context: APIContext) {
   }
 
   try {
+    // Use the new, simpler helper function
     const allViewsData = await safeGetJson(kv, 'views_all_data', {});
     const latestEvents = await safeGetJson(kv, 'views_latest_events', []);
     
@@ -89,7 +87,7 @@ export async function GET(context: APIContext) {
       date.setDate(date.getDate() - i);
       const dateStr = date.toISOString().slice(0, 10);
       
-      const dayData = await safeGetJson(kv, `analytics:daily:${dateStr}`, null); // Use null default
+      const dayData = await safeGetJson(kv, `analytics:daily:${dateStr}`, null);
       if (dayData) {
         dailyData[dateStr] = dayData;
       }
@@ -119,7 +117,6 @@ export async function POST(context: APIContext) {
     const country = context.request.headers.get('cf-ipcountry') ?? 'XX';
     const city = context.request.headers.get('cf-ipcity') ?? 'Unknown';
     const region = context.request.headers.get('cf-region') ?? 'Unknown';
-    const timezone = context.request.headers.get('cf-timezone') ?? 'Unknown';
     const userAgent = context.request.headers.get('user-agent') ?? 'Unknown';
     const device = getDeviceType(userAgent);
     const referrerHost = getReferrerHost(referrer);
@@ -137,19 +134,17 @@ export async function POST(context: APIContext) {
     else if (userAgent.includes('Android')) os = 'Android';
     else if (userAgent.includes('iOS')) os = 'iOS';
 
-    // FIX: Safely merge loaded data with our default structure
     const allViewsData = await safeGetJson(kv, 'views_all_data', {});
     let loadedPostData = allViewsData[path];
     
-    // Handle the old data format where you just stored a number
     if (typeof loadedPostData === 'number') {
       loadedPostData = { total: loadedPostData };
     }
     
-    // This is the key fix: merge defaults with loaded data
+    // FIX: This now correctly merges the default shape with any loaded data
     const postData = { ...postDataDefaults, ...loadedPostData };
-    // And ensure uniqueVisitors is a Set for this operation
-    const uniqueVisitorsSet = new Set(postData.uniqueVisitors || []);
+    // FIX: This now correctly re-creates the Set from the loaded array
+    const uniqueVisitorsSet = new Set(postData.uniqueVisitors);
 
     // Update counters
     postData.total += 1;
@@ -161,40 +156,32 @@ export async function POST(context: APIContext) {
     postData.operatingSystems[os] = (postData.operatingSystems[os] || 0) + 1;
     postData.referrers[referrerHost] = (postData.referrers[referrerHost] || 0) + 1;
     postData.timestamps.push({
-      time: timestamp,
-      country,
-      city,
-      device,
-      browser,
-      os,
-      referrer: referrerHost
+      time: timestamp, country, city, device, browser, os, referrer: referrerHost
     });
 
     // Track unique visitors
     const visitorId = `${ip}_${userAgent.slice(0, 50)}`;
     uniqueVisitorsSet.add(visitorId);
-
-    // Convert Set back to array for JSON storage
-    postData.uniqueVisitors = Array.from(uniqueVisitorsSet);
+    postData.uniqueVisitors = Array.from(uniqueVisitorsSet); // Convert back to array for storing in JSON
 
     allViewsData[path] = postData;
 
-    // Update latest events
+    // FIX: This will now correctly be an array
     const latestEvents = await safeGetJson(kv, 'views_latest_events', []);
-    latestEvents.unshift({
+    latestEvents.unshift({ // This line will no longer crash
       path, country, city, device, browser, os, timestamp, referrer: referrerHost
     });
     if (latestEvents.length > 20) latestEvents.pop();
 
-    // Store updated data
     await kv.put('views_all_data', JSON.stringify(allViewsData));
     await kv.put('views_latest_events', JSON.stringify(latestEvents));
 
     // Store daily aggregate
     const day = timestamp.slice(0, 10);
     const dailyKey = `analytics:daily:${day}`;
-    // FIX: Merge the loaded data with the defaults
-    const dailyData = { ...(dailyDataDefaults), ...(await safeGetJson(kv, dailyKey, dailyDataDefaults))};
+    // FIX: Explicitly merge the default shape with the loaded data
+    const loadedDailyData = await safeGetJson(kv, dailyKey, dailyDataDefaults);
+    const dailyData = { ...dailyDataDefaults, ...loadedDailyData };
     
     dailyData.events += 1;
     dailyData.countries[country] = (dailyData.countries[country] || 0) + 1;
