@@ -187,7 +187,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         
         const options = {
             chart: { type: 'area', height: '100%', toolbar: { show: false }, zoom: { enabled: false } },
-            series:,
+            series: [{ name: 'Views', data: seriesData }],
             xaxis: { type: 'category', categories: sortedDates, labels: { show: true, rotate: -45, style: { fontSize: '10px' } } },
             yaxis: { labels: { formatter: (val) => fmt(val) } },
             stroke: { curve: 'smooth', width: 2 },
@@ -230,7 +230,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         const seriesData = sorted.map(([, value]) => value);
         const options = {
             chart: { type: 'bar', height: '100%', toolbar: { show: false } },
-            series:,
+            series: [{ name: 'Referrers', data: seriesData }],
             xaxis: { categories: labels },
             plotOptions: { bar: { horizontal: true, borderRadius: 4 } },
             colors: ['var(--color-green)'],
@@ -241,7 +241,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
             referrersChart = new ApexCharts(document.getElementById('referrers-chart'), options);
             referrersChart.render();
         } else {
-            referrersChart.updateOptions({...options, series:, xaxis: { categories: labels } });
+            referrersChart.updateOptions({ ...options, series: [{ name: 'Referrers', data: seriesData }], xaxis: { categories: labels } });
         }
     }
 
@@ -258,7 +258,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
     function renderMap(countries) {
         if (!mapInstance) {
-            mapInstance = L.map('view-map').setView(, 2);
+            mapInstance = L.map('view-map').setView([20, 0], 2);
             L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png', {
                 attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
                 subdomains: 'abcd',
