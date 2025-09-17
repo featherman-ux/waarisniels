@@ -2,662 +2,236 @@
 // src/pages/analytics-dashboard.astro
 import BaseLayout from '../layouts/BaseLayout.astro';
 ---
-<BaseLayout title="Niels Veerman's Real-Time Analytics">
-  <link
-    rel="stylesheet"
-    href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css"
-    slot="head"
-  />
+<BaseLayout title="Niels Veerman's Analytics Dashboard">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css" slot="head" />
   <script src="https://cdn.jsdelivr.net/npm/apexcharts" slot="head"></script>
+
   <style>
     :root {
       --bg-light: linear-gradient(135deg, #f1f5f9 0%, #e3e7ed 100%);
-      --bg-dark: linear-gradient(135deg, #0f172a 0%, #020617 100%);
-      --card-light: rgba(255, 255, 255, 0.75);
-      --card-dark: rgba(15, 23, 42, 0.7);
-      --card-border-light: rgba(255, 255, 255, 0.2);
-      --card-border-dark: rgba(56, 73, 106, 0.3);
+      --card-light: rgba(255, 255, 255, 0.85);
+      --card-border-light: rgba(255, 255, 255, 0.3);
       --text-primary-light: #023047;
-      --text-primary-dark: #e2e8f0;
       --text-secondary-light: #475569;
-      --text-secondary-dark: #94a3b8;
-      --gold: #FFD700;
-      --silver: #C0C0C0;
-      --bronze: #CD7F32;
+      --color-blue: #2172FF;
+      --color-green: #23C65D;
+      --color-orange: #FF8C00;
     }
-    
-    .dashboard-container-wrapper {
-      font-family: 'Inter', sans-serif;
+
+    body {
       background: var(--bg-light);
-      min-height: 100vh;
-      position: relative;
-      overflow-x: hidden;
-      padding: 1rem;
+      font-family: 'Inter', sans-serif;
+      color: var(--text-primary-light);
+      margin: 0;
+      padding: 0;
     }
-    
-    @media (min-width: 768px) {
-      .dashboard-container-wrapper {
-        padding: 2rem 1.5rem;
-      }
-    }
-    
-    @media (min-width: 1024px) {
-      .dashboard-container-wrapper {
-        padding: 3rem 1.5rem;
-      }
-    }
-    
-    .dark .dashboard-container-wrapper {
-      background: var(--bg-dark);
+
+    .dashboard-container-wrapper {
+      max-width: 1200px;
+      margin: 2rem auto;
+      padding: 0 1rem;
     }
 
     .glass-card {
       background: var(--card-light);
-      backdrop-filter: blur(12px) saturate(180%);
-      -webkit-backdrop-filter: blur(12px) saturate(180%);
       border: 1.5px solid var(--card-border-light);
       border-radius: 1rem;
-      box-shadow: 0 8px 32px rgba(34,66,108,0.16);
-      transition: transform 0.3s, box-shadow 0.3s;
-      position: relative;
-      overflow: hidden;
-    }
-    
-    .dark .glass-card {
-      background: var(--card-dark);
-      border: 1.5px solid var(--card-border-dark);
-    }
-    
-    .glass-card:hover {
-      transform: scale(1.02) translateY(-2px);
-      box-shadow: 0 16px 64px rgba(34,66,108,0.24);
-    }
-    
-    @media (min-width: 1024px) {
-      .glass-card:hover {
-        transform: scale(1.04) translateY(-6px);
-      }
-    }
-    
-    /* Fun Gamification Animations */
-    @keyframes bounce {
-      0%, 20%, 60%, 100% {
-        transform: translateY(0);
-      }
-      40% {
-        transform: translateY(-10px);
-      }
-      80% {
-        transform: translateY(-5px);
-      }
-    }
-
-    @keyframes pulse-glow {
-      0% {
-        box-shadow: 0 0 5px rgba(255, 215, 0, 0.3);
-      }
-      50% {
-        box-shadow: 0 0 25px rgba(255, 215, 0, 0.8);
-      }
-      100% {
-        box-shadow: 0 0 5px rgba(255, 215, 0, 0.3);
-      }
-    }
-
-    @keyframes shake {
-      0% { transform: translate(1px, 1px) rotate(0deg); }
-      10% { transform: translate(-1px, -2px) rotate(-1deg); }
-      20% { transform: translate(-3px, 0px) rotate(1deg); }
-      30% { transform: translate(3px, 2px) rotate(0deg); }
-      40% { transform: translate(1px, -1px) rotate(1deg); }
-      50% { transform: translate(-1px, 2px) rotate(-1deg); }
-      60% { transform: translate(-3px, 1px) rotate(0deg); }
-      70% { transform: translate(3px, 1px) rotate(-1deg); }
-      80% { transform: translate(-1px, -1px) rotate(1deg); }
-      90% { transform: translate(1px, 2px) rotate(0deg); }
-      100% { transform: translate(1px, -2px) rotate(-1deg); }
-    }
-
-    @keyframes confetti-fall {
-      0% {
-        transform: translateY(-100vh) rotate(0deg);
-        opacity: 1;
-      }
-      100% {
-        transform: translateY(100vh) rotate(360deg);
-        opacity: 0;
-      }
-    }
-
-    @keyframes trophy-bounce {
-      0%, 100% {
-        transform: translateY(0) scale(1);
-      }
-      50% {
-        transform: translateY(-20px) scale(1.1);
-      }
-    }
-
-    @keyframes race-car {
-      0% {
-        transform: translateX(-100px);
-      }
-      100% {
-        transform: translateX(300px);
-      }
-    }
-
-    .achievement-badge {
-      position: absolute;
-      top: -10px;
-      right: -10px;
-      background: linear-gradient(45deg, var(--gold), #FFA500);
-      border-radius: 50%;
-      width: 30px;
-      height: 30px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.05);
+      padding: 1rem 1.5rem;
+      transition: box-shadow 0.3s ease;
       display: flex;
-      align-items: center;
+      flex-direction: column;
       justify-content: center;
-      font-size: 14px;
-      animation: pulse-glow 2s infinite;
-      z-index: 10;
+    }
+    .glass-card:hover {
+      box-shadow: 0 8px 36px rgba(0,0,0,0.1);
     }
 
-    .viral-card {
-      animation: shake 0.5s infinite;
-      border: 2px solid #FF6B6B !important;
-      background: linear-gradient(45deg, rgba(255, 107, 107, 0.1), rgba(255, 215, 0, 0.1)) !important;
+    .header {
+      text-align: center;
+      margin-bottom: 3rem;
     }
-
-    .trending-up {
-      animation: bounce 1s infinite;
-    }
-
-    .confetti {
-      position: absolute;
-      width: 10px;
-      height: 10px;
-      background: var(--gold);
-      animation: confetti-fall 3s linear infinite;
-    }
-
-    .racing-container {
-      position: relative;
-      height: 60px;
-      overflow: hidden;
-      border-radius: 8px;
-      background: linear-gradient(90deg, #E8F5E8 0%, #C8E6C9 100%);
-      margin: 10px 0;
-    }
-
-    .racing-track {
-      position: absolute;
-      top: 50%;
-      left: 0;
-      right: 0;
-      height: 2px;
-      background: repeating-linear-gradient(
-        90deg,
-        #333 0px,
-        #333 10px,
-        transparent 10px,
-        transparent 20px
-      );
-      transform: translateY(-50%);
-    }
-
-    .racing-car {
-      position: absolute;
-      top: 50%;
-      transform: translateY(-50%);
-      font-size: 24px;
-      animation: race-car 3s ease-in-out infinite;
-    }
-
-    .emoji-progress-bar {
-      display: flex;
-      align-items: center;
-      margin: 8px 0;
-      padding: 8px;
-      background: rgba(255, 255, 255, 0.1);
-      border-radius: 8px;
-    }
-
-    .emoji-icon {
-      font-size: 20px;
-      margin-right: 12px;
-      animation: bounce 2s infinite;
-    }
-
-    .progress-track {
-      flex: 1;
-      height: 8px;
-      background: rgba(255, 255, 255, 0.2);
-      border-radius: 4px;
-      overflow: hidden;
-      margin-right: 12px;
-    }
-
-    .progress-fill {
-      height: 100%;
-      background: linear-gradient(90deg, var(--gold) 0%, #FFA500 100%);
-      border-radius: 4px;
-      transition: width 1s ease-out;
-    }
-
-    .leaderboard-item {
-      display: flex;
-      align-items: center;
-      padding: 12px;
-      margin: 8px 0;
-      border-radius: 8px;
-      background: rgba(255, 255, 255, 0.1);
-      transition: transform 0.3s ease;
-    }
-
-    .leaderboard-item:hover {
-      transform: translateX(10px);
-    }
-
-    .leaderboard-medal {
-      font-size: 24px;
-      margin-right: 12px;
-      animation: trophy-bounce 2s infinite;
-    }
-
-    .insight-mascot {
-      display: inline-block;
-      font-size: 20px;
-      margin-right: 8px;
-      animation: bounce 1.5s infinite;
-    }
-    
     .main-title {
-      font-size: 2rem;
       font-weight: 900;
-      background: linear-gradient(96deg, #00bdd6 10%, #ffb703 70%, #023047 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      line-height: 1.2;
+      font-size: 2.5rem;
+      margin-bottom: 0.7rem;
+      line-height: 1.1;
     }
-    
-    @media (min-width: 768px) {
-      .main-title {
-        font-size: 3rem;
-      }
-    }
-    
-    @media (min-width: 1024px) {
-      .main-title {
-        font-size: 3.5rem;
-      }
-    }
-    
     .main-desc {
-      font-size: 1rem;
+      font-weight: 500;
+      font-size: 1.125rem;
       color: var(--text-secondary-light);
+      max-width: 650px;
+      margin: 0 auto;
     }
-    
-    @media (min-width: 768px) {
-      .main-desc {
-        font-size: 1.125rem;
+
+    .grid {
+      display: grid;
+      gap: 1.5rem;
+      margin-bottom: 3rem;
+    }
+    .grid-3 {
+      grid-template-columns: 1fr 1fr 1fr;
+    }
+    .grid-5 {
+      grid-template-columns: repeat(5, 1fr);
+    }
+    .grid-2 {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    @media (max-width: 768px) {
+      .grid-3, .grid-5, .grid-2 {
+        grid-template-columns: 1fr;
       }
     }
-    
-    .dark .main-desc { color: var(--text-secondary-dark); }
-    
+
     .kpi-label {
-      font-size: 0.875rem;
+      font-size: 0.9rem;
       font-weight: 600;
       color: var(--text-secondary-light);
-      margin-bottom: 4px;
+      margin-bottom: 6px;
     }
-    
-    @media (min-width: 768px) {
-      .kpi-label {
-        font-size: 1rem;
-      }
-    }
-    
-    .dark .kpi-label { color: var(--text-secondary-dark); }
-    
     .kpi-number {
-      font-size: 1.875rem;
-      font-weight: 900;
+      font-weight: 700;
+      font-size: 2.25rem;
+      line-height: 1.1;
       color: var(--text-primary-light);
-      line-height: 1.2;
+      word-break: break-word;
     }
-    
-    @media (min-width: 768px) {
-      .kpi-number {
-        font-size: 2.25rem;
-      }
+    .kpi-subtext {
+      font-size: 0.85rem;
+      color: var(--text-secondary-light);
+      margin-top: 0.25rem;
     }
-    
-    @media (min-width: 1024px) {
-      .kpi-number {
-        font-size: 2.75rem;
-      }
-    }
-    
-    .dark .kpi-number { color: var(--text-primary-dark); }
 
-    .kpi-text-lg {
-      font-size: 1.125rem;
-      font-weight: 700;
-      line-height: 1.5;
-    }
-    
-    @media (min-width: 768px) {
-      .kpi-text-lg {
-        font-size: 1.25rem;
-        line-height: 1.75rem;
-      }
-    }
-    
-    @media (min-width: 1024px) {
-      .kpi-text-lg {
-        font-size: 1.5rem;
-        line-height: 2rem;
-      }
-    }
-    
-    .kpi-text-xl {
-      font-size: 1rem;
-      font-weight: 700;
-      line-height: 1.5;
-    }
-    
-    @media (min-width: 768px) {
-      .kpi-text-xl {
-        font-size: 1.125rem;
-        line-height: 1.75rem;
-      }
-    }
-    
-    @media (min-width: 1024px) {
-      .kpi-text-xl {
-        font-size: 1.25rem;
-        line-height: 1.75rem;
-      }
-    }
-    
+    /* Map container */
     #view-map {
-      height: 100%;
+      height: 320px;
+      border-radius: 0.5rem;
       width: 100%;
-      min-height: 280px;
-      border-radius: 0.5rem; 
-      overflow: hidden;
     }
-    
-    @media (min-width: 768px) {
+    @media (max-width: 768px) {
       #view-map {
-        min-height: 320px;
+        height: 240px;
       }
     }
-    
+
+    /* Chart containers */
     .chart-container {
-      height: 250px;
       width: 100%;
+      height: 280px;
     }
-    
-    @media (min-width: 768px) {
+    @media (max-width: 768px) {
       .chart-container {
-        height: 280px;
+        height: 220px;
       }
     }
-    
-    @media (min-width: 1024px) {
-      .chart-container {
-        height: 320px;
-      }
+
+    /* Truncate text for KPI labels */
+    .truncate {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
-    
-    /* Chart Dark Mode Styles */
-    .dark .apexcharts-tooltip { 
-      background: #1e293b !important; 
-      border: 1px solid #334155 !important; 
+
+    /* Footer */
+    footer {
+      text-align: center;
+      margin-top: 4rem;
+      padding: 1rem 1rem 2rem 1rem;
+      font-size: 0.9rem;
+      color: var(--text-secondary-light);
     }
-    .dark .apexcharts-tooltip-title, 
-    .dark .apexcharts-tooltip-text { 
-      color: #f1f5f9 !important; 
+    footer a {
+      margin: 0 0.75rem;
+      color: var(--text-secondary-light);
+      text-decoration: none;
+      font-weight: 500;
     }
-    .dark .apexcharts-text, 
-    .dark .apexcharts-xaxis-label, 
-    .dark .apexcharts-yaxis-label { 
-      fill: var(--text-secondary-dark) !important; 
-    }
-    .dark .apexcharts-legend-text { 
-      color: var(--text-secondary-dark) !important; 
-    }
-    .dark .apexcharts-gridline { 
-      stroke: #334155 !important; 
-    }
-    .dark .leaflet-tile-pane { 
-      filter: brightness(0.6) invert(1) contrast(3) hue-rotate(200deg) saturate(0.3) brightness(0.7); 
-    }
-    .dark .leaflet-popup-content-wrapper, 
-    .dark .leaflet-popup-tip { 
-      background: #0f172a; 
-      color: #f1f5f9; 
-      box-shadow: 0 3px 14px rgba(0,0,0,0.4); 
+    footer a:hover {
+      color: var(--color-orange);
     }
   </style>
 
   <div class="dashboard-container-wrapper">
-    <!-- Background Effects -->
-    <div class="absolute top-0 left-0 w-1/3 h-1/2 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full filter blur-3xl opacity-10 dark:opacity-20 pointer-events-none"></div>
-    <div class="absolute bottom-0 right-0 w-1/2 h-1/2 bg-gradient-to-br from-blue-900 to-yellow-400 rounded-full filter blur-3xl opacity-10 dark:opacity-15 pointer-events-none"></div>
-
-    <main class="relative max-w-7xl mx-auto z-10">
-      <!-- Theme Toggle -->
-      <button id="theme-toggle" class="fixed top-4 right-4 z-50 p-2 rounded-lg glass-card text-slate-800 dark:text-slate-200 border-0 shadow-lg md:absolute md:-top-4 md:right-0">
-        <svg id="theme-toggle-light-icon" class="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
-        <svg id="theme-toggle-dark-icon" class="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
-      </button>
-      
-      <!-- Profile Header -->
-      <div class="glass-card mb-8 md:mb-12 p-4 flex flex-col sm:flex-row items-center justify-between shadow-none border-0 space-y-4 sm:space-y-0">
-        <div class="flex items-center space-x-4">
-          <img src="/images/niels.jpg" alt="Niels Veerman" class="w-10 h-10 md:w-12 md:h-12 rounded-full border-2 border-white/50 shadow-lg"/>
-          <div class="text-center sm:text-left">
-            <h2 class="font-bold text-base md:text-lg text-primary-light dark:text-primary-dark">🏆 Niels Veerman</h2>
-            <p class="text-xs md:text-sm text-secondary-light dark:text-secondary-dark">📊 Data Explorer & 🌍 Travel Storyteller</p>
-          </div>
-        </div>
-        <div class="flex items-center space-x-4">
-          <div id="streak-counter" class="text-xs md:text-sm font-bold text-orange-500">🔥 0 dag streak</div>
-          <a href="/about" class="px-4 py-2 rounded-lg text-xs md:text-sm font-semibold text-primary-light dark:text-primary-dark bg-white/60 dark:bg-slate-800/60 hover:bg-white dark:hover:bg-slate-800 transition shadow-sm">About Me</a>
-        </div>
-      </div>
-
-      <!-- Header -->
-      <header class="text-center mb-12 md:mb-16">
-        <h1 class="main-title mb-4 tracking-tight">🎮 Niels' Gaming Analytics Dashboard</h1>
-        <p class="main-desc max-w-3xl mx-auto">
-          🚀 Level up your blog game! Track performance, conquer global reach & master user engagement!
-        </p>
+    <main>
+      <header class="header">
+        <h1 class="main-title">Niels Veerman's Analytics Dashboard</h1>
+        <p class="main-desc">Real insights from your audience — clear, modern & professional. No noise, just data you can trust.</p>
       </header>
 
-      <!-- Fun Insights Section -->
-      <section class="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 mb-12 md:mb-16">
-        <div class="glass-card p-4 md:p-6 flex items-center space-x-4" id="trend-card">
-          <div class="p-2 md:p-3 bg-blue-100 dark:bg-blue-900/50 rounded-lg shrink-0">
-            <span class="text-2xl">📈</span>
-          </div>
-          <div class="min-w-0 flex-1">
-            <h3 class="font-bold text-sm md:text-base text-primary-light dark:text-primary-dark">🎯 Top Quest</h3>
-            <p class="text-xs md:text-sm text-secondary-light dark:text-secondary-dark truncate" id="insight-trend">
-              <span class="insight-mascot">🕵️</span>Analyzing adventures...
-            </p>
-          </div>
+      <!-- KPI Summary Grid -->
+      <section class="grid grid-5" style="margin-bottom: 2rem;">
+        <div class="glass-card">
+          <div class="kpi-label">Total Views</div>
+          <div id="kpi-total-views" class="kpi-number">0</div>
+          <div class="kpi-subtext">Overall page views</div>
         </div>
-        
-        <div class="glass-card p-4 md:p-6 flex items-center space-x-4" id="ai-card">
-          <div class="p-2 md:p-3 bg-yellow-100 dark:bg-yellow-900/50 rounded-lg shrink-0">
-            <span class="text-2xl">🤖</span>
-          </div>
-          <div class="min-w-0 flex-1">
-            <h3 class="font-bold text-sm md:text-base text-primary-light dark:text-primary-dark">🧠 AI Oracle</h3>
-            <p class="text-xs md:text-sm text-secondary-light dark:text-secondary-dark truncate" id="insight-ai">
-              <span class="insight-mascot">🔮</span>Generating prophecy...
-            </p>
-          </div>
+
+        <div class="glass-card">
+          <div class="kpi-label">Unique Visitors</div>
+          <div id="kpi-unique-visitors" class="kpi-number">0</div>
+          <div class="kpi-subtext">Distinct users (approx.)</div>
         </div>
-        
-        <div class="glass-card p-4 md:p-6 flex items-center space-x-4" id="spike-card">
-          <div class="p-2 md:p-3 bg-orange-100 dark:bg-orange-900/50 rounded-lg shrink-0">
-            <span class="text-2xl">⚡</span>
-          </div>
-          <div class="min-w-0 flex-1">
-            <h3 class="font-bold text-sm md:text-base text-primary-light dark:text-primary-dark">🚨 Power Spike</h3>
-            <p class="text-xs md:text-sm text-secondary-light dark:text-secondary-dark truncate" id="insight-spike">
-              <span class="insight-mascot">🔥</span>Monitoring energy...
-            </p>
-          </div>
+
+        <div class="glass-card">
+          <div class="kpi-label">Avg. Time on Page</div>
+          <div id="kpi-avg-time" class="kpi-number">0s</div>
+          <div class="kpi-subtext">How long visitors stay</div>
+        </div>
+
+        <div class="glass-card">
+          <div class="kpi-label">Bounce Rate</div>
+          <div id="kpi-bounce-rate" class="kpi-number">0%</div>
+          <div class="kpi-subtext">Single-page visits</div>
+        </div>
+
+        <div class="glass-card">
+          <div class="kpi-label">Top Traffic Source</div>
+          <div id="kpi-top-referrer" class="kpi-number truncate" title=""></div>
+          <div class="kpi-subtext">Referrer driving most traffic</div>
         </div>
       </section>
 
-      <!-- Gamified KPI Section -->
-      <section class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-6 lg:gap-8 mb-12 md:mb-16">
-        <div class="glass-card p-4 md:p-6 lg:p-8" id="total-views-card">
-          <div class="flex items-center space-x-2 md:space-x-3 mb-2">
-            <span class="text-2xl">👀</span>
-            <h2 class="kpi-label">Total Views Power</h2>
-          </div>
-          <div id="kpi-total-views" class="kpi-number text-primary-light dark:text-primary-dark">0</div>
-          <div class="emoji-progress-bar">
-            <span class="emoji-icon">🎯</span>
-            <div class="progress-track">
-              <div id="views-progress" class="progress-fill" style="width: 0%"></div>
-            </div>
-            <span class="text-xs font-bold">LVL UP!</span>
-          </div>
+      <!-- Charts and Map Grid -->
+      <section class="grid grid-3" style="margin-bottom: 3rem;">
+        <!-- Views Over Time -->
+        <div class="glass-card">
+          <h2 style="font-weight: 600; margin-bottom: 0.8rem;">Views Over Last 30 Days</h2>
+          <div id="time-series-chart" class="chart-container"></div>
         </div>
-        
-        <div class="glass-card p-4 md:p-6 lg:p-8" id="spike-card-kpi">
-          <div class="flex items-center space-x-2 md:space-x-3 mb-2">
-           <span class="text-2xl">⚡</span>
-            <h2 class="kpi-label">Epic Spike Day</h2>
-          </div>
-          <div id="kpi-trend-highlight" class="kpi-number kpi-text-lg truncate text-primary-light dark:text-primary-dark">N/A</div>
-          <div class="racing-container">
-            <div class="racing-track"></div>
-            <div class="racing-car">🏎️</div>
-          </div>
+
+        <!-- Device Usage -->
+        <div class="glass-card">
+          <h2 style="font-weight: 600; margin-bottom: 0.8rem;">Devices</h2>
+          <div id="device-chart" class="chart-container"></div>
         </div>
-        
-         <div class="glass-card p-4 md:p-6 lg:p-8 col-span-2 md:col-span-1" id="popular-post-card">
-          <div class="flex items-center space-x-2 md:space-x-3 mb-2">
-            <span class="text-2xl">🏆</span>
-            <h2 class="kpi-label">Champion Post</h2>
-          </div>
-           <div id="kpi-top-post" class="kpi-number kpi-text-xl truncate text-primary-light dark:text-primary-dark" title="Loading...">Loading...</div>
-           <div class="leaderboard-item">
-             <span class="leaderboard-medal">🥇</span>
-             <span class="text-xs">Current Champion!</span>
-           </div>
-        </div>
-        
-        <div class="glass-card p-4 md:p-6 lg:p-8" id="country-card">
-          <div class="flex items-center space-x-2 md:space-x-3 mb-2">
-            <span class="text-2xl">🌍</span>
-            <h2 class="kpi-label">Territory Leader</h2>
-          </div>
-           <div id="kpi-top-country" class="kpi-number kpi-text-lg truncate text-primary-light dark:text-primary-dark">N/A</div>
-           <div class="emoji-progress-bar">
-             <span class="emoji-icon">🗺️</span>
-             <div class="progress-track">
-               <div id="country-progress" class="progress-fill" style="width: 0%"></div>
-             </div>
-             <span class="text-xs">Explore!</span>
-           </div>
-        </div>
-        
-        <div class="glass-card p-4 md:p-6 lg:p-8" id="live-event-card">
-            <div class="flex items-center space-x-2 md:space-x-3 mb-2">
-            <span class="text-2xl">⏰</span>
-            <h2 class="kpi-label">Latest Explorer</h2>
-          </div>
-           <div id="kpi-live-event" class="kpi-number kpi-text-lg text-primary-light dark:text-primary-dark">N/A</div>
-           <div class="text-xs text-secondary-light dark:text-secondary-dark">
-             <span class="insight-mascot">🚶</span>Last adventurer spotted!
-           </div>
+
+        <!-- Referrer Breakdown -->
+        <div class="glass-card">
+          <h2 style="font-weight: 600; margin-bottom: 0.8rem;">Traffic Sources</h2>
+          <div id="referrers-chart" class="chart-container"></div>
         </div>
       </section>
 
-      <!-- Charts and Map Section -->
-      <section class="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8 mb-12 md:mb-16">
-        <!-- Adventure Map -->
-        <div class="glass-card p-4 md:p-6 col-span-1 order-2 lg:order-1">
-          <h2 class="text-xl md:text-2xl font-bold text-primary-light dark:text-primary-dark mb-4 tracking-tight">
-            🗺️ Adventure Map
-            <span class="text-sm font-normal">🧭 Explorer Hotspots</span>
-          </h2>
-          <div id="view-map"></div>
-          <div class="mt-4 text-xs text-secondary-light dark:text-secondary-dark">
-            <span class="insight-mascot">📍</span>Click circles to discover explorer territories!
-          </div>
-        </div>
-        
-        <!-- Charts -->
-        <div class="col-span-1 lg:col-span-2 space-y-6 md:space-y-8 order-1 lg:order-2">
-          <!-- Power Level Chart -->
-          <div class="glass-card p-4 md:p-6">
-            <h2 class="text-xl md:text-2xl font-bold text-primary-light dark:text-primary-dark mb-4 tracking-tight">
-              📊 Power Level Timeline
-              <span class="text-sm font-normal">⚡ 30-Day Energy Boost</span>
-            </h2>
-             <div id="time-series-chart" class="chart-container"></div>
-          </div>
-          
-          <!-- Device Squad & Traffic Squad -->
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
-            <div class="glass-card p-4 md:p-6">
-              <h2 class="text-lg md:text-2xl font-bold text-primary-light dark:text-primary-dark mb-4 tracking-tight">
-                📱 Device Squad
-                <span class="text-sm font-normal block">🎮 Your Gaming Arsenal</span>
-              </h2>
-               <div id="device-chart" class="chart-container flex justify-center"></div>
-            </div>
-            <div class="glass-card p-4 md:p-6">
-              <h2 class="text-lg md:text-2xl font-bold text-primary-light dark:text-primary-dark mb-4 tracking-tight">
-                🚪 Portal Sources
-                <span class="text-sm font-normal block">🌈 How adventurers find you!</span>
-              </h2>
-               <div id="referrers-chart" class="chart-container"></div>
-               <div id="referrer-mascots" class="mt-4"></div>
-            </div>
-          </div>
-        </div>
+      <!-- Map -->
+      <section style="margin-bottom: 3rem;">
+        <h2 style="font-weight: 600; margin-bottom: 0.5rem;">Visitors by Country</h2>
+        <div id="view-map"></div>
       </section>
 
-      <!-- Hall of Fame -->
-      <div class="glass-card mb-12 md:mb-16 p-4 md:p-6 lg:p-8">
-        <h2 class="text-xl md:text-2xl font-bold text-primary-light dark:text-primary-dark mb-6 tracking-tight">
-          🏆 Hall of Fame
-          <span class="text-sm font-normal">🎖️ Top 10 Champion Adventures</span>
-        </h2>
-        <div id="popular-posts" class="space-y-3"></div>
-      </div>
+      <!-- Top Posts -->
+      <section>
+        <h2 style="font-weight: 600; margin-bottom: 0.5rem;">Top 10 Posts</h2>
+        <div id="popular-posts"></div>
+      </section>
 
-      <!-- Footer -->
-      <footer class="text-center mt-12 md:mt-16 pt-8 border-t border-slate-300 dark:border-slate-700">
-        <p class="text-sm md:text-base text-secondary-light dark:text-secondary-dark">
-          🎲 Powered by Niels' Gaming Analytics Engine 🚀
-        </p>
-         <div class="flex justify-center space-x-4 mt-4">
-           <a href="https://github.com/featherman-ux" target="_blank" rel="noopener" class="text-slate-500 hover:text-orange-500 transition text-sm md:text-base">
-             <span class="insight-mascot">💻</span>GitHub
-           </a>
-           <a href="#" class="text-slate-500 hover:text-orange-500 transition text-sm md:text-base">
-             <span class="insight-mascot">💼</span>LinkedIn
-           </a>
-           <a href="/about" class="text-slate-500 hover:text-orange-500 transition text-sm md:text-base">
-             <span class="insight-mascot">ℹ️</span>About
-           </a>
-         </div>
+      <footer>
+        <div>Data provided by Niels Veerman's serverless functions.</div>
+        <div style="margin-top: 1rem;">
+          <a href="https://github.com/featherman-ux" target="_blank" rel="noopener">GitHub</a> |
+          <a href="/about">About</a>
+        </div>
       </footer>
     </main>
   </div>
@@ -665,791 +239,312 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   <script type="module">
     import * as L from 'https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet-src.esm.js';
 
-    // Chart & Map instances
     let timeSeriesChart, deviceChart, referrersChart, mapInstance;
     let mapLayers = [];
-    let coordinateData = null;
+    let coordinateData = null; // To store country coords map
 
-    // Fun Data & Gamification
-    const REFERRER_MASCOTS = {
-      'google': '🔍 Google Explorer',
-      'direct': '🏃 Direct Runner', 
-      'instagram': '📸 Insta Adventurer',
-      'facebook': '📘 FB Navigator',
-      'unknown': '🤖 Mystery Bot',
-      'twitter': '🐦 Tweet Scout',
-      'whatsapp': '💬 Chat Messenger',
-      'internal': '🏠 Home Base',
-      'linkedin': '💼 Professional Guide',
-      'reddit': '🤓 Reddit Detective',
-      'youtube': '📺 Video Explorer',
-      'tiktok': '🕺 Dance Scout',
-      'pinterest': '📌 Pin Collector'
-    };
+    // Helper to format numbers consistent with locale
+    const fmt = n => n > 999 ? (n/1000).toFixed(1) + 'k' : String(n);
 
-    const ACHIEVEMENT_THRESHOLDS = {
-      views: { bronze: 100, silver: 500, gold: 1000, diamond: 5000 },
-      countries: { bronze: 3, silver: 10, gold: 20, diamond: 50 },
-      posts: { bronze: 5, silver: 15, gold: 30, diamond: 100 }
-    };
-
-    // Color palette
-    const COLORS = {
-      primary: '#023047',
-      secondary: '#ffb703',
-      accent: '#fb8500',
-      gold: '#FFD700',
-      silver: '#C0C0C0',
-      bronze: '#CD7F32'
-    };
-
-    // Helpers
-    const fmt = n => (n > 999 ? `${(n/1000).toFixed(1)}k` : String(n));
-    const ago = d => {
-      if (!d) return 'N/A';
-      const s = Math.floor((Date.now() - new Date(d))/1000);
-      if (s < 60) return `${s}s ago`;
-      const m = Math.floor(s/60);
-      if (m < 60) return `${m}m ago`;
-      const h = Math.floor(m/60);
-      return h < 24 ? `${h}h ago` : `${Math.floor(h/24)}d ago`;
-    };
-
-    // Fun Gamification Functions
-    function createConfetti(element) {
-      for (let i = 0; i < 10; i++) {
-        const confetti = document.createElement('div');
-        confetti.className = 'confetti';
-        confetti.style.left = Math.random() * 100 + '%';
-        confetti.style.animationDelay = Math.random() * 2 + 's';
-        confetti.style.backgroundColor = ['#FFD700', '#FF6B6B', '#4ECDC4', '#45B7D1'][Math.floor(Math.random() * 4)];
-        element.appendChild(confetti);
-        
-        setTimeout(() => confetti.remove(), 3000);
-      }
-    }
-
-    function addAchievementBadge(element, type) {
-      const badge = document.createElement('div');
-      badge.className = 'achievement-badge';
-      badge.textContent = type === 'gold' ? '🥇' : type === 'silver' ? '🥈' : '🥉';
-      element.appendChild(badge);
-    }
-
-    function updateStreakCounter() {
-      const today = new Date().toISOString().split('T')[0];
-      let streak = parseInt(localStorage.getItem('analytics-streak') || '0');
-      const lastVisit = localStorage.getItem('analytics-last-visit');
+    // Animate count-up effect
+    function animateCountUp(el, val, suffix = '') {
+      if (!el) return;
+      let start = parseFloat(el.textContent.replace(/[k,%]/g, '')) || 0;
+      if (start === val) return;
       
-      if (lastVisit !== today) {
-        const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
-        streak = lastVisit === yesterday ? streak + 1 : 1;
-        localStorage.setItem('analytics-streak', streak.toString());
-        localStorage.setItem('analytics-last-visit', today);
-      }
-      
-      const streakEl = document.getElementById('streak-counter');
-      if (streakEl) {
-        streakEl.textContent = `🔥 ${streak} dag streak`;
-        if (streak >= 7) streakEl.classList.add('trending-up');
-      }
-    }
-
-    function checkAchievements(total, countriesCount, postsCount) {
-      // Views achievement
-      const viewsCard = document.getElementById('total-views-card');
-      if (total >= ACHIEVEMENT_THRESHOLDS.views.gold) {
-        addAchievementBadge(viewsCard, 'gold');
-        createConfetti(viewsCard);
-      } else if (total >= ACHIEVEMENT_THRESHOLDS.views.silver) {
-        addAchievementBadge(viewsCard, 'silver');
-      }
-
-      // Update progress bars
-      const viewsProgress = document.getElementById('views-progress');
-      if (viewsProgress) {
-        const percentage = Math.min((total / ACHIEVEMENT_THRESHOLDS.views.gold) * 100, 100);
-        viewsProgress.style.width = percentage + '%';
-      }
-
-      const countryProgress = document.getElementById('country-progress');
-      if (countryProgress) {
-        const percentage = Math.min((countriesCount / ACHIEVEMENT_THRESHOLDS.countries.gold) * 100, 100);
-        countryProgress.style.width = percentage + '%';
-      }
-    }
-
-    function detectViralContent(perDay) {
-      const values = Object.values(perDay);
-      const maxViews = Math.max(...values);
-      const avgViews = values.reduce((a, b) => a + b, 0) / values.length;
-      
-      if (maxViews > avgViews * 3) {
-        const spikeCard = document.getElementById('spike-card');
-        if (spikeCard) {
-          spikeCard.classList.add('viral-card');
-          createConfetti(spikeCard);
-          
-          // Add viral alert
-          const viralAlert = document.createElement('div');
-          viralAlert.className = 'absolute top-2 left-2 bg-red-500 text-white px-2 py-1 rounded text-xs font-bold';
-          viralAlert.textContent = '🔥 VIRAL!';
-          spikeCard.appendChild(viralAlert);
-        }
-      }
-    }
-
-    // Enhanced count-up animation
-    function animateCountUp(element, endValue) {
-      if (!element) return;
-      const startValueText = element.textContent.replace(/[k,]/g, '') || '0';
-      const startValue = parseFloat(startValueText) || 0;
-
-      if (startValue === endValue) return;
-
-      const duration = 1200; 
-      let startTime = null;
-
-      function animationStep(timestamp) {
+      let startTime;
+      const duration = 1500;
+      function step(timestamp) {
         if (!startTime) startTime = timestamp;
-        const progress = Math.min((timestamp - startTime) / duration, 1);
-        const easeOutProgress = progress * (2 - progress); 
-        const currentValue = Math.floor(easeOutProgress * (endValue - startValue) + startValue);
-        
-        element.textContent = fmt(currentValue);
-
-        if (progress < 1) {
-          requestAnimationFrame(animationStep);
-        } else {
-          element.textContent = fmt(endValue); 
-        }
+        const progress = Math.min((timestamp - startTime)/duration, 1);
+        const currVal = Math.floor(progress * (val - start) + start);
+        el.textContent = fmt(currVal) + suffix;
+        if (progress < 1) window.requestAnimationFrame(step);
       }
-      requestAnimationFrame(animationStep);
+      window.requestAnimationFrame(step);
     }
-    
-    // Enhanced Dark Mode Toggle
-    const themeToggle = document.getElementById('theme-toggle');
-    const lightIcon = document.getElementById('theme-toggle-light-icon');
-    const darkIcon = document.getElementById('theme-toggle-dark-icon');
-    
-    function setDarkMode(isDark) {
-      document.documentElement.classList.toggle('dark', isDark);
-      lightIcon?.classList.toggle('hidden', !isDark);
-      darkIcon?.classList.toggle('hidden', isDark);
-      localStorage.setItem('theme', isDark ? 'dark' : 'light');
-      
-      if(mapInstance) {
-        setTimeout(() => {
-          mapInstance.invalidateSize();
-        }, 100);
-      }
-      
-      setTimeout(() => {
-        const chartTheme = getChartTheme();
-        if (timeSeriesChart) timeSeriesChart.updateOptions(chartTheme.time);
-        if (deviceChart) deviceChart.updateOptions(chartTheme.device);
-        if (referrersChart) referrersChart.updateOptions(chartTheme.referrers);
-      }, 150);
-    }
-    
-    const prefersDark = localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches);
-    setDarkMode(prefersDark);
 
-    themeToggle.addEventListener('click', () => {
-      setDarkMode(!document.documentElement.classList.contains('dark'));
-    });
-
-    // Enhanced window resize handler
-    let resizeTimeout;
-    window.addEventListener('resize', () => {
-      clearTimeout(resizeTimeout);
-      resizeTimeout = setTimeout(() => {
-        if (mapInstance) {
-          mapInstance.invalidateSize();
-        }
-        if (timeSeriesChart) timeSeriesChart.resize();
-        if (deviceChart) deviceChart.resize();
-        if (referrersChart) referrersChart.resize();
-      }, 100);
-    });
-
-    // API Data Fetching
-    async function fetchData(endpoint) {
+    // Fetch JSON with error handling
+    async function fetchData(url) {
       try {
-        const res = await fetch(endpoint);
-        if (!res.ok) { 
-          console.error(`Failed to fetch from ${endpoint}`);
-          return null; 
-        }
+        const res = await fetch(url);
+        if (!res.ok) throw new Error('Fetch failed');
         return res.json();
-      } catch (e) {
-        console.error(`Fetch error for ${endpoint}:`, e);
+      } catch(e) {
+        console.error('Fetch error:', e);
         return null;
       }
     }
-    
-    async function fetchAiInsight() {
-      try {
-        const data = await fetchData('/api/ai-summary');
-        return data?.insight || "🤖 AI Oracle is meditating on your data...";
-      } catch (e) {
-        return "🔮 Crystal ball is cloudy, try again later!";
-      }
+
+    // Render KPIs
+    function renderKPIs(data) {
+      if (!data) return;
+      animateCountUp(document.querySelector('#kpi-total-views'), data.totalViews || 0);
+      animateCountUp(document.querySelector('#kpi-unique-visitors'), data.uniqueVisitors || 0);
+      animateCountUp(document.querySelector('#kpi-avg-time'), Math.round(data.avgTimeOnPage) || 0, 's');
+      const bounceRate = data.bounceRate !== undefined ? (data.bounceRate * 100).toFixed(1) + '%' : 'N/A';
+      document.querySelector('#kpi-bounce-rate').textContent = bounceRate;
+      const referrer = data.topReferrer || 'Direct';
+      const referrerEl = document.querySelector('#kpi-top-referrer');
+      referrerEl.textContent = referrer;
+      referrerEl.title = referrer;
     }
 
-    // Enhanced Render Functions
-    function renderKPIs(total, posts, countries, perDay, latest) {
-      const spike = Object.entries(perDay).reduce(
-        (best, [day, v]) => (v > best.v ? { day, v } : best),
-        { day: 'N/A', v: 0 }
-      );
-      
-      const topCountryEntry = Object.entries(countries).sort((a,b)=>b[1]-a[1])[0];
-      const topCountryValue = topCountryEntry ? `${topCountryEntry[0]} (${fmt(topCountryEntry[1])})` : 'N/A';
-      
-      animateCountUp(document.querySelector("#kpi-total-views"), total);
-
-      const spikeEl = document.querySelector("#kpi-trend-highlight");
-      if (spikeEl) spikeEl.textContent = spike.v > 0 ? `${fmt(spike.v)} (${spike.day.split('-')[2]})` : 'N/A';
-      
-      const postEl = document.querySelector("#kpi-top-post");
-      if (postEl) {
-        postEl.textContent = posts[0]?.title || 'N/A';
-        postEl.title = posts[0]?.title || 'N/A'; 
-      }
-
-      const countryEl = document.querySelector("#kpi-top-country");
-      if (countryEl) countryEl.textContent = topCountryValue;
-
-      const eventEl = document.querySelector("#kpi-live-event");
-      if (eventEl) eventEl.textContent = ago(latest?.timestamp);
-
-      // Check achievements and add gamification
-      checkAchievements(total, Object.keys(countries).length, posts.length);
-      detectViralContent(perDay);
-    }
-
-    // Enhanced Chart Theme Helper
-    function getChartTheme() {
-      const isDark = document.documentElement.classList.contains('dark');
-      const labelColor = isDark ? '#94a3b8' : '#64748b';
-      const gridColor = isDark ? '#334155' : '#e2e8f0';
-      const theme = isDark ? 'dark' : 'light';
-      
-      const baseLabelStyle = { style: { colors: labelColor, fontWeight: 600 } };
-      
-      const getResponsiveConfig = () => {
-        const width = window.innerWidth;
-        if (width < 768) {
-          return {
-            chart: { height: 250 },
-            legend: { position: 'bottom', fontSize: '12px' },
-            dataLabels: { style: { fontSize: '10px' } }
-          };
-        } else if (width < 1024) {
-          return {
-            chart: { height: 280 },
-            legend: { position: 'bottom', fontSize: '13px' },
-            dataLabels: { style: { fontSize: '11px' } }
-          };
-        } else {
-          return {
-            chart: { height: 320 },
-            legend: { position: 'bottom', fontSize: '14px' },
-            dataLabels: { style: { fontSize: '12px' } }
-          };
-        }
-      };
-
-      const responsiveConfig = getResponsiveConfig();
-      
-      return {
-        time: {
-          ...responsiveConfig,
-          tooltip: { theme },
-          grid: { borderColor: gridColor },
-          xaxis: { categories: [], labels: { ...baseLabelStyle, style: { ...baseLabelStyle.style, fontSize: responsiveConfig.dataLabels.style.fontSize } } },
-          yaxis: { labels: { ...baseLabelStyle, style: { ...baseLabelStyle.style, fontSize: responsiveConfig.dataLabels.style.fontSize } } },
-          responsive: [
-            {
-              breakpoint: 768,
-              options: {
-                chart: { height: 250 },
-                xaxis: { labels: { style: { fontSize: '10px' } } },
-                yaxis: { labels: { style: { fontSize: '10px' } } }
-              }
-            }
-          ]
-        },
-        device: {
-          ...responsiveConfig,
-          tooltip: { theme },
-          legend: { 
-            labels: { colors: [labelColor] }, 
-            fontWeight: 600, 
-            position: 'bottom',
-            fontSize: responsiveConfig.legend.fontSize
-          },
-          responsive: [
-            {
-              breakpoint: 768,
-              options: {
-                chart: { height: 250 },
-                legend: { fontSize: '12px', position: 'bottom' }
-              }
-            }
-          ]
-        },
-        referrers: {
-          ...responsiveConfig,
-          tooltip: { theme },
-          grid: { borderColor: gridColor },
-          xaxis: { categories: [], labels: { ...baseLabelStyle, style: { ...baseLabelStyle.style, fontSize: responsiveConfig.dataLabels.style.fontSize } } },
-          yaxis: { labels: { ...baseLabelStyle, style: { ...baseLabelStyle.style, fontSize: responsiveConfig.dataLabels.style.fontSize } } },
-          responsive: [
-            {
-              breakpoint: 768,
-              options: {
-                chart: { height: 250 },
-                xaxis: { labels: { style: { fontSize: '10px' } } },
-                yaxis: { labels: { style: { fontSize: '10px' } } }
-              }
-            }
-          ]
-        }
-      };
-    }
-
+    // Render time series chart
     function renderTimeSeries(data) {
-      const dates = Object.keys(data).sort().slice(-30);
-      const series = [{ name:'⚡ Power Level', data:dates.map(d=>data[d] || 0) }];
-      const themeOpts = getChartTheme().time;
-      
+      if (!data) return;
+      const dates = Object.keys(data).sort();
+      const counts = dates.map(d => data[d] || 0);
       const opts = {
-        ...themeOpts,
-        series,
-        xaxis: { ...themeOpts.xaxis, categories: dates.map(d => d.split('-')[2]) },
-        chart: { 
-          type: 'area', 
-          toolbar: { show: false }, 
-          animations: { easing: 'easeOut', speed: 600 },
-          redrawOnParentResize: true,
-          redrawOnWindowResize: true
-        },
-        colors: [COLORS.gold],
-        stroke: { curve: 'smooth', width: 3 }, 
-        fill: { 
-          type: 'gradient', 
-          gradient: { 
-            opacityFrom: 0.7, 
-            opacityTo: 0.2,
-            colorStops: [
-              { offset: 0, color: COLORS.gold, opacity: 0.7 },
-              { offset: 100, color: COLORS.secondary, opacity: 0.2 }
-            ]
-          } 
-        },
+        chart: { type: 'area', height: 280, toolbar: { show: false }},
+        series: [{ name: 'Views', data: counts }],
+        xaxis: { categories: dates, labels: { rotate: -45 } },
+        stroke: { curve: 'smooth', width: 3 },
+        colors: ['var(--color-blue)'],
         dataLabels: { enabled: false },
+        grid: {borderColor: '#e3e7ed'}
       };
-      
       if (!timeSeriesChart) {
         timeSeriesChart = new ApexCharts(document.getElementById('time-series-chart'), opts);
         timeSeriesChart.render();
       } else {
-        timeSeriesChart.updateOptions({ ...themeOpts, series, xaxis: { categories: dates.map(d => d.split('-')[2]) } });
+        timeSeriesChart.updateOptions({ ...opts, series: [{ data: counts }] });
       }
     }
-    
+
+    // Render device chart
     function renderDeviceChart(data) {
-      const labels = Object.keys(data).map(k => {
-        const emoji = k === 'mobile' ? '📱' : k === 'desktop' ? '🖥️' : k === 'tablet' ? '📟' : '🎮';
-        return `${emoji} ${k.charAt(0).toUpperCase() + k.slice(1)}`;
-      });
+      if (!data) return;
+      const labels = Object.keys(data).map(d => d.charAt(0).toUpperCase() + d.slice(1));
       const series = Object.values(data);
-      const themeOpts = getChartTheme().device;
-      
-      const opts = { 
-        ...themeOpts,
-        series, 
-        labels, 
-        chart: { 
-          type: 'donut', 
-          redrawOnParentResize: true,
-          redrawOnWindowResize: true,
-          animations: { enabled: true, speed: 800 }
-        },
-        colors: [COLORS.primary, COLORS.secondary, COLORS.accent, COLORS.gold],
-        legend: { ...themeOpts.legend },
-        plotOptions: {
-          pie: {
-            donut: {
-              labels: {
-                show: true,
-                total: {
-                  show: true,
-                  label: '🎮 Total Squad',
-                  formatter: () => series.reduce((a, b) => a + b, 0)
-                }
-              }
-            }
-          }
-        }
+      const opts = {
+        chart: { type: 'donut', height: 280 },
+        labels,
+        series,
+        colors: ['var(--color-blue)', 'var(--color-green)', 'var(--color-orange)'],
+        legend: { position: 'bottom' }
       };
-      
       if (!deviceChart) {
         deviceChart = new ApexCharts(document.getElementById('device-chart'), opts);
         deviceChart.render();
       } else {
-        deviceChart.updateOptions({ ...themeOpts, series, labels });
+        deviceChart.updateOptions({ ...opts, series });
       }
     }
-    
-    function renderReferrersChart(data) {
-      const sorted = Object.entries(data).sort((a,b)=>b[1]-a[1]).slice(0,7);
-      const categories = sorted.map(([k]) => {
-        const mascot = REFERRER_MASCOTS[k.toLowerCase()] || `🌐 ${k}`;
-        return mascot.split(' ')[0]; // Just the emoji for space
-      });
-      const series = [{ name: '🚪 Portal Traffic', data: sorted.map(([,v])=>v) }];
-      const themeOpts = getChartTheme().referrers;
 
-      const opts = { 
-        ...themeOpts,
-        series, 
-        chart: { 
-          type: 'bar',
-          redrawOnParentResize: true,
-          redrawOnWindowResize: true,
-          animations: { enabled: true, speed: 800 }
-        },
-        xaxis: { ...themeOpts.xaxis, categories }, 
-        colors: [COLORS.secondary], 
-        plotOptions: { 
-          bar: { 
-            borderRadius: 8, 
-            horizontal: true,
-            distributed: true
-          } 
-        },
+    // Render referrers chart with clear categories
+    function renderReferrersChart(data) {
+      if (!data) return;
+      // Sort and top 7 referrers
+      const entries = Object.entries(data);
+      entries.sort((a,b) => b[1] - a[1]);
+      const top = entries.slice(0, 7);
+      const categories = top.map(t => t[0]);
+      const series = [{ name: 'Traffic Sources', data: top.map(t => t[1]) }];
+      const opts = {
+        chart: { type: 'bar', height: 280 },
+        xaxis: { categories },
+        series,
+        colors: ['var(--color-green)'],
+        plotOptions: { bar: { borderRadius: 5, horizontal: true } },
+        dataLabels: { enabled: false }
       };
-      
       if (!referrersChart) {
         referrersChart = new ApexCharts(document.getElementById('referrers-chart'), opts);
         referrersChart.render();
       } else {
-        referrersChart.updateOptions({ ...themeOpts, series, xaxis: { categories } });
-      }
-
-      // Show mascot details
-      const mascotsContainer = document.getElementById('referrer-mascots');
-      if (mascotsContainer) {
-        mascotsContainer.innerHTML = sorted.slice(0, 3).map(([source, views]) => {
-          const mascot = REFERRER_MASCOTS[source.toLowerCase()] || `🌐 ${source}`;
-          return `<div class="emoji-progress-bar">
-            <span class="emoji-icon">${mascot.split(' ')[0]}</span>
-            <span class="text-xs truncate flex-1">${mascot}</span>
-            <span class="text-xs font-bold">${fmt(views)}</span>
-          </div>`;
-        }).join('');
+        referrersChart.updateOptions({ ...opts, series, xaxis: { categories } });
       }
     }
 
-    // Enhanced Map Function with Gaming Elements
-    function renderMap(countries) {
-      if (!coordinateData) {
-        console.warn('Coordinate data not loaded yet');
-        return;
-      }
-
-      if (!mapInstance) {
-        mapInstance = L.map('view-map', { 
-          zoomControl: false,
-          attributionControl: false
-        }).setView([20, 0], 2);
-        
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-          attribution: '© Gaming Map',
-          subdomains: 'abcd',
-          maxZoom: 19
-        }).addTo(mapInstance);
-
-        L.control.zoom({
-          position: 'bottomright'
-        }).addTo(mapInstance);
-      }
-
-      // Clear old layers
-      mapLayers.forEach(layer => layer.remove());
-      mapLayers = [];
-
-      let foundCountries = 0;
-      const maxViews = Math.max(...Object.values(countries));
-
-      Object.entries(countries).forEach(([code, views]) => {
-        const upperCode = code.toUpperCase();
-        const variations = [upperCode, code.toLowerCase(), code];
-        
-        let countryInfo = null;
-        for (const variation of variations) {
-          countryInfo = coordinateData.get(variation);
-          if (countryInfo) break;
-        }
-        
-        if (!countryInfo) return;
-
-        foundCountries++;
-        
-        // Gaming-style circles with power levels
-        const powerLevel = (views / maxViews) * 100;
-        let circleColor = COLORS.primary;
-        let emoji = '🟢';
-        
-        if (powerLevel > 75) {
-          circleColor = COLORS.gold;
-          emoji = '⭐';
-        } else if (powerLevel > 50) {
-          circleColor = COLORS.secondary;
-          emoji = '🔥';
-        } else if (powerLevel > 25) {
-          circleColor = COLORS.accent;
-          emoji = '💫';
-        }
-        
-        const circle = L.circle([countryInfo.lat, countryInfo.lng], {
-          radius: Math.max(Math.sqrt(views) * 40000, 50000),
-          color: circleColor,
-          fillColor: circleColor,
-          fillOpacity: 0.7,
-          weight: 3,
-          opacity: 0.9
-        });
-        
-        circle.addTo(mapInstance).bindPopup(`
-          <div style="text-align: center; font-family: 'Inter', sans-serif;">
-            <div style="font-size: 24px; margin-bottom: 8px;">${emoji}</div>
-            <div style="font-weight: bold; font-size: 16px;">${countryInfo.name}</div>
-            <div style="color: #666; margin: 4px 0;">Power Level: ${Math.round(powerLevel)}%</div>
-            <div style="font-weight: bold; color: ${circleColor};">${fmt(views)} explorers</div>
-          </div>
-        `);
-        mapLayers.push(circle);
-      });
-
-      console.log(`🗺️ Rendered ${foundCountries} territories on adventure map!`);
-
-      setTimeout(() => {
-        mapInstance.invalidateSize();
-      }, 100);
-    }
-
-    // Enhanced popular posts with Hall of Fame
+    // Render top posts list
     function renderPopular(posts) {
       const container = document.getElementById('popular-posts');
       if (!container) return;
-      
-      container.innerHTML = posts.slice(0, 10).map((p, i) => {
-        let medal = '';
-        let bgClass = '';
-        
-        if (i === 0) {
-          medal = '🥇';
-          bgClass = 'bg-gradient-to-r from-yellow-100 to-yellow-200 dark:from-yellow-900/30 dark:to-yellow-800/30';
-        } else if (i === 1) {
-          medal = '🥈';
-          bgClass = 'bg-gradient-to-r from-gray-100 to-gray-200 dark:from-gray-800/30 dark:to-gray-700/30';
-        } else if (i === 2) {
-          medal = '🥉';
-          bgClass = 'bg-gradient-to-r from-amber-100 to-amber-200 dark:from-amber-900/30 dark:to-amber-800/30';
-        } else {
-          medal = i < 5 ? '🏆' : i < 8 ? '⭐' : '💫';
-          bgClass = 'bg-white/50 dark:bg-slate-800/30';
-        }
-
-        return `
-        <div class="leaderboard-item ${bgClass} border border-white/20">
-          <span class="leaderboard-medal">${medal}</span>
-          <div class="truncate text-primary-light dark:text-primary-dark pr-4 text-sm md:text-base flex-1">
-            <strong class="text-xs md:text-sm">#${i+1}</strong> ${p.title}
-          </div>
-          <div class="font-extrabold text-primary-light dark:text-primary-dark ml-4 shrink-0 text-sm md:text-base">
-            ${fmt(p.views)} 
-            <span class="text-xs">⚡</span>
-          </div>
-        </div>`;
-      }).join('');
+      container.innerHTML = posts.slice(0, 10).map((p,i) =>
+        `<div style="padding: 0.3rem 0.5rem; border-bottom: 1px solid #ddd;">
+          <strong>${i+1}. </strong> <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${p.title}</span> 
+          <span style="float: right; font-weight: 600;">${fmt(p.views)}</span>
+        </div>`
+      ).join('');
     }
 
-    // Enhanced data processing
+    // Render map circles robustly and cleanly
+    function renderMap(countries) {
+      if (!coordinateData) return;
+      
+      if (!mapInstance) {
+        mapInstance = L.map('view-map', { zoomControl: true }).setView([20, 0], 2);
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png').addTo(mapInstance);
+      }
+
+      // Clear previous circles
+      mapLayers.forEach(l => mapInstance.removeLayer(l));
+      mapLayers = [];
+      
+      // Calculate max for scaling radius
+      const maxViews = Math.max(...Object.values(countries));
+      Object.entries(countries).forEach(([code, count]) => {
+        const coords = coordinateData.get(code.toUpperCase());
+        if (!coords) return;
+
+        const radius = 20000 + (count / maxViews) * 80000;
+
+        const circle = L.circle([coords.lat, coords.lng], {
+          color: 'var(--color-blue)',
+          fillColor: 'var(--color-blue)',
+          fillOpacity: 0.5,
+          radius,
+          weight: 1
+        }).addTo(mapInstance);
+
+        circle.bindPopup(`<b>${coords.name}</b><br>${fmt(count)} views`);
+        mapLayers.push(circle);
+      });
+
+      // Invalidate size to avoid display issues
+      setTimeout(() => mapInstance.invalidateSize(), 200);
+    }
+
+    // Main dashboard update
     async function updateDashboard(data) {
-      if (!data || !data.allViewsData) {
-        console.warn("Update called with no data. API might be empty or failing.");
-        return; 
-      }
-      
-      const { allViewsData, latestEvents } = data;
-      const postsArr = Object.entries(allViewsData).map(([path, d]) => ({
-        title: path.replace(/^\/blog\//, ''), 
-        views: d?.total || 0
-      })).sort((a, b) => b.views - a.views);
-      
-      const total = postsArr.reduce((s, p) => s + p.views, 0);
-      const countries = {}, devices = {}, referrers = {}, perDay = {};
+      if (!data || !data.allViewsData) return;
 
-      Object.values(allViewsData).forEach(d => {
-        if (typeof d !== 'object' || d === null) return; 
+      const { allViewsData, latestEvents, dailyData } = data;
 
-        Object.entries(d.countries || {}).forEach(([c, v]) => countries[c] = (countries[c] || 0) + (v || 0));
-        Object.entries(d.devices || {}).forEach(([dvc, v]) => devices[dvc] = (devices[dvc] || 0) + (v || 0));
-        Object.entries(d.referrers || {}).forEach(([r, v]) => referrers[r] = (referrers[r] || 0) + (v || 0));
-        
-        (d.timestamps || []).forEach(ts => {
-          const timestampString = (typeof ts === 'object' && ts !== null) ? ts.time : ts;
-          if (timestampString && typeof timestampString === 'string') {
-            const day = timestampString.split('T')[0];
-            perDay[day] = (perDay[day] || 0) + 1;
-          }
+      // Aggregate totals for KPIs
+      const posts = Object.entries(allViewsData).map(([path, d]) => ({
+        title: path.replace(/^\/blog\//, ''),
+        views: (d?.total || 0)
+      })).sort((a,b) => b.views - a.views);
+
+      const totalViews = posts.reduce((acc, val) => acc + val.views, 0);
+      const uniqueVisitors = Object.values(allViewsData).reduce((acc, p) => acc + (p?.uniqueVisitors?.length || 0), 0);
+
+      // Bounce rate approximation
+      const bounceRates = Object.values(allViewsData)
+        .map(p => p.bounceRate || 0)
+        .filter(v => typeof v === 'number' && !isNaN(v));
+      const avgBounceRate = bounceRates.length ? bounceRates.reduce((a,b) => a+b, 0)/bounceRates.length : 0;
+
+      // Average time on page in seconds
+      const avgTimePages = Object.values(allViewsData)
+        .map(p => p.averageTimeOnPage || 0)
+        .filter(t => typeof t === 'number' && !isNaN(t));
+      const avgTimeOnPage = avgTimePages.length ? avgTimePages.reduce((a,b) => a+b, 0)/avgTimePages.length : 0;
+
+      // Aggregate referrers from all posts
+      const combinedReferrers = {};
+      Object.values(allViewsData).forEach(p => {
+        if (!p.referrers) return;
+        Object.entries(p.referrers).forEach(([k,v]) => {
+          combinedReferrers[k] = (combinedReferrers[k] || 0) + v;
         });
-      }); 
+      });
 
-      try {
-        renderKPIs(total, postsArr, countries, perDay, latestEvents ? latestEvents[0] : null);
-        renderPopular(postsArr);
-        renderTimeSeries(perDay);
-        renderDeviceChart(devices);
-        renderReferrersChart(referrers);
-        renderMap(countries);
-
-        // Update fun AI insights
-        fetchAiInsight().then(insight => {
-           const el = document.getElementById('insight-ai');
-           if (el) el.textContent = `🤖 ${insight}`;
+      // Aggregate devices
+      const combinedDevices = {};
+      Object.values(allViewsData).forEach(p => {
+        if (!p.devices) return;
+        Object.entries(p.devices).forEach(([k,v]) => {
+          combinedDevices[k] = (combinedDevices[k] || 0) + v;
         });
+      });
 
-        // Update gaming insight cards
-        const trendEl = document.getElementById('insight-trend');
-        if (trendEl && postsArr[0]) {
-          trendEl.textContent = `🎯 Champion: "${postsArr[0].title}" is dominating!`;
-        }
+      // Aggregate countries
+      const combinedCountries = {};
+      Object.values(allViewsData).forEach(p => {
+        if (!p.countries) return;
+        Object.entries(p.countries).forEach(([k,v]) => {
+          combinedCountries[k] = (combinedCountries[k] || 0) + v;
+        });
+      });
 
-        const topCountry = Object.entries(countries).sort((a,b) => b[1] - a[1])[0];
-        const spikeEl = document.getElementById('insight-spike');
-        if (spikeEl && topCountry) {
-          spikeEl.textContent = `🚨 Territory Leader: ${topCountry[0]} rules the realm!`;
-        }
+      // Render data
+      renderKPIs({
+        totalViews,
+        uniqueVisitors,
+        avgTimeOnPage,
+        bounceRate: avgBounceRate,
+        topReferrer: Object.entries(combinedReferrers).sort((a,b) => b[1]-a[1])[0]?.[0] || 'N/A'
+      });
 
-        // Update streak counter
-        updateStreakCounter();
+      renderTimeSeries(
+        Object.entries(dailyData).reduce((acc, [date, dayData]) => {
+          acc[date] = dayData.events || 0;
+          return acc;
+        }, {})
+      );
 
-      } catch (error) {
-        console.error('Error rendering dashboard components:', error);
-      }
+      renderDeviceChart(combinedDevices);
+      renderReferrersChart(combinedReferrers);
+      renderTopPosts(posts);
+      renderMap(combinedCountries);
     }
 
-    // Enhanced initialization
-    async function init() {
+    function renderTopPosts(posts) {
+      const container = document.getElementById('popular-posts');
+      if (!container) return;
+
+      container.innerHTML = posts.slice(0, 10).map((post, i) => `
+        <div style="padding: 8px 12px; border-bottom:1px solid #eee; font-weight: 500; font-size: 0.9rem; display: flex; justify-content: space-between; align-items: center;">
+          <span>${i + 1}. ${post.title}</span>
+          <span>${fmt(post.views)}</span>
+        </div>
+      `).join('');
+    }
+
+    // Initialize country coordinate map once
+    async function loadCoordinates() {
       try {
-        console.log('🎮 Loading gaming coordinate data...');
-        
-        const coordinateUrls = [
+        const urls = [
           'https://cdn.jsdelivr.net/gh/hdutchison/iso-country-codes@master/data.json',
           'https://raw.githubusercontent.com/stefangabos/world_countries/master/data/countries/en/countries.json'
         ];
-        
-        let coordinateResponse = null;
-        
-        for (const url of coordinateUrls) {
+
+        let data = null;
+        for (const url of urls) {
           try {
             const res = await fetch(url);
             if (res.ok) {
-              const data = await res.json();
-              coordinateResponse = data;
-              console.log(`🗺️ Successfully loaded coordinates from: ${url}`);
+              data = await res.json();
               break;
             }
-          } catch (e) {
-            console.warn(`❌ Failed to load from ${url}:`, e);
-          }
+          } catch {}
         }
-        
-        if (coordinateResponse) {
-          let countryArray = Array.isArray(coordinateResponse) ? coordinateResponse : coordinateResponse.countries || Object.values(coordinateResponse);
-          
-          if (!Array.isArray(countryArray)) {
-            console.error('Unexpected coordinate data format');
-            return;
-          }
 
-          coordinateData = new Map();
-          
-          countryArray.forEach(country => {
-            const codes = [
-              country.alpha2 || country.code || country.iso2,
-              country.alpha3 || country.iso3,
-              country.countryCode,
-              country.cca2,
-              country.cca3
-            ].filter(Boolean);
-            
-            const name = country.name || country.country || country.en_short_name;
-            const lat = parseFloat(country.latitude || country.lat || country.latlng?.[0]);
-            const lng = parseFloat(country.longitude || country.lng || country.latlng?.[1]);
-            
-            if (name && !isNaN(lat) && !isNaN(lng)) {
-              const countryInfo = { name, lat, lng };
-              codes.forEach(code => {
-                if (code) {
-                  coordinateData.set(code.toUpperCase(), countryInfo);
-                  coordinateData.set(code.toLowerCase(), countryInfo);
-                }
-              });
-            }
-          });
-          
-          console.log(`🎯 Loaded coordinates for ${coordinateData.size} territories!`);
-        }
-      } catch (e) {
-        console.error('💥 Critical error loading coordinate data:', e);
-      }
-      
-      console.log('🚀 Loading initial gaming analytics...');
-      const initialData = await fetchData('/api/view');
-      if (initialData) {
-        updateDashboard(initialData);
-      }
-      
-      // Enhanced gaming polling
-      let pollAttempts = 0;
-      const maxPollAttempts = 5;
-      
-      const poll = async () => {
-        try {
-          console.log('⚡ Fetching fresh power levels...');
-          const fresh = await fetchData('/api/view');
-          if (fresh) {
-            updateDashboard(fresh);
-            pollAttempts = 0;
-          } else {
-            pollAttempts++;
-            console.warn(`🔄 Power level check ${pollAttempts} failed`);
+        if (!data) throw new Error("Failed to load country coords");
+
+        let countries = Array.isArray(data) ? data : data.countries || Object.values(data);
+
+        coordinateData = new Map();
+        countries.forEach(c => {
+          const codes = [c.alpha2 || c.code || c.iso2].filter(Boolean);
+          const lat = parseFloat(c.latitude ?? c.lat ?? (c.latlng?.[0] || 0));
+          const lng = parseFloat(c.longitude ?? c.lng ?? (c.latlng?.[1] || 0));
+          if (codes.length && !isNaN(lat) && !isNaN(lng)) {
+            codes.forEach(code => coordinateData.set(code.toUpperCase(), { name: c.name || c.country || c.en_short_name, lat, lng }));
           }
-        } catch (error) {
-          pollAttempts++;
-          console.error(`💥 Poll error (attempt ${pollAttempts}):`, error);
-        }
-        
-        if (pollAttempts < maxPollAttempts) {
-          setTimeout(poll, 15000);
-        } else {
-          console.error('🛑 Max poll attempts reached, going offline');
-        }
-      };
-      
-      setTimeout(poll, 15000);
+        });
+
+      } catch (err) {
+        console.error('Error loading coordinates:', err);
+      }
     }
 
-    // Initialize the gaming dashboard!
-    init().catch(error => {
-      console.error('🚨 Failed to initialize gaming dashboard:', error);
-    });
+    async function init() {
+      await loadCoordinates();
+      const initialData = await fetchData('/api/view');
+      if (initialData) updateDashboard(initialData);
+
+      setInterval(async () => {
+        const fresh = await fetchData('/api/view');
+        if (fresh) updateDashboard(fresh);
+      }, 15000);
+    }
+
+    init();
+
   </script>
+
 </BaseLayout>
