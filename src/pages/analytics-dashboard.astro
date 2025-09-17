@@ -5,40 +5,39 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 <BaseLayout title="Niels Veerman's Analytics Dashboard">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css" slot="head" />
   <script src="https://cdn.jsdelivr.net/npm/apexcharts" slot="head"></script>
+  <script src="https://unpkg.com/topojson-client@3"></script>
+  <script src="https://unpkg.com/world-atlas@2.0.2/countries-110m.json"></script>
 
   <style>
     :root {
       --bg-light: linear-gradient(135deg, #f1f5f9 0%, #e3e7ed 100%);
-      --card-light: rgba(255, 255, 255, 0.85);
-      --card-border-light: rgba(255, 255, 255, 0.3);
-      --text-primary-light: #023047;
-      --text-secondary-light: #475569;
-      --color-blue: #2172FF;
-      --color-green: #23C65D;
-      --color-orange: #FF8C00;
+      --card-light: rgba(255,255,255,0.85);
+      --card-border: rgba(255,255,255,0.3);
+      --text-primary: #023047;
+      --text-secondary: #475569;
+      --blue: #2172FF;
+      --green: #23C65D;
+      --orange: #FF8C00;
     }
-
     body {
       background: var(--bg-light);
+      color: var(--text-primary);
       font-family: 'Inter', sans-serif;
-      color: var(--text-primary-light);
       margin: 0;
       padding: 0;
     }
-
     .dashboard-container-wrapper {
       max-width: 1200px;
       margin: 2rem auto;
       padding: 0 1rem;
     }
-
     .glass-card {
       background: var(--card-light);
-      border: 1.5px solid var(--card-border-light);
+      border: 1.5px solid var(--card-border);
       border-radius: 1rem;
       box-shadow: 0 4px 16px rgba(0,0,0,0.05);
       padding: 1rem 1.5rem;
-      transition: box-shadow 0.3s ease;
+      transition: box-shadow 0.3s;
       display: flex;
       flex-direction: column;
       justify-content: center;
@@ -46,505 +45,313 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     .glass-card:hover {
       box-shadow: 0 8px 36px rgba(0,0,0,0.1);
     }
-
-    .header {
-      text-align: center;
-      margin-bottom: 3rem;
-    }
+    .header { text-align: center; margin-bottom: 3rem; }
     .main-title {
-      font-weight: 900;
-      font-size: 2.5rem;
-      margin-bottom: 0.7rem;
-      line-height: 1.1;
+      font-size: 2.5rem; font-weight: 900; margin-bottom: 0.7rem; line-height: 1.1;
     }
     .main-desc {
-      font-weight: 500;
-      font-size: 1.125rem;
-      color: var(--text-secondary-light);
-      max-width: 650px;
-      margin: 0 auto;
+      font-size: 1.125rem; color: var(--text-secondary); max-width:650px; margin:0 auto;
     }
-
-    .grid {
-      display: grid;
-      gap: 1.5rem;
-      margin-bottom: 3rem;
+    .grid { display: grid; gap:1.5rem; margin-bottom:2rem; }
+    .grid-5 { grid-template-columns: repeat(5,1fr); }
+    .grid-3 { grid-template-columns: repeat(3,1fr); }
+    .grid-4 { grid-template-columns: repeat(4,1fr); }
+    @media(max-width:768px) {
+      .grid-5, .grid-3, .grid-4 { grid-template-columns:1fr; }
     }
-    .grid-3 {
-      grid-template-columns: 1fr 1fr 1fr;
-    }
-    .grid-5 {
-      grid-template-columns: repeat(5, 1fr);
-    }
-    .grid-2 {
-      grid-template-columns: repeat(2, 1fr);
-    }
-    @media (max-width: 768px) {
-      .grid-3, .grid-5, .grid-2 {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    .kpi-label {
-      font-size: 0.9rem;
-      font-weight: 600;
-      color: var(--text-secondary-light);
-      margin-bottom: 6px;
-    }
-    .kpi-number {
-      font-weight: 700;
-      font-size: 2.25rem;
-      line-height: 1.1;
-      color: var(--text-primary-light);
-      word-break: break-word;
-    }
-    .kpi-subtext {
-      font-size: 0.85rem;
-      color: var(--text-secondary-light);
-      margin-top: 0.25rem;
-    }
-
-    /* Map container */
-    #view-map {
-      height: 320px;
-      border-radius: 0.5rem;
-      width: 100%;
-    }
-    @media (max-width: 768px) {
-      #view-map {
-        height: 240px;
-      }
-    }
-
-    /* Chart containers */
-    .chart-container {
-      width: 100%;
-      height: 280px;
-    }
-    @media (max-width: 768px) {
-      .chart-container {
-        height: 220px;
-      }
-    }
-
-    /* Truncate text for KPI labels */
-    .truncate {
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    /* Footer */
-    footer {
-      text-align: center;
-      margin-top: 4rem;
-      padding: 1rem 1rem 2rem 1rem;
-      font-size: 0.9rem;
-      color: var(--text-secondary-light);
-    }
-    footer a {
-      margin: 0 0.75rem;
-      color: var(--text-secondary-light);
-      text-decoration: none;
-      font-weight: 500;
-    }
-    footer a:hover {
-      color: var(--color-orange);
-    }
+    .kpi-label { font-size:0.9rem; font-weight:600; color:var(--text-secondary); margin-bottom:6px; }
+    .kpi-number { font-size:2.25rem; font-weight:700; line-height:1.1; word-break:break-word; }
+    .kpi-subtext { font-size:0.85rem; color:var(--text-secondary); margin-top:0.25rem; }
+    #view-map { height:320px; border-radius:0.5rem; width:100%; margin-bottom:3rem; }
+    @media(max-width:768px) { #view-map { height:240px; } }
+    .chart-container { width:100%; height:280px; }
+    @media(max-width:768px) { .chart-container { height:220px; } }
+    .small-chart { height:180px; }
+    footer { text-align:center; margin-top:4rem; padding:1rem; color:var(--text-secondary); font-size:0.9rem; }
+    footer a { margin:0 0.75rem; color:var(--text-secondary); text-decoration:none; font-weight:500; }
+    footer a:hover { color:var(--orange); }
   </style>
 
   <div class="dashboard-container-wrapper">
-    <main>
-      <header class="header">
-        <h1 class="main-title">Niels Veerman's Analytics Dashboard</h1>
-        <p class="main-desc">Real insights from your audience — clear, modern & professional. No noise, just data you can trust.</p>
-      </header>
+    <header class="header">
+      <h1 class="main-title">Niels Veerman's Analytics Dashboard</h1>
+      <p class="main-desc">Real insights from your audience — clear, modern & professional.</p>
+    </header>
 
-      <!-- KPI Summary Grid -->
-      <section class="grid grid-5" style="margin-bottom: 2rem;">
-        <div class="glass-card">
-          <div class="kpi-label">Total Views</div>
-          <div id="kpi-total-views" class="kpi-number">0</div>
-          <div class="kpi-subtext">Overall page views</div>
-        </div>
+    <!-- KPI Grid -->
+    <section class="grid grid-5">
+      <div class="glass-card">
+        <div class="kpi-label">Total Views</div>
+        <div id="kpi-total-views" class="kpi-number">0</div>
+        <div class="kpi-subtext">Overall page views</div>
+      </div>
+      <div class="glass-card">
+        <div class="kpi-label">Unique Visitors</div>
+        <div id="kpi-unique-visitors" class="kpi-number">0</div>
+        <div class="kpi-subtext">Distinct users</div>
+      </div>
+      <div class="glass-card">
+        <div class="kpi-label">Avg. Time on Page</div>
+        <div id="kpi-avg-time" class="kpi-number">0s</div>
+        <div class="kpi-subtext">Average session</div>
+      </div>
+      <div class="glass-card">
+        <div class="kpi-label">Bounce Rate</div>
+        <div id="kpi-bounce-rate" class="kpi-number">0%</div>
+        <div class="kpi-subtext">Single-page visits</div>
+      </div>
+      <div class="glass-card">
+        <div class="kpi-label">Top Referrer</div>
+        <div id="kpi-top-referrer" class="kpi-number truncate" title=""></div>
+        <div class="kpi-subtext">Source driving highest traffic</div>
+      </div>
+    </section>
 
-        <div class="glass-card">
-          <div class="kpi-label">Unique Visitors</div>
-          <div id="kpi-unique-visitors" class="kpi-number">0</div>
-          <div class="kpi-subtext">Distinct users (approx.)</div>
-        </div>
+    <!-- Additional Metrics Grid -->
+    <section class="grid grid-4">
+      <div class="glass-card">
+        <h3 style="font-weight:600;margin-bottom:0.5rem;">Visitors by Hour</h3>
+        <div id="hour-heatmap" class="small-chart"></div>
+      </div>
+      <div class="glass-card">
+        <h3 style="font-weight:600;margin-bottom:0.5rem;">Visits by Day</h3>
+        <div id="day-bar" class="small-chart"></div>
+      </div>
+      <div class="glass-card">
+        <h3 style="font-weight:600;margin-bottom:0.5rem;">Session Duration</h3>
+        <div id="session-dist" class="small-chart"></div>
+      </div>
+      <div class="glass-card">
+        <h3 style="font-weight:600;margin-bottom:0.5rem;">Scroll Depth</h3>
+        <div id="scroll-dist" class="small-chart"></div>
+      </div>
+    </section>
 
-        <div class="glass-card">
-          <div class="kpi-label">Avg. Time on Page</div>
-          <div id="kpi-avg-time" class="kpi-number">0s</div>
-          <div class="kpi-subtext">How long visitors stay</div>
-        </div>
+    <!-- Core Charts -->
+    <section class="grid grid-3">
+      <div class="glass-card">
+        <h3 style="font-weight:600;margin-bottom:0.8rem;">Views Last 30 Days</h3>
+        <div id="time-series-chart" class="chart-container"></div>
+      </div>
+      <div class="glass-card">
+        <h3 style="font-weight:600;margin-bottom:0.8rem;">Device Usage</h3>
+        <div id="device-chart" class="chart-container"></div>
+      </div>
+      <div class="glass-card">
+        <h3 style="font-weight:600;margin-bottom:0.8rem;">Referrer Breakdown</h3>
+        <div id="referrers-chart" class="chart-container"></div>
+      </div>
+    </section>
 
-        <div class="glass-card">
-          <div class="kpi-label">Bounce Rate</div>
-          <div id="kpi-bounce-rate" class="kpi-number">0%</div>
-          <div class="kpi-subtext">Single-page visits</div>
-        </div>
+    <!-- Choropleth Map -->
+    <section>
+      <h3 style="font-weight:600;margin-bottom:0.5rem;">Global Views Map</h3>
+      <div id="view-map"></div>
+    </section>
 
-        <div class="glass-card">
-          <div class="kpi-label">Top Traffic Source</div>
-          <div id="kpi-top-referrer" class="kpi-number truncate" title=""></div>
-          <div class="kpi-subtext">Referrer driving most traffic</div>
-        </div>
-      </section>
+    <!-- Top Posts -->
+    <section>
+      <h3 style="font-weight:600;margin-bottom:0.5rem;">Top 10 Posts</h3>
+      <div id="popular-posts"></div>
+    </section>
 
-      <!-- Charts and Map Grid -->
-      <section class="grid grid-3" style="margin-bottom: 3rem;">
-        <!-- Views Over Time -->
-        <div class="glass-card">
-          <h2 style="font-weight: 600; margin-bottom: 0.8rem;">Views Over Last 30 Days</h2>
-          <div id="time-series-chart" class="chart-container"></div>
-        </div>
-
-        <!-- Device Usage -->
-        <div class="glass-card">
-          <h2 style="font-weight: 600; margin-bottom: 0.8rem;">Devices</h2>
-          <div id="device-chart" class="chart-container"></div>
-        </div>
-
-        <!-- Referrer Breakdown -->
-        <div class="glass-card">
-          <h2 style="font-weight: 600; margin-bottom: 0.8rem;">Traffic Sources</h2>
-          <div id="referrers-chart" class="chart-container"></div>
-        </div>
-      </section>
-
-      <!-- Map -->
-      <section style="margin-bottom: 3rem;">
-        <h2 style="font-weight: 600; margin-bottom: 0.5rem;">Visitors by Country</h2>
-        <div id="view-map"></div>
-      </section>
-
-      <!-- Top Posts -->
-      <section>
-        <h2 style="font-weight: 600; margin-bottom: 0.5rem;">Top 10 Posts</h2>
-        <div id="popular-posts"></div>
-      </section>
-
-      <footer>
-        <div>Data provided by Niels Veerman's serverless functions.</div>
-        <div style="margin-top: 1rem;">
-          <a href="https://github.com/featherman-ux" target="_blank" rel="noopener">GitHub</a> |
-          <a href="/about">About</a>
-        </div>
-      </footer>
-    </main>
+    <footer>
+      Data provided by Niels Veerman's serverless functions.  
+      <a href="https://github.com/featherman-ux" target="_blank">GitHub</a> | <a href="/about">About</a>
+    </footer>
   </div>
 
   <script type="module">
     import * as L from 'https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet-src.esm.js';
+    import { feature } from 'https://cdn.jsdelivr.net/npm/topojson-client@3/+esm';
+    import worldData from 'https://unpkg.com/world-atlas@2.0.2/countries-110m.json';
 
-    let timeSeriesChart, deviceChart, referrersChart, mapInstance;
-    let mapLayers = [];
-    let coordinateData = null; // To store country coords map
+    let timeSeriesChart, deviceChart, referrersChart;
+    let mapInstance, mapLayer;
+    let coordinateData = null;
 
-    // Helper to format numbers consistent with locale
-    const fmt = n => n > 999 ? (n/1000).toFixed(1) + 'k' : String(n);
+    // Simple formatter
+    const fmt = n => n > 999 ? (n/1000).toFixed(1)+'k' : String(n);
 
-    // Animate count-up effect
-    function animateCountUp(el, val, suffix = '') {
+    // Animate count-up
+    function animateCountUp(el, val, suf='') {
       if (!el) return;
-      let start = parseFloat(el.textContent.replace(/[k,%]/g, '')) || 0;
-      if (start === val) return;
-      
-      let startTime;
-      const duration = 1500;
-      function step(timestamp) {
-        if (!startTime) startTime = timestamp;
-        const progress = Math.min((timestamp - startTime)/duration, 1);
-        const currVal = Math.floor(progress * (val - start) + start);
-        el.textContent = fmt(currVal) + suffix;
-        if (progress < 1) window.requestAnimationFrame(step);
+      let startVal = parseFloat(el.textContent.replace(/[k,%s]/g,''))||0;
+      const duration=1500; let startTime;
+      function step(ts){
+        if(!startTime) startTime=ts;
+        const progress=Math.min((ts-startTime)/duration,1);
+        const curr=Math.floor(progress*(val-startVal)+startVal);
+        el.textContent=fmt(curr)+suf;
+        if(progress<1) window.requestAnimationFrame(step);
       }
       window.requestAnimationFrame(step);
     }
 
-    // Fetch JSON with error handling
-    async function fetchData(url) {
-      try {
-        const res = await fetch(url);
-        if (!res.ok) throw new Error('Fetch failed');
-        return res.json();
-      } catch(e) {
-        console.error('Fetch error:', e);
-        return null;
-      }
+    // Fetch JSON safely
+    async function fetchData(url){
+      try{ const r=await fetch(url); if(!r.ok) throw ''; return r.json();}
+      catch(e){ console.error(e); return null;}
     }
 
     // Render KPIs
-    function renderKPIs(data) {
-      if (!data) return;
-      animateCountUp(document.querySelector('#kpi-total-views'), data.totalViews || 0);
-      animateCountUp(document.querySelector('#kpi-unique-visitors'), data.uniqueVisitors || 0);
-      animateCountUp(document.querySelector('#kpi-avg-time'), Math.round(data.avgTimeOnPage) || 0, 's');
-      const bounceRate = data.bounceRate !== undefined ? (data.bounceRate * 100).toFixed(1) + '%' : 'N/A';
-      document.querySelector('#kpi-bounce-rate').textContent = bounceRate;
-      const referrer = data.topReferrer || 'Direct';
-      const referrerEl = document.querySelector('#kpi-top-referrer');
-      referrerEl.textContent = referrer;
-      referrerEl.title = referrer;
+    function renderKPIs({ totalViews, uniqueVisitors, avgTimeOnPage, bounceRate, topReferrer }){
+      animateCountUp(document.getElementById('kpi-total-views'), totalViews||0);
+      animateCountUp(document.getElementById('kpi-unique-visitors'), uniqueVisitors||0);
+      animateCountUp(document.getElementById('kpi-avg-time'), Math.round(avgTimeOnPage)||0,'s');
+      document.getElementById('kpi-bounce-rate').textContent=((bounceRate||0)*100).toFixed(1)+'%';
+      const tref=document.getElementById('kpi-top-referrer');
+      tref.textContent=topReferrer||'Direct'; tref.title=topReferrer||'Direct';
     }
 
-    // Render time series chart
-    function renderTimeSeries(data) {
-      if (!data) return;
-      const dates = Object.keys(data).sort();
-      const counts = dates.map(d => data[d] || 0);
-      const opts = {
-        chart: { type: 'area', height: 280, toolbar: { show: false }},
-        series: [{ name: 'Views', data: counts }],
-        xaxis: { categories: dates, labels: { rotate: -45 } },
-        stroke: { curve: 'smooth', width: 3 },
-        colors: ['var(--color-blue)'],
-        dataLabels: { enabled: false },
-        grid: {borderColor: '#e3e7ed'}
-      };
-      if (!timeSeriesChart) {
-        timeSeriesChart = new ApexCharts(document.getElementById('time-series-chart'), opts);
-        timeSeriesChart.render();
-      } else {
-        timeSeriesChart.updateOptions({ ...opts, series: [{ data: counts }] });
-      }
+    // Time series chart
+    function renderTimeSeries(data){
+      const dates=Object.keys(data).sort(), counts=dates.map(d=>data[d]||0);
+      const opts={ chart:{type:'area',height:280,toolbar:{show:false}},
+        series:[{name:'Views',data:counts}],
+        xaxis:{categories:dates,labels:{rotate:-45}},
+        stroke:{curve:'smooth',width:3},
+        colors:['var(--blue)'],dataLabels:{enabled:false},grid:{borderColor:'#e3e7ed'}};
+      if(!timeSeriesChart){ timeSeriesChart=new ApexCharts(document.getElementById('time-series-chart'),opts); timeSeriesChart.render(); }
+      else timeSeriesChart.updateOptions({...opts,series:[{data:counts}]});
     }
 
-    // Render device chart
-    function renderDeviceChart(data) {
-      if (!data) return;
-      const labels = Object.keys(data).map(d => d.charAt(0).toUpperCase() + d.slice(1));
-      const series = Object.values(data);
-      const opts = {
-        chart: { type: 'donut', height: 280 },
-        labels,
-        series,
-        colors: ['var(--color-blue)', 'var(--color-green)', 'var(--color-orange)'],
-        legend: { position: 'bottom' }
-      };
-      if (!deviceChart) {
-        deviceChart = new ApexCharts(document.getElementById('device-chart'), opts);
-        deviceChart.render();
-      } else {
-        deviceChart.updateOptions({ ...opts, series });
-      }
+    // Device chart
+    function renderDeviceChart(data){
+      const labels=Object.keys(data).map(k=>k.charAt(0).toUpperCase()+k.slice(1)), series=Object.values(data);
+      const opts={chart:{type:'donut',height:280},labels,series,colors:['var(--blue)','var(--green)','var(--orange)'],legend:{position:'bottom'}};
+      if(!deviceChart){ deviceChart=new ApexCharts(document.getElementById('device-chart'),opts); deviceChart.render(); }
+      else deviceChart.updateOptions({...opts,series});
     }
 
-    // Render referrers chart with clear categories
-    function renderReferrersChart(data) {
-      if (!data) return;
-      // Sort and top 7 referrers
-      const entries = Object.entries(data);
-      entries.sort((a,b) => b[1] - a[1]);
-      const top = entries.slice(0, 7);
-      const categories = top.map(t => t[0]);
-      const series = [{ name: 'Traffic Sources', data: top.map(t => t[1]) }];
-      const opts = {
-        chart: { type: 'bar', height: 280 },
-        xaxis: { categories },
-        series,
-        colors: ['var(--color-green)'],
-        plotOptions: { bar: { borderRadius: 5, horizontal: true } },
-        dataLabels: { enabled: false }
-      };
-      if (!referrersChart) {
-        referrersChart = new ApexCharts(document.getElementById('referrers-chart'), opts);
-        referrersChart.render();
-      } else {
-        referrersChart.updateOptions({ ...opts, series, xaxis: { categories } });
-      }
+    // Referrer chart
+    function renderReferrersChart(data){
+      const entries=Object.entries(data).sort((a,b)=>b[1]-a[1]).slice(0,7);
+      const cats=entries.map(e=>e[0]), vals=entries.map(e=>e[1]);
+      const opts={chart:{type:'bar',height:280},series:[{name:'Refs',data:vals}],xaxis:{categories:cats},colors:['var(--green)'],plotOptions:{bar:{borderRadius:5,horizontal:true}},dataLabels:{enabled:false}};
+      if(!referrersChart){ referrersChart=new ApexCharts(document.getElementById('referrers-chart'),opts); referrersChart.render(); }
+      else referrersChart.updateOptions({...opts,series:[{data:vals}],xaxis:{categories:cats}});
     }
 
-    // Render top posts list
-    function renderPopular(posts) {
-      const container = document.getElementById('popular-posts');
-      if (!container) return;
-      container.innerHTML = posts.slice(0, 10).map((p,i) =>
-        `<div style="padding: 0.3rem 0.5rem; border-bottom: 1px solid #ddd;">
-          <strong>${i+1}. </strong> <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${p.title}</span> 
-          <span style="float: right; font-weight: 600;">${fmt(p.views)}</span>
-        </div>`
-      ).join('');
+    // Top posts list
+    function renderPopular(posts){
+      const c=document.getElementById('popular-posts');
+      c.innerHTML=posts.slice(0,10).map((p,i)=>`
+        <div style="display:flex;justify-content:space-between;padding:8px 12px;border-bottom:1px solid #eee;font-weight:500;">
+          <span>${i+1}. ${p.title}</span><span>${fmt(p.views)}</span>
+        </div>`).join('');
     }
 
-    // Render map circles robustly and cleanly
-    function renderMap(countries) {
-      if (!coordinateData) return;
-      
-      if (!mapInstance) {
-        mapInstance = L.map('view-map', { zoomControl: true }).setView([20, 0], 2);
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png').addTo(mapInstance);
-      }
-
-      // Clear previous circles
-      mapLayers.forEach(l => mapInstance.removeLayer(l));
-      mapLayers = [];
-      
-      // Calculate max for scaling radius
-      const maxViews = Math.max(...Object.values(countries));
-      Object.entries(countries).forEach(([code, count]) => {
-        const coords = coordinateData.get(code.toUpperCase());
-        if (!coords) return;
-
-        const radius = 20000 + (count / maxViews) * 80000;
-
-        const circle = L.circle([coords.lat, coords.lng], {
-          color: 'var(--color-blue)',
-          fillColor: 'var(--color-blue)',
-          fillOpacity: 0.5,
-          radius,
-          weight: 1
-        }).addTo(mapInstance);
-
-        circle.bindPopup(`<b>${coords.name}</b><br>${fmt(count)} views`);
-        mapLayers.push(circle);
-      });
-
-      // Invalidate size to avoid display issues
-      setTimeout(() => mapInstance.invalidateSize(), 200);
-    }
-
-    // Main dashboard update
-    async function updateDashboard(data) {
-      if (!data || !data.allViewsData) return;
-
-      const { allViewsData, latestEvents, dailyData } = data;
-
-      // Aggregate totals for KPIs
-      const posts = Object.entries(allViewsData).map(([path, d]) => ({
-        title: path.replace(/^\/blog\//, ''),
-        views: (d?.total || 0)
-      })).sort((a,b) => b.views - a.views);
-
-      const totalViews = posts.reduce((acc, val) => acc + val.views, 0);
-      const uniqueVisitors = Object.values(allViewsData).reduce((acc, p) => acc + (p?.uniqueVisitors?.length || 0), 0);
-
-      // Bounce rate approximation
-      const bounceRates = Object.values(allViewsData)
-        .map(p => p.bounceRate || 0)
-        .filter(v => typeof v === 'number' && !isNaN(v));
-      const avgBounceRate = bounceRates.length ? bounceRates.reduce((a,b) => a+b, 0)/bounceRates.length : 0;
-
-      // Average time on page in seconds
-      const avgTimePages = Object.values(allViewsData)
-        .map(p => p.averageTimeOnPage || 0)
-        .filter(t => typeof t === 'number' && !isNaN(t));
-      const avgTimeOnPage = avgTimePages.length ? avgTimePages.reduce((a,b) => a+b, 0)/avgTimePages.length : 0;
-
-      // Aggregate referrers from all posts
-      const combinedReferrers = {};
-      Object.values(allViewsData).forEach(p => {
-        if (!p.referrers) return;
-        Object.entries(p.referrers).forEach(([k,v]) => {
-          combinedReferrers[k] = (combinedReferrers[k] || 0) + v;
-        });
-      });
-
-      // Aggregate devices
-      const combinedDevices = {};
-      Object.values(allViewsData).forEach(p => {
-        if (!p.devices) return;
-        Object.entries(p.devices).forEach(([k,v]) => {
-          combinedDevices[k] = (combinedDevices[k] || 0) + v;
-        });
-      });
-
-      // Aggregate countries
-      const combinedCountries = {};
-      Object.values(allViewsData).forEach(p => {
-        if (!p.countries) return;
-        Object.entries(p.countries).forEach(([k,v]) => {
-          combinedCountries[k] = (combinedCountries[k] || 0) + v;
-        });
-      });
-
-      // Render data
-      renderKPIs({
-        totalViews,
-        uniqueVisitors,
-        avgTimeOnPage,
-        bounceRate: avgBounceRate,
-        topReferrer: Object.entries(combinedReferrers).sort((a,b) => b[1]-a[1])[0]?.[0] || 'N/A'
-      });
-
-      renderTimeSeries(
-        Object.entries(dailyData).reduce((acc, [date, dayData]) => {
-          acc[date] = dayData.events || 0;
-          return acc;
-        }, {})
-      );
-
-      renderDeviceChart(combinedDevices);
-      renderReferrersChart(combinedReferrers);
-      renderTopPosts(posts);
-      renderMap(combinedCountries);
-    }
-
-    function renderTopPosts(posts) {
-      const container = document.getElementById('popular-posts');
-      if (!container) return;
-
-      container.innerHTML = posts.slice(0, 10).map((post, i) => `
-        <div style="padding: 8px 12px; border-bottom:1px solid #eee; font-weight: 500; font-size: 0.9rem; display: flex; justify-content: space-between; align-items: center;">
-          <span>${i + 1}. ${post.title}</span>
-          <span>${fmt(post.views)}</span>
-        </div>
-      `).join('');
-    }
-
-    // Initialize country coordinate map once
-    async function loadCoordinates() {
-      try {
-        const urls = [
-          'https://cdn.jsdelivr.net/gh/hdutchison/iso-country-codes@master/data.json',
-          'https://raw.githubusercontent.com/stefangabos/world_countries/master/data/countries/en/countries.json'
-        ];
-
-        let data = null;
-        for (const url of urls) {
-          try {
-            const res = await fetch(url);
-            if (res.ok) {
-              data = await res.json();
-              break;
-            }
-          } catch {}
+    // Load country coords map
+    async function loadCoordinates(){
+      const world=worldData;
+      const countriesGeo=topojson.feature(world, world.objects.countries).features;
+      coordinateData=new Map();
+      countriesGeo.forEach(f=>{
+        const isoNum=f.id;
+        const iso2=countryNumericToAlpha2[isoNum];
+        if(iso2){
+          coordinateData.set(iso2, { name:f.properties.name, lat:f.properties.latitude||0, lng:f.properties.longitude||0 });
         }
+      });
+    }
 
-        if (!data) throw new Error("Failed to load country coords");
-
-        let countries = Array.isArray(data) ? data : data.countries || Object.values(data);
-
-        coordinateData = new Map();
-        countries.forEach(c => {
-          const codes = [c.alpha2 || c.code || c.iso2].filter(Boolean);
-          const lat = parseFloat(c.latitude ?? c.lat ?? (c.latlng?.[0] || 0));
-          const lng = parseFloat(c.longitude ?? c.lng ?? (c.latlng?.[1] || 0));
-          if (codes.length && !isNaN(lat) && !isNaN(lng)) {
-            codes.forEach(code => coordinateData.set(code.toUpperCase(), { name: c.name || c.country || c.en_short_name, lat, lng }));
-          }
-        });
-
-      } catch (err) {
-        console.error('Error loading coordinates:', err);
+    // Choropleth map
+    async function renderMap(countries){
+      if(!mapInstance){ mapInstance=L.map('view-map',{}).setView([20,0],2); L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png').addTo(mapInstance); }
+      if(mapLayer) mapInstance.removeLayer(mapLayer);
+      const world=worldData;
+      const geo=topojson.feature(world, world.objects.countries);
+      const maxCount=Math.max(...Object.values(countries),1);
+      function getColor(v){
+        const r=v/maxCount;
+        return r>0.75? '#08519c':r>0.5?'#3182bd':r>0.25?'#6baed6':v>0?'#bdd7e7':'#f0f0f0';
       }
+      mapLayer=L.geoJson(geo, {
+        style:f=>{
+          const iso2=countryNumericToAlpha2[f.id]||'';
+          const v=countries[iso2]||0;
+          return { fillColor:getColor(v), weight:1, color:'#fff', fillOpacity:0.8 };
+        },
+        onEachFeature:(f,l)=>{
+          const iso2=countryNumericToAlpha2[f.id]||'';
+          const v=countries[iso2]||0;
+          l.bindPopup(`<b>${f.properties.name}</b><br>${fmt(v)} views`);
+        }
+      }).addTo(mapInstance);
+      setTimeout(()=>mapInstance.invalidateSize(),200);
     }
 
-    async function init() {
+    // Numeric to alpha2 map (partial; expand as needed)
+    const countryNumericToAlpha2={
+      '276':'DE','250':'FR','840':'US','826':'GB',
+      '528':'NL','124':'CA','036':'AU','356':'IN','392':'JP'
+      // etc.
+    };
+
+    // Additional charts for new metrics
+    function renderHourHeatmap(data){
+      if(!data) return;
+      const hrs=Array.from({length:24},(_,i)=>i);
+      const series=[{name:'Hour',data:hrs.map(h=>({x:`${h}:00`,y:data[h]||0}))}];
+      new ApexCharts(document.getElementById('hour-heatmap'),{chart:{type:'heatmap',height:180},series,plotOptions:{heatmap:{shadeIntensity:0.5}},colors:['#2172FF']}).render();
+    }
+    function renderDayBar(data){
+      if(!data) return;
+      const days=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+      const vals=days.map(d=>data[d]||0);
+      new ApexCharts(document.getElementById('day-bar'),{chart:{type:'bar',height:180},series:[{name:'Visits',data:vals}],xaxis:{categories:days},colors:['#23C65D']}).render();
+    }
+    function renderSessionDist(data){
+      if(!data) return;
+      const bins=['<30s','30–60s','1–2m','2–5m','>5m'], vals=bins.map(b=>data[b]||0);
+      new ApexCharts(document.getElementById('session-dist'),{chart:{type:'bar',height:180},series:[{name:'Sessions',data:vals}],xaxis:{categories:bins},colors:['#FF8C00']}).render();
+    }
+    function renderScrollDist(data){
+      if(!data) return;
+      const ranges=['0–25%','25–50%','50–75%','75–100%'], vals=ranges.map(r=>data[r]||0);
+      new ApexCharts(document.getElementById('scroll-dist'),{chart:{type:'bar',height:180},series:[{name:'Views',data:vals}],xaxis:{categories:ranges},colors:['#2172FF']}).render();
+    }
+
+    // Update dashboard
+    async function updateDashboard(data){
+      if(!data) return;
+      const { allViewsData, dailyData, insights }=data;
+      const posts=Object.entries(allViewsData).map(([p,d])=>({title:p.replace(/^\/blog\//,''),views:d.total||0})).sort((a,b)=>b.views-a.views);
+      const totalViews=posts.reduce((a,v)=>a+v.views,0);
+      const uniqueVisitors=Object.values(allViewsData).reduce((a,v)=>a+(v.uniqueVisitors?.length||0),0);
+      const bounceRates=Object.values(allViewsData).map(v=>v.bounceRate||0).filter(v=>!isNaN(v));
+      const avgBounce=bounceRates.length?bounceRates.reduce((a,b)=>a+b)/bounceRates.length:0;
+      const times=Object.values(allViewsData).map(v=>v.averageTimeOnPage||0).filter(t=>!isNaN(t));
+      const avgTime=times.length?times.reduce((a,b)=>a+b)/times.length:0;
+      const combinedRef={}, combinedDev={}, combinedCountry={};
+      Object.values(allViewsData).forEach(v=>{
+        Object.entries(v.referrers||{}).forEach(([k,c])=>combinedRef[k]=(combinedRef[k]||0)+c);
+        Object.entries(v.devices||{}).forEach(([k,c])=>combinedDev[k]=(combinedDev[k]||0)+c);
+        Object.entries(v.countries||{}).forEach(([k,c])=>combinedCountry[k]=(combinedCountry[k]||0)+c);
+      });
+
+      renderKPIs({ totalViews, uniqueVisitors, avgTimeOnPage:avgTime, bounceRate:avgBounce, topReferrer:Object.entries(combinedRef).sort((a,b)=>b[1]-a[1])[0]?.[0]||'N/A' });
+      renderTimeSeries(Object.fromEntries(Object.entries(dailyData).map(([d,v])=>[d,v.events||0])));
+      renderDeviceChart(combinedDev);
+      renderReferrersChart(combinedRef);
+      await renderMap(combinedCountry);
+      renderPopular(posts);
+      renderHourHeatmap(insights.byHour);
+      renderDayBar(insights.byDay);
+      renderSessionDist(insights.sessionDurationDist);
+      renderScrollDist(insights.scrollDepth);
+    }
+
+    async function init(){
       await loadCoordinates();
-      const initialData = await fetchData('/api/view');
-      if (initialData) updateDashboard(initialData);
-
-      setInterval(async () => {
-        const fresh = await fetchData('/api/view');
-        if (fresh) updateDashboard(fresh);
-      }, 15000);
+      const d=await fetchData('/api/view');
+      if(d) updateDashboard(d);
+      setInterval(async()=>{
+        const d2=await fetchData('/api/view');
+        if(d2) updateDashboard(d2);
+      },15000);
     }
-
     init();
-
   </script>
-
 </BaseLayout>
