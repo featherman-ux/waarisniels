@@ -63,6 +63,8 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       border-radius: 0.75rem;
       width: 100%;
       background-color: #e5e7eb;
+      position: relative;
+      overflow: hidden;
     }
 .chart-container {
       width: 100%;
@@ -72,6 +74,18 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+    }
+    #view-map.map--empty::after {
+      content: 'Nog geen geo-data om te tonen (nog even geduld).';
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      color: var(--text-secondary-light);
+      font-size: 0.95rem;
+      text-align: center;
+      padding: 0 1.5rem;
+      background: linear-gradient(145deg, rgba(255,255,255,0.88), rgba(255,255,255,0.6));
     }
   </style>
 
@@ -257,6 +271,10 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     }
 
     function renderMap(countries) {
+        const mapElement = document.getElementById('view-map');
+        if (!mapElement) return;
+        mapElement.classList.add('map-initialized');
+
         if (!mapInstance) {
             mapInstance = L.map('view-map').setView([20, 0], 2);
             L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png', {
@@ -272,12 +290,19 @@ import BaseLayout from '../layouts/BaseLayout.astro';
             }
         });
 
-        if (!countries ||!coordinateData) return;
-        
-        const counts = Object.values(countries);
-        if (counts.length === 0) return;
-        
-        const maxViews = Math.max(...counts);
+        if (!countries || !coordinateData) {
+            mapElement.classList.add('map--empty');
+            return;
+        }
+
+        const counts = Object.values(countries).filter((count) => count > 0);
+        if (counts.length === 0) {
+            mapElement.classList.add('map--empty');
+            return;
+        }
+
+        const maxViews = Math.max(1, ...counts);
+        mapElement.classList.remove('map--empty');
 
         Object.entries(countries).forEach(([code, count]) => {
             const coords = coordinateData.get(code.toUpperCase());
@@ -297,31 +322,66 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
     // --- Initialization ---
     async function loadCoordinates() {
+        if (coordinateData) return;
+
+        const cacheKey = 'analytics-country-centroids';
         try {
-            const res = await fetch('https://cdn.jsdelivr.net/gh/stefangabos/world_countries/master/data/countries/en/countries.json');
-            if (!res.ok) throw new Error('Failed to fetch coordinates');
+            const cached = sessionStorage.getItem(cacheKey);
+            if (cached) {
+                const parsed = JSON.parse(cached);
+                coordinateData = new Map(parsed.map((c) => [c.code, c]));
+                return;
+            }
+        } catch (err) {
+            console.warn('Unable to read coordinate cache', err);
+        }
+
+        try {
+            const res = await fetch('/data/country-centroids.json');
+            if (!res.ok) throw new Error(`Failed to fetch coordinates (${res.status})`);
             const data = await res.json();
-            
-            coordinateData = new Map();
-            data.forEach(c => {
-                if (c.alpha2 && c.latitude && c.longitude) {
-                    coordinateData.set(c.alpha2.toUpperCase(), {
-                        name: c.name,
-                        lat: parseFloat(c.latitude),
-                        lng: parseFloat(c.longitude)
-                    });
-                }
-            });
+
+            coordinateData = new Map(
+                data
+                    .filter((c) => c.code && !Number.isNaN(c.lat) && !Number.isNaN(c.lng))
+                    .map((c) => [c.code.toUpperCase(), c])
+            );
+
+            try {
+                sessionStorage.setItem(cacheKey, JSON.stringify(data));
+            } catch (err) {
+                console.warn('Unable to store coordinate cache', err);
+            }
         } catch (err) {
             console.error('Error loading country coordinates:', err);
         }
     }
 
+    function showEmptyState() {
+        const message = 'Nog geen analytics-data. Bezoek een blogpost (en laad de view counter) om metingen te starten.';
+        ['time-series-chart', 'device-chart', 'referrers-chart', 'top-posts-list'].forEach((id) => {
+            const el = document.getElementById(id);
+            if (el) {
+                el.innerHTML = `<div class="flex items-center justify-center h-full text-sm text-slate-500 text-center px-4">${message}</div>`;
+            }
+        });
+        renderMap({});
+    }
+
     async function updateDashboard() {
-        const data = await fetchData('/api/view');
-        if (!data) return;
+        const data = await fetchData('/api/analytics');
+        if (!data || !data.kpis) {
+            showEmptyState();
+            return;
+        }
 
         renderKPIs(data.kpis);
+
+        if (data.kpis.totalViews === 0) {
+            showEmptyState();
+            return;
+        }
+
         renderTimeSeries(data.charts.viewsLast30Days);
         renderDeviceChart(data.charts.deviceUsage);
         renderReferrersChart(data.charts.referrerBreakdown);

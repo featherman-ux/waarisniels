@@ -1,3 +1,4 @@
+
 name = "waarisniels"
 pages_build_output_dir = "dist"
 compatibility_date = "2025-08-28"
@@ -15,5 +16,10 @@ binding = "SESSION"
 id = "adadbaa37ca743d5a6c3e3b2d311fb3c" 
 preview_id = "adadbaa37ca743d5a6c3e3b2d311fb3c"
 
+[[vectorize]]
+binding = "VECTORIZE_INDEX" # This is how we'll access the index in our code
+index_name = "travel-blog-index"
+
+# Add this if you don't have it already, for the AI model access
 [ai]
 binding = "AI"

@@ -1,11 +1,21 @@
 import type { APIContext } from 'astro';
 
-// Helper to return JSON
 function jsonResponse(body: unknown, status = 200): Response {
   return new Response(JSON.stringify(body), {
     status,
-    headers: { 'Content-Type': 'application/json' }
+    headers: {
+      'Content-Type': 'application/json',
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type',
+    },
   });
+}
+
+export const prerender = false;
+
+export async function OPTIONS() {
+  return jsonResponse(null, 204);
 }
 
 // Helper to safely read from KV
@@ -72,5 +82,45 @@ export async function GET(context: APIContext) {
   } catch (error: any) {
     console.error("AI Summary Error:", error);
     return jsonResponse({ error: error.message }, 500);
+  }
+}
+
+export async function POST(context: APIContext) {
+  const ai = context.locals.runtime?.env?.AI;
+  if (!ai) {
+    console.error("AI service binding not found.");
+    return jsonResponse({ error: 'AI not available' }, 500);
+  }
+
+  try {
+    const { content } = await context.request.json();
+    if (!content) {
+      return jsonResponse({ error: 'Missing content for summary' }, 400);
+    }
+
+    // Clean up the content a bit before sending
+    const cleanContent = content
+      .replace(/---[\s\S]*?---/, '') // Remove frontmatter
+      .replace(/<[^>]*>?/gm, '')   // Remove HTML tags
+      .replace(/[#*`_~]/g, '')      // Remove markdown characters
+      .replace(/\s+/g, ' ')        // Normalize whitespace
+      .trim();
+
+    const systemPrompt = `Je bent Niels, een Nederlandse travelblogger met veel enthousiasme. Schrijf maximaal twee zinnen in de ik-vorm, warm en spontaan, alsof je vrienden bijpraat. Gebruik in totaal hooguit 60 woorden en verwerk minimaal één van deze uitspraken op een natuurlijke manier: "heeee meiden", "gasten facking mooi", "ken gebeuren", "magisch mooi". Vermijd inleidingen zoals "Hier is" of "Samenvatting". Focus op het gevoel van de trip en één opvallend detail.`;
+
+    const response = await ai.run('@cf/meta/llama-3.1-8b-instruct', {
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: `Dit is de blogpost-inhoud waar je kort op reageert: """${cleanContent}"""` }
+      ]
+    });
+
+    return jsonResponse({ 
+      summary: response.response || 'Could not generate a summary at this time.',
+    });
+
+  } catch (error) {
+    console.error('AI Summary error:', error);
+    return jsonResponse({ error: 'AI service unavailable' }, 500);
   }
 }

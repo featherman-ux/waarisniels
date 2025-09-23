@@ -9,9 +9,6 @@ tags: ["Peru", "Mancora", "Kitesurfen", "Surfen"]
 draft: false
 ---
 
-
-import Video from '../../components/Video.astro';
-
 # Halloooooootjes
 
 Dag lieve lezers, het is weer tijd voor een update.
@@ -24,17 +21,27 @@ De afgelopen twee weken heb ik heerlijk mogen vertoeven aan de kust van Peru, vo
 
 ## Mancora
 
-<Video type="local" src="/images/mancora+huanchaco/mancora.mp4" title="Surfen in Mancora" />
+<div class="video-responsive">
+  <video controls preload="metadata" poster="/images/mancora+huanchaco/mancora-anton.jpeg">
+    <source src="/images/mancora+huanchaco/mancora.mp4" type="video/mp4" />
+    Je browser ondersteunt geen video element.
+  </video>
+</div>
 
 ’s Ochtends stond ik heerlijk rond 6:30 op om te gaan golfsurfen, dan had ik daarna Spaanse les, de middag sloot ik af met kitesurfles en de avonden vulde ik met sociale activiteiten. Dit hield ik een weekje vol en toen werd ik gepakt door een fikse voedselvergiftiging, een paar daagjes lag ik eruit en toen hield ik mij aan een wat minder strak schema.
 
 In Mancora ben ik redelijk verslaafd geraakt aan het kitesurfen waardoor ik mij met volle overgave hierin heb gegooid, ik kan het nu redelijk!!! Helaas niet echt opgelet op de fikse kosten van les en huur dus nu druk een side hustle aan het bedenken (www.veermandev.nl binnenkort live!!!) om toch nog wat langer te kunnen blijven en een kitesurfset te kunnen kopen in Brazilië.
 
-<Video type="local" src="/images/mancora+huanchaco/kitesurfen.mp4" title="Kitesurfen in Mancora" />
+<div class="video-responsive">
+  <video controls preload="metadata" poster="/images/mancora+huanchaco/mancora-anton2.jpeg">
+    <source src="/images/mancora+huanchaco/kitesurfen.mp4" type="video/mp4" />
+    Je browser ondersteunt geen video element.
+  </video>
+</div>
 
-<div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-  <img src="/images/mancora+huanchaco/mancora-anton2.jpeg" alt="Mancora 2" width="300" />
-  <img src="/images/mancora+huanchaco/mancora-anton3.jpeg" alt="Mancora 3" width="300" />
+<div class="photo-grid" style="margin-top: 1rem;">
+  <img src="/images/mancora+huanchaco/mancora-anton2.jpeg" alt="Mancora 2" />
+  <img src="/images/mancora+huanchaco/mancora-anton3.jpeg" alt="Mancora 3" />
 </div>
 
 ---
@@ -45,8 +52,8 @@ Na Mancora doorgetrokken naar Huanchaco, een ongekend ongezellige nachtbus: half
 
 Aangekomen in Huanchaco vond ik het maar een troosteloze plek, golven waren kut, weer was matig, hostel leeg dus na twee nachten (wel lekker geslapen en lekker eten gehad) weer door!
 
-<div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-  <img src="/images/mancora+huanchaco/huanchaco-pier.jpeg" alt="Huanchaco pier" width="300" />
-  <img src="/images/mancora+huanchaco/huanchaco-zee.jpeg" alt="Huanchaco zee" width="300" />
-  <img src="/images/mancora+huanchaco/Rijstepap-huanchaco.jpg" alt="Rijstepap Huanchaco" width="300" />
+<div class="photo-grid" style="margin-top: 1rem;">
+  <img src="/images/mancora+huanchaco/huanchaco-pier.jpeg" alt="Huanchaco pier" />
+  <img src="/images/mancora+huanchaco/huanchaco-zee.jpeg" alt="Huanchaco zee" />
+  <img src="/images/mancora+huanchaco/Rijstepap-huanchaco.jpg" alt="Rijstepap Huanchaco" />
 </div>

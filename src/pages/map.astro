@@ -48,7 +48,7 @@ const pageDescription = "Eenvoudige, snelle kaart met mijn route en stops (bus, 
     overflow: hidden;
     box-shadow: var(--shadow-md);
     max-width: 1280px;
-    margin: 0 auto 4rem;
+    margin: 0 auto 2rem;
     padding: 0; /* no padding: map fills entire card */
   }
   .map-wrap {
@@ -83,9 +83,29 @@ const pageDescription = "Eenvoudige, snelle kaart met mijn route en stops (bus, 
     color: var(--clr-text-subtle);
     font-size: .9rem;
   }
+  .map-ai-panel {
+    max-width: 720px;
+    margin: 0 auto 3rem;
+    background: white;
+    border-radius: 1rem;
+    border: 1px solid #e2e8f0;
+    box-shadow: var(--shadow-md);
+    padding: 1.5rem;
+  }
+  .map-ai-panel h3 {
+    margin: 0 0 0.5rem;
+    font-size: 1.1rem;
+    color: #1f2937;
+  }
+  .map-ai-panel p {
+    margin: 0;
+    color: #4b5563;
+    line-height: 1.6;
+  }
   @media (max-width: 640px) {
     .map-wrap { height: 400px; }
     .hero h1 { font-size: 1.75rem; }
+    .map-ai-panel { margin-bottom: 2rem; }
   }
 </style>
 
@@ -94,6 +114,11 @@ const pageDescription = "Eenvoudige, snelle kaart met mijn route en stops (bus, 
     <h1>{pageTitle}</h1>
     <p>Hopelijk nu sneller en vloeiender!</p>
   </section>
+
+  <aside id="map-ai-panel" class="map-ai-panel" aria-live="polite">
+    <h3>AI Reisbuddy</h3>
+    <p id="map-ai-text">niels is in Cusco. Je bent op weg naar Cusco, de historische hoofdstad van de Inca's! Kijk uit het raam en geniet van de adembenemende uitzichten op de Andes. Wacht maar tot je de majestueuze Sacsayhuamán-fortress ziet liggen, een van de meest indrukwekkende overblijfselen van de Inca-keizerlijke tijd.</p>
+  </aside>
 
   <article class="card">
     <div id="map" class="map-wrap"></div>
@@ -121,8 +146,8 @@ const pageDescription = "Eenvoudige, snelle kaart met mijn route en stops (bus, 
     if (typeof L === 'undefined') return;
 
     const map = L.map('map', {
-      scrollWheelZoom: false,
-      zoomControl: false,
+      scrollWheelZoom: true,
+      zoomControl: true,
       inertia: true,
     }).setView([-0.18, -78.47], 6);
 
@@ -150,8 +175,32 @@ const pageDescription = "Eenvoudige, snelle kaart met mijn route en stops (bus, 
       }).addTo(map);
     }
 
-    const markers = places.map(p => {
-      const mk = L.marker([p.lat, p.lon]).addTo(map);
+    const currentPlace = places[places.length - 1];
+
+    const defaultIcon = L.icon({
+      iconUrl: '/images/marker-icon.png',
+      iconRetinaUrl: '/images/marker-icon-2x.png',
+      shadowUrl: '/images/marker-shadow.png',
+      iconSize: [25, 41],
+      iconAnchor: [12, 41],
+      popupAnchor: [1, -28],
+      shadowSize: [41, 41],
+    });
+
+    const currentIcon = L.icon({
+      iconUrl: '/images/marker-icon-2x.png',
+      iconRetinaUrl: '/images/marker-icon-2x.png',
+      shadowUrl: '/images/marker-shadow.png',
+      iconSize: [30, 50],
+      iconAnchor: [15, 50],
+      popupAnchor: [1, -32],
+      shadowSize: [50, 50],
+    });
+
+    const markers = places.map((p, index) => {
+      const mk = L.marker([p.lat, p.lon], {
+        icon: index === places.length - 1 ? currentIcon : defaultIcon,
+      }).addTo(map);
       mk.bindPopup(`<strong>${p.name}</strong>${p.notes ? '<br>' + p.notes : ''}`);
       return mk;
     });
@@ -159,6 +208,28 @@ const pageDescription = "Eenvoudige, snelle kaart met mijn route en stops (bus, 
     const group = L.featureGroup(markers);
     if (group.getBounds().isValid()) {
       map.fitBounds(group.getBounds().pad(0.1));
+    }
+
+    const aiPanel = document.getElementById('map-ai-text');
+    const defaultHighlight = "niels is in Cusco. Je bent op weg naar Cusco, de historische hoofdstad van de Inca's! Kijk uit het raam en geniet van de adembenemende uitzichten op de Andes. Wacht maar tot je de majestueuze Sacsayhuamán-fortress ziet liggen, een van de meest indrukwekkende overblijfselen van de Inca-keizerlijke tijd.";
+
+    if (aiPanel) {
+      aiPanel.textContent = defaultHighlight;
+    }
+
+    if (currentPlace && aiPanel) {
+      try {
+        const res = await fetch('/api/ai-place', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ place: currentPlace.name, notes: currentPlace.notes }),
+        });
+        const data = res.ok ? await res.json() : null;
+        aiPanel.textContent = data?.highlight || defaultHighlight;
+      } catch (error) {
+        console.warn('AI highlight mislukt', error);
+        aiPanel.textContent = defaultHighlight;
+      }
     }
   });
 </script>

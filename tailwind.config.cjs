@@ -16,12 +16,12 @@ module.exports = {
       },
       colors: {
         primary: {
- DEFAULT: '#1E40AF', // Example: Blue-700
- light: '#3B82F6', // Example: Blue-500
- dark: '#1D4ED8',  // Example: Blue-800
+          DEFAULT: '#1E40AF', // Example: Blue-700
+          light: '#3B82F6', // Example: Blue-500
+          dark: '#1D4ED8',  // Example: Blue-800
         },
         secondary: {
- DEFAULT: '#9333EA', // Example: Purple-600
+          DEFAULT: '#9333EA', // Example: Purple-600
         },
         // Add more custom colors as needed
       },

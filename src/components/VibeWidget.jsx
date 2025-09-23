@@ -1,16 +1,23 @@
 import React, { useState, useEffect } from 'react';
 
-function getVibe(hour) {
-  if (hour >= 22 || hour < 6) return "😴💤😴💤😴💤";
-  if (hour >= 6 && hour < 8) return "🌄🥾 Hiken 🌞";
-  if (hour >= 8 && hour < 11) return "🥾🏞️ Hiken & Hiken 🌲";
-  if (hour >= 11 && hour < 14) return "🥾🌄 Meer Hiken 🌳📸";
-  if (hour >= 14 && hour < 17) return "🥾🏔️ Nog meer Hiken 🗻";
-  if (hour >= 17 && hour < 19) return "!!! Uitrusten van Hiken !!! ";
-  if (hour >= 19 && hour < 21) return "🍽️ Avondeten";
-  if (hour >= 21 && hour < 22) return "Keimooi aan het pilsen";
-  return "Kutzoooooooi, widget kapot 🤷‍♂️";
-}
+const VIBE_SCHEDULE = [
+  { start: 0, label: '😴💤😴💤😴💤' },
+  { start: 6, label: '🌄🥾 Hiken 🌞' },
+  { start: 8, label: '🥾🏞️ Hiken & Hiken 🌲' },
+  { start: 11, label: '🥾🌄 Meer Hiken 🌳📸' },
+  { start: 14, label: '🥾🏔️ Nog meer Hiken 🗻' },
+  { start: 17, label: '!!! Uitrusten van Hiken !!! ' },
+  { start: 19, label: '🍽️ Avondeten' },
+  { start: 21, label: 'Keimooi aan het pilsen' },
+  { start: 22, label: '😴💤😴💤😴💤' },
+];
+
+const resolveVibe = (hour) => {
+  const entry = [...VIBE_SCHEDULE]
+    .filter(({ start }) => start <= hour)
+    .pop();
+  return entry ? entry.label : VIBE_SCHEDULE[VIBE_SCHEDULE.length - 1].label;
+};
 
 export function VibeWidget() {
   const [peruTime, setPeruTime] = useState('');
@@ -30,7 +37,7 @@ export function VibeWidget() {
       });
 
       setPeruTime(`${String(hour).padStart(2, '0')}:${minute}`);
-      setVibe(getVibe(hour));
+      setVibe(resolveVibe(hour));
     }
 
     updateVibe();

@@ -15,5 +15,7 @@
   { "name": "Guayaquil", "lat": -2.1700, "lon": -79.9220, "notes": "Vlucht vanaf San Cristóbal" },
   { "name": "Máncora", "lat": -4.106, "lon": -81.053, "notes": "Aankomst Peru" },
   { "name": "Huanchaco", "lat": -8.105, "lon": -79.141, "notes": "Strandstad nabij Trujillo" },
-  { "name": "Huaraz", "lat": -9.528, "lon": -77.534, "notes": "Start hoogtehikes in de Andes" }
+  { "name": "Huaraz", "lat": -9.528, "lon": -77.534, "notes": "Start hoogtehikes in de Andes" },
+  { "name": "Lima", "lat": -12.0464, "lon": -77.0428, "notes": "Busrit naar de hoofdstad van Peru" },
+  { "name": "Cusco", "lat": -13.53195, "lon": -71.96746, "notes": "Vlucht richting de Inca-hoofdstad" }
 ]

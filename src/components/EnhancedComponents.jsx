@@ -1,76 +1,231 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
-// Enhanced ViewCounter with privacy compliance
+// --- View Counter ---------------------------------------------------------
+
+const formatNumber = (value) => {
+  if (typeof value !== 'number') return '0';
+  return new Intl.NumberFormat('nl-NL').format(value);
+};
+
+const safeStorageGet = (storage, key) => {
+  try {
+    return storage.getItem(key);
+  } catch (error) {
+    console.warn('[ViewCounter] Storage read blocked', error);
+    return null;
+  }
+};
+
+const safeStorageSet = (storage, key, value) => {
+  try {
+    storage.setItem(key, value);
+  } catch (error) {
+    console.warn('[ViewCounter] Storage write blocked', error);
+  }
+};
+
 export function ViewCounter({ path, apiUrl }) {
-  const [views, setViews] = useState('...');
-  const [uniqueVisitors, setUniqueVisitors] = useState(0);
-  const [error, setError] = useState(false);
-  const endpoint = `${apiUrl}/api/view`;
-  const hasTracked = useRef(false);
+  const [views, setViews] = useState(null);
+  const [uniqueVisitors, setUniqueVisitors] = useState(null);
+  const [status, setStatus] = useState('idle');
+  const trackedPath = useRef('');
 
   useEffect(() => {
-    if (!path || !endpoint || hasTracked.current) return;
+    if (typeof window === 'undefined') return;
+    if (!path) return;
 
-    // Enhanced dev mode detection
-    const isDevMode = localStorage.getItem('niels_dev_mode') === 'true' || 
-                     window.location.hostname === 'localhost' ||
-                     window.location.hostname.includes('preview');
+    const baseUrl = apiUrl || window.location.origin;
+    const endpoint = `${baseUrl.replace(/\/$/, '')}/api/view`;
+    const analyticsEndpoint = `${baseUrl.replace(/\/$/, '')}/api/analytics`;
+    const trackKey = `${endpoint}|${path}`;
 
-    if (isDevMode) {
-      console.log("🔧 Dev Mode: pageview tracking disabled");
-      setViews('DEV');
+    if (trackedPath.current === trackKey) return;
+    trackedPath.current = trackKey;
+
+    const controller = new AbortController();
+    const sessionKey = 'viewcounter-session-id';
+
+    const devMode =
+      window.location.hostname === 'localhost' ||
+      window.location.hostname.endsWith('.test') ||
+      safeStorageGet(window.localStorage, 'niels_dev_mode') === 'true';
+
+    if (devMode) {
+      setStatus('dev');
+      setViews(0);
+      setUniqueVisitors(0);
       return;
     }
 
-    // Track visitor with privacy-compliant data
-    const trackVisitor = async () => {
-      try {
-        const response = await fetch(endpoint, {
+    const ensureSessionId = () => {
+      const existing = safeStorageGet(window.sessionStorage, sessionKey);
+      if (existing) return existing;
+
+      const generated =
+        typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
+          ? crypto.randomUUID()
+          : `session-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+
+      safeStorageSet(window.sessionStorage, sessionKey, generated);
+      return generated;
+    };
+
+    const sendAnalytics = (payload) => {
+      const body = JSON.stringify(payload);
+      if (navigator.sendBeacon) {
+        const blob = new Blob([body], { type: 'application/json' });
+        navigator.sendBeacon(analyticsEndpoint, blob);
+      } else {
+        fetch(analyticsEndpoint, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ 
-            path, 
-            referrer: document.referrer || 'Direct',
-            timestamp: new Date().toISOString()
-          }),
+          body,
           keepalive: true,
-        });
-
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}`);
-        }
-
-        const data = await response.json();
-        setViews(data.views ?? 'Error');
-        setUniqueVisitors(data.uniqueVisitors ?? 0);
-        hasTracked.current = true;
-
-      } catch (err) {
-        console.error("Analytics error:", err);
-        setViews('Error');
-        setError(true);
+        }).catch((error) => console.warn('[ViewCounter] Analytics send failed', error));
       }
     };
 
-    trackVisitor();
-  }, [path, endpoint, apiUrl]);
+    const emitPageview = () => {
+      sendAnalytics({
+        type: 'pageview',
+        path,
+        referrer: document.referrer || null,
+        screenResolution: `${window.screen.width || 0}x${window.screen.height || 0}`,
+        sessionDuration: 0,
+        timestamp: new Date().toISOString(),
+      });
+    };
+
+    const fetchViews = async () => {
+      try {
+        setStatus('loading');
+        const sessionId = ensureSessionId();
+        const screenResolution = `${window.screen.width || 0}x${window.screen.height || 0}`;
+        const referrer = document.referrer || null;
+
+        const res = await fetch(endpoint, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest',
+          },
+          body: JSON.stringify({
+            path,
+            sessionId,
+            timestamp: new Date().toISOString(),
+            referrer,
+            screenResolution,
+          }),
+          keepalive: true,
+          signal: controller.signal,
+        });
+
+        if (!res.ok) throw new Error(`Unexpected status ${res.status}`);
+
+        const data = await res.json();
+        setViews(typeof data.views === 'number' ? data.views : 0);
+        setUniqueVisitors(
+          typeof data.uniqueVisitors === 'number' ? data.uniqueVisitors : null
+        );
+        setStatus('ready');
+        emitPageview();
+      } catch (error) {
+        if (controller.signal.aborted) return;
+        console.error('[ViewCounter] Failed to fetch views', error);
+        setStatus('error');
+      }
+    };
+
+    fetchViews();
+
+    const visibilityState = {
+      startedAt: performance.now(),
+      totalVisibleMs: 0,
+      flushed: false,
+    };
+
+    const flushAnalytics = (reason = 'session_end') => {
+      if (visibilityState.flushed) return;
+      visibilityState.flushed = true;
+
+      if (!document.hidden) {
+        visibilityState.totalVisibleMs += performance.now() - visibilityState.startedAt;
+      }
+
+      const durationSeconds = Math.round(visibilityState.totalVisibleMs / 1000);
+
+      sendAnalytics({
+        type: reason,
+        path,
+        referrer: document.referrer || null,
+        screenResolution: `${window.screen.width || 0}x${window.screen.height || 0}`,
+        sessionDuration: durationSeconds,
+        timestamp: new Date().toISOString(),
+      });
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        visibilityState.totalVisibleMs += performance.now() - visibilityState.startedAt;
+      } else {
+        visibilityState.startedAt = performance.now();
+      }
+    };
+
+    const handleBeforeUnload = () => flushAnalytics('before_unload');
+    const handlePageHide = () => flushAnalytics('pagehide');
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    window.addEventListener('pagehide', handlePageHide);
+
+    return () => {
+      controller.abort();
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      window.removeEventListener('pagehide', handlePageHide);
+      flushAnalytics('cleanup');
+    };
+  }, [path, apiUrl]);
+
+  const titleText =
+    status === 'ready' && typeof views === 'number'
+      ? `${formatNumber(views)} total views${
+          typeof uniqueVisitors === 'number' && uniqueVisitors > 0
+            ? ` • ${formatNumber(uniqueVisitors)} unique visitors`
+            : ''
+        }`
+      : undefined;
+
+  const label = (() => {
+    if (status === 'dev') return 'DEV';
+    if (status === 'error') return 'Error';
+    if (status === 'ready' && typeof views === 'number') return formatNumber(views);
+    return '…';
+  })();
 
   return (
-    <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium transition-all duration-300 ${
-      error
-        ? 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400'
-        : 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400 hover:bg-blue-200'
-    }`}>
-      <span>👁️</span>
-      <span>{views}</span>
-      {uniqueVisitors > 0 && (
-        <span className="text-xs opacity-75">• {uniqueVisitors} unique</span>
+    <span
+      className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium transition-colors duration-150 ${
+        status === 'error'
+          ? 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400'
+          : 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-300'
+      }`}
+      aria-live="polite"
+      title={titleText}
+      data-state={status}
+    >
+      <span aria-hidden="true">👁️</span>
+      <span>{label}</span>
+      {status === 'ready' && typeof uniqueVisitors === 'number' && uniqueVisitors > 0 && (
+        <span className="text-xs opacity-75">• {formatNumber(uniqueVisitors)} unique</span>
       )}
     </span>
   );
 }
 
-// Enhanced LikeButton with animations
+// --- Like Button ----------------------------------------------------------
+
 export function LikeButton({ likeKey, apiUrl }) {
   const [count, setCount] = useState(0);
   const [isLiked, setIsLiked] = useState(false);
@@ -83,30 +238,26 @@ export function LikeButton({ likeKey, apiUrl }) {
     fetch(`${endpoint}?key=${encodeURIComponent(likeKey)}`)
       .then((res) => res.json())
       .then((data) => setCount(data.count ?? 0))
-      .catch((err) => console.error("Error fetching likes:", err));
+      .catch((err) => console.error('Error fetching likes:', err));
   }, [likeKey, endpoint]);
 
   const handleLike = async () => {
     if (isLoading) return;
-    
+
     setIsLoading(true);
     setIsLiked(true);
-    
+
     try {
       const response = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ key: likeKey }),
       });
-      
       const data = await response.json();
       setCount(data.count ?? 0);
-      
-      // Add visual feedback
       setTimeout(() => setIsLiked(false), 1000);
-      
-    } catch (err) {
-      console.error("Error posting like:", err);
+    } catch (error) {
+      console.error('Error posting like:', error);
       setIsLiked(false);
     } finally {
       setIsLoading(false);
@@ -114,13 +265,11 @@ export function LikeButton({ likeKey, apiUrl }) {
   };
 
   return (
-    <button 
+    <button
       onClick={handleLike}
       disabled={isLoading}
       className={`inline-flex items-center gap-1 px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 transform ${
-        isLiked 
-          ? 'bg-red-100 text-red-800 scale-105' 
-          : 'bg-gray-100 text-gray-800 hover:bg-gray-200 hover:scale-105'
+        isLiked ? 'bg-red-100 text-red-800 scale-105' : 'bg-gray-100 text-gray-800 hover:bg-gray-200 hover:scale-105'
       } ${isLoading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
     >
       <span className={`transition-transform duration-300 ${isLiked ? 'animate-bounce' : ''}`}>
@@ -131,137 +280,148 @@ export function LikeButton({ likeKey, apiUrl }) {
   );
 }
 
-// Enhanced Comments with better UX
-export default function Comments({ slug, apiUrl }) {
+// --- Comments -------------------------------------------------------------
+
+const escapeHTML = (value) =>
+  String(value).replace(/[&<>"']/g, (m) =>
+    ({
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#39;',
+    }[m])
+  );
+
+const formatMessage = (value) =>
+  escapeHTML(value)
+    .split(/\r?\n/)
+    .map((line) => (line.length ? line : '&nbsp;'))
+    .join('<br />');
+
+export function Comments({ slug, apiUrl }) {
   const [comments, setComments] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [message, setMessage] = useState('');
+  const [error, setError] = useState('');
   const endpoint = `${apiUrl}/api/comments`;
 
   const fetchComments = async () => {
     if (!slug) return;
-    const url = new URL(endpoint);
-    url.searchParams.set('slug', slug);
-
     try {
-      const response = await fetch(url.toString());
-      const data = await response.json();
+      const url = new URL(endpoint);
+      url.searchParams.set('slug', slug);
+      const res = await fetch(url.toString());
+      const data = await res.json();
       setComments(Array.isArray(data) ? data : []);
     } catch (err) {
-      console.error("Error fetching comments:", err);
+      console.error('Error fetching comments:', err);
     }
   };
 
   useEffect(() => {
     fetchComments();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [slug]);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (isSubmitting) return;
-    
-    setIsSubmitting(true);
-    setMessage('');
-    
-    const form = e.currentTarget;
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    if (!slug || isSubmitting) return;
+
+    const form = event.currentTarget;
     const fd = new FormData(form);
     const payload = {
       slug,
       name: (fd.get('name') || '').toString().trim(),
-      message: (fd.get('message') || '').toString().trim(),
-      website: (fd.get('website') || '').toString(), // Honeypot
+      message: (fd.get('message') || '').toString(),
+      website: (fd.get('website') || '').toString(),
     };
 
+    if (payload.website) return; // Honeypot filled
+
+    if (payload.message.length < 2) {
+      setError('Je reactie is iets te kort.');
+      return;
+    }
+
+    setError('');
+    setIsSubmitting(true);
+
     try {
-      const response = await fetch(endpoint, {
+      const res = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
 
-      if (!response.ok) throw new Error('Failed to post comment');
-      
+      if (!res.ok) throw new Error(`Failed to post comment (${res.status})`);
+
       form.reset();
-      setMessage('Comment posted successfully!');
-      fetchComments();
-      
+      await fetchComments();
     } catch (err) {
       console.error(err);
-      setMessage('Could not post comment. Please try again.');
+      setError('Plaatsen lukt nu niet. Probeer het later nog eens.');
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <section className="comments space-y-6">
-      <h2 className="text-2xl font-bold">Comments</h2>
-      
-      <form onSubmit={handleSubmit} className="space-y-4 p-6 bg-gray-50 rounded-lg">
-        <input 
-          type="text" 
-          name="name" 
-          placeholder="Name (optional)" 
-          className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-        />
-        
+    <section className="comments" aria-labelledby="comments-title">
+      <div className="comments__header">
+        <h2 id="comments-title">Reacties</h2>
+        <p className="comments__subtitle">Laat een berichtje achter – ik lees alles.</p>
+      </div>
+
+      <form id="c-form" className="comments__form" onSubmit={handleSubmit}>
+        <label className="sr-only" htmlFor="comment-name">Naam</label>
+        <input id="comment-name" type="text" name="name" placeholder="Naam (optioneel)" />
+
         <input
           type="text"
           name="website"
+          className="hp"
           style={{ display: 'none' }}
           tabIndex="-1"
           autoComplete="off"
         />
-        
-        <textarea 
-          name="message" 
-          required 
-          minLength={2} 
-          placeholder="Leave a comment..." 
-          rows="4"
-          className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+
+        <label className="sr-only" htmlFor="comment-message">Bericht</label>
+        <textarea
+          id="comment-message"
+          name="message"
+          required
+          minLength={2}
+          placeholder="Zeg iets leuks…"
         />
-        
-        <button 
-          type="submit"
-          disabled={isSubmitting}
-          className={`px-6 py-2 rounded-md font-medium transition-all duration-200 ${
-            isSubmitting
-              ? 'bg-gray-400 text-white cursor-not-allowed'
-              : 'bg-blue-600 text-white hover:bg-blue-700 transform hover:scale-105'
-          }`}
-        >
-          {isSubmitting ? 'Posting...' : 'Post Comment'}
+
+        <button type="submit" disabled={isSubmitting}>
+          {isSubmitting ? 'Versturen…' : 'Plaats reactie'}
         </button>
-        
-        {message && (
-          <div className={`p-3 rounded-md ${
-            message.includes('successfully') 
-              ? 'bg-green-100 text-green-800' 
-              : 'bg-red-100 text-red-800'
-          }`}>
-            {message}
-          </div>
+
+        {error && (
+          <p className="comments__error" role="status" aria-live="polite">
+            {error}
+          </p>
         )}
       </form>
 
-      <div className="space-y-4">
+      <div id="c-list" className="comments__list" aria-live="polite">
         {comments.length === 0 ? (
-          <p className="text-gray-500 text-center py-8">No comments yet. Be the first to comment!</p>
+          <p className="comments__empty">Nog geen reacties.</p>
         ) : (
-          comments.map((comment) => (
-            <div key={comment.id} className="p-4 bg-white border border-gray-200 rounded-lg shadow-sm">
-              <div className="flex items-center justify-between mb-2">
-                <strong className="text-gray-900">{comment.name || 'Anonymous'}</strong>
-                <small className="text-gray-500">
-                  {new Date(comment.createdAt).toLocaleDateString()}
-                </small>
-              </div>
-              <p className="text-gray-700">{comment.message}</p>
-            </div>
+          comments.map((c) => (
+            <article className="comments__item" key={c.id}>
+              <header className="comments__meta">
+                <strong>{c.name?.trim() || 'Anoniem'}</strong>
+                <time dateTime={c.createdAt}>{new Date(c.createdAt).toLocaleString()}</time>
+              </header>
+              <p dangerouslySetInnerHTML={{ __html: formatMessage(c.message || '') }} />
+            </article>
           ))
         )}
       </div>
     </section>
   );
 }
+
+export default Comments;

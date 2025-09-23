@@ -12,6 +12,19 @@ const { title, description = 'WaarIsNiels – reisblog & kaart' } = Astro.props;
 const path = Astro.url.pathname;
 const isActive = (p: string) => path === p || path.startsWith(p + '/');
 
+const navLinks = [
+  { href: '/blog/', match: '/blog', label: 'Blog' },
+  { href: '/map/', match: '/map', label: 'Kaart' },
+  { href: '/about/', match: '/about', label: 'Over' },
+];
+
+const navClasses = (match: string) => [
+  'text-sm sm:text-base px-2 py-1 rounded transition-colors',
+  isActive(match)
+    ? 'text-primary dark:text-primary-light underline underline-offset-4'
+    : 'text-gray-700 dark:text-gray-300 hover:text-primary dark:hover:text-primary-light'
+];
+
 const currentYear = new Date().getFullYear();
 ---
 <!DOCTYPE html>
@@ -45,20 +58,15 @@ const currentYear = new Date().getFullYear();
         <a href="/" class="text-2xl font-bold text-primary dark:text-primary-light">WaarIsNiels?</a>
 
         <div class="flex items-center gap-3 sm:gap-5">
-          <a href="/blog/" aria-current={isActive('/blog') ? 'page' : undefined} class:list={[
-            'text-sm sm:text-base px-2 py-1 rounded transition-colors',
-            isActive('/blog') ? 'text-primary dark:text-primary-light underline underline-offset-4' : 'text-gray-700 dark:text-gray-300 hover:text-primary dark:hover:text-primary-light'
-          ]}>Blog</a>
-
-          <a href="/map/" aria-current={isActive('/map') ? 'page' : undefined} class:list={[
-            'text-sm sm:text-base px-2 py-1 rounded transition-colors',
-            isActive('/map') ? 'text-primary dark:text-primary-light underline underline-offset-4' : 'text-gray-700 dark:text-gray-300 hover:text-primary dark:hover:text-primary-light'
-          ]}>Kaart</a>
-
-          <a href="/about/" aria-current={isActive('/about') ? 'page' : undefined} class:list={[
-            'text-sm sm:text-base px-2 py-1 rounded transition-colors',
-            isActive('/about') ? 'text-primary dark:text-primary-light underline underline-offset-4' : 'text-gray-700 dark:text-gray-300 hover:text-primary dark:hover:text-primary-light'
-          ]}>Over</a>
+          {navLinks.map(({ href, match, label }) => (
+            <a
+              href={href}
+              aria-current={isActive(match) ? 'page' : undefined}
+              class:list={navClasses(match)}
+            >
+              {label}
+            </a>
+          ))}
         </div>
       </nav>
     </header>

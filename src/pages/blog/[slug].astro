@@ -9,7 +9,7 @@ import BlogPostLayout from '../../layouts/BlogPostLayout.astro';
 const { slug } = Astro.params;
 
 if (!slug) {
-  throw Astro.error({
+  return new Response(null, {
     status: 400,
     statusText: 'Slug parameter is required',
   });
@@ -22,7 +22,7 @@ const posts = await getCollection('blog', ({ data }) =>
 const post = posts.find((p) => p.slug === slug);
 
 if (!post) {
-  throw Astro.error({
+  return new Response(null, {
     status: 404,
     statusText: `Blog post not found: ${slug}`,
   });

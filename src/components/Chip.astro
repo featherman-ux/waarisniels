@@ -1,0 +1,41 @@
+---
+export interface Props {
+  text: string;
+  href?: string;
+  class?: string;
+}
+
+const { text, href, class: className = '' } = Astro.props;
+---
+
+{href ? (
+  <a href={href} class={`chip ${className}`}>
+    {text}
+  </a>
+) : (
+  <span class={`chip ${className}`}>
+    {text}
+  </span>
+)}
+
+<style>
+  .chip {
+    display: inline-block;
+    background: var(--clr-bg-card);
+    border: 1px solid var(--clr-border);
+    border-radius: var(--radius-full);
+    padding: 0.25rem 0.75rem;
+    font-size: 0.875rem;
+    color: var(--clr-text-main);
+    text-decoration: none;
+    font-weight: 500;
+    transition: var(--transition-fast);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .chip:hover {
+    background: var(--clr-bg);
+    border-color: var(--clr-border);
+    transform: translateY(-1px);
+  }
+</style>

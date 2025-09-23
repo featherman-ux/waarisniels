@@ -1,5 +1,6 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import '../styles/home.css';
 import { getCollection } from 'astro:content';
 import BlogPostPreview from '../components/BlogPostPreview.astro';
 import HomePopup from '../components/HomePopup.astro';
@@ -13,60 +14,6 @@ const latestPosts = (
 ---
 
 <BaseLayout title="Waar is Niels?" description="Welkom op mijn reisblog">
-  <style>
-    :root { --orange: #ffb703; --blue: #023047; }
-    .hero {
-      position: relative;
-      width: 100%;
-      min-height: 350px;
-      max-height: 500px;
-      overflow: hidden;
-      border-radius: 0.75rem;
-      margin: 0.75rem auto 1.25rem;
-      box-shadow: 0 8px 16px rgba(0,0,0,0.1);
-    }
-    .hero img {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      filter: brightness(.7);
-      transform: scale(1.02);
-    }
-    .hero-text {
-      position: absolute;
-      inset: 0;
-      display: grid;
-      place-items: center;
-      color: #fff;
-      text-align: center;
-      padding: 0 1rem;
-    }
-    .hero-text h1 { font-size: 2.3rem; margin-bottom: 0.4rem; line-height: 1.2; }
-    .hero-text p { font-size: 1.05rem; opacity: .95; }
-
-    .posts { padding: 1.5rem 1rem 2.5rem; background: #f8f9fa; border-radius: .75rem; max-width: 1200px; margin: auto; }
-    .posts h2 { color: var(--blue); text-align: center; margin-bottom: 1.1rem; font-size: 1.6rem; }
-    .grid-posts { display: grid; gap: 1.1rem; }
-    @media (min-width: 640px) { .grid-posts { grid-template-columns: repeat(2,1fr); } }
-    @media (min-width: 1024px){ .grid-posts { grid-template-columns: repeat(3,1fr); } }
-
-    .ai-features { max-width: 1200px; margin: 3rem auto; text-align: center; }
-    .ai-features h2 { font-size: 1.8rem; margin-bottom: 1rem; color: var(--blue); }
-    .ai-grid { display: grid; gap: 1rem; }
-    @media (min-width: 640px) { .ai-grid { grid-template-columns: repeat(3,1fr); } }
-    .feature-card {
-      background: white; 
-      border-radius: .5rem; 
-      padding: 1.5rem; 
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-      font-weight: 600;
-      color: var(--blue);
-    }
-  </style>
-
   <!-- Floating Vibe Widget -->
   <VibeWidget client:load />
 
@@ -88,8 +35,8 @@ const latestPosts = (
   <HomePopup />
 
   <!-- Map link -->
-  <div class="map-link" style="text-align:center; margin-bottom:2rem;">
-    <a href="/map" style="color: var(--blue); text-decoration: underline;">
+  <div class="map-link">
+    <a href="/map">
       🗺️ Bekijk de kaart met mijn reisroute
     </a>
   </div>
@@ -106,13 +53,4 @@ const latestPosts = (
     )}
   </section>
 
-  <!-- AI-Powered Features -->
-  <section class="ai-features">
-    <h2>🤖 AI-Powered Features</h2>
-    <div class="ai-grid">
-      <div class="feature-card">🧠 Smart Chat Assistant</div>
-      <div class="feature-card">🎨 AI Image Generator</div>
-      <div class="feature-card">📍 Smart Location Tracking</div>
-    </div>
-  </section>
 </BaseLayout>
