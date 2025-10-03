@@ -1,17 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react';
 
-// --- View Counter ---------------------------------------------------------
-
-const formatNumber = (value) => {
-  if (typeof value !== 'number') return '0';
-  return new Intl.NumberFormat('nl-NL').format(value);
-};
-
 const safeStorageGet = (storage, key) => {
   try {
     return storage.getItem(key);
   } catch (error) {
-    console.warn('[ViewCounter] Storage read blocked', error);
+    console.warn(`[safeStorage] Failed to get item '${key}'`, error);
     return null;
   }
 };
@@ -20,7 +13,7 @@ const safeStorageSet = (storage, key, value) => {
   try {
     storage.setItem(key, value);
   } catch (error) {
-    console.warn('[ViewCounter] Storage write blocked', error);
+    console.warn(`[safeStorage] Failed to set item '${key}'`, error);
   }
 };
 

@@ -1,11 +1,12 @@
 ---
-import { getCollection } from 'astro:content';
+import type { PaginateFunction } from 'astro';
+import { getCollection, type CollectionEntry } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import BlogPostPreview from '../../components/BlogPostPreview.astro';
 
 export const prerender = true;
 
-export async function getStaticPaths({ paginate }) {
+export async function getStaticPaths({ paginate }: { paginate: PaginateFunction }) {
   const allPosts = await getCollection('blog', ({ data }) =>
     import.meta.env.PROD ? data.draft !== true : true
   );
@@ -21,14 +22,20 @@ export async function getStaticPaths({ paginate }) {
   });
 }
 
-const { page } = Astro.props;
+const { page } = Astro.props as {
+  page: {
+    data: CollectionEntry<'blog'>[];
+    url: { prev?: string; next?: string };
+  };
+};
+
 const posts = page?.data ?? [];
 ---
 <BaseLayout title="My Travel Blog" description="All my adventures in one place.">
   <h1>My Travel Blog</h1>
   <p>Follow my journey around the world, one post at a time.</p>
   <div class="post-list">
-    {posts.map((p) => <BlogPostPreview post={p} />)}
+    {posts.map((post) => <BlogPostPreview post={post} />)}
   </div>
 
   <div class="pagination">

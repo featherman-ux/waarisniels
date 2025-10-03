@@ -3,7 +3,17 @@ export interface Props { post: import('astro:content').CollectionEntry<'blog'> }
 const { post } = Astro.props
 const { title, description, pubDate, image } = post.data
 const href = `/blog/${post.slug}/`
-const imgSrc = image?.url ?? '/images/default-post.jpg'
+
+const resolveImageSrc = (input?: string) => {
+  if (!input) return '/images/default-post.jpg'
+  try {
+    return new URL(input, Astro.url).href
+  } catch {
+    return '/images/default-post.jpg'
+  }
+}
+
+const imgSrc = resolveImageSrc(image?.url)
 const imgAlt = image?.alt ?? title
 ---
 <article class="rounded-lg border bg-white dark:bg-gray-800 p-4 shadow-sm hover:shadow-md transition">

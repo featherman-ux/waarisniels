@@ -39,8 +39,8 @@ export async function POST(context: APIContext) {
   }
 
   try {
-    const body = await context.request.json().catch(() => ({} as any));
-    const key = String(body.key || 'site');
+    const body = (await context.request.json().catch(() => null)) as { key?: unknown } | null;
+    const key = typeof body?.key === 'string' && body.key.trim().length > 0 ? body.key.trim() : 'site';
     const kvKey = `likes:${key}`;
     const raw = await kv.get(kvKey);
     const current = raw ? Number(raw) || 0 : 0;

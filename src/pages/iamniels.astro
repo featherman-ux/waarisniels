@@ -47,33 +47,44 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   </main>
 
   <script>
-    const button = document.getElementById('admin-toggle-button');
     const storageKey = 'niels_dev_mode';
 
-    function updateButtonState() {
-      const isDevMode = localStorage.getItem(storageKey) === 'true';
-      if (isDevMode) {
-        button.textContent = 'Jouw bezoeken worden NIET meegeteld (Admin Mode AAN)';
-        button.classList.add('active');
-        button.classList.remove('inactive');
-      } else {
-        button.textContent = 'Jouw bezoeken worden WEL meegeteld (Admin Mode UIT)';
-        button.classList.add('inactive');
-        button.classList.remove('active');
+    const initAdminToggle = () => {
+      const button = document.getElementById('admin-toggle-button');
+      if (!(button instanceof HTMLButtonElement)) {
+        return;
       }
-    }
 
-    button.addEventListener('click', () => {
-      const isCurrentlyDevMode = localStorage.getItem(storageKey) === 'true';
-      if (isCurrentlyDevMode) {
-        localStorage.removeItem(storageKey);
-      } else {
-        localStorage.setItem(storageKey, 'true');
-      }
+      const updateButtonState = () => {
+        const isDevMode = localStorage.getItem(storageKey) === 'true';
+        if (isDevMode) {
+          button.textContent = 'Jouw bezoeken worden NIET meegeteld (Admin Mode AAN)';
+          button.classList.add('active');
+          button.classList.remove('inactive');
+        } else {
+          button.textContent = 'Jouw bezoeken worden WEL meegeteld (Admin Mode UIT)';
+          button.classList.add('inactive');
+          button.classList.remove('active');
+        }
+      };
+
+      button.addEventListener('click', () => {
+        const isCurrentlyDevMode = localStorage.getItem(storageKey) === 'true';
+        if (isCurrentlyDevMode) {
+          localStorage.removeItem(storageKey);
+        } else {
+          localStorage.setItem(storageKey, 'true');
+        }
+        updateButtonState();
+      });
+
       updateButtonState();
-    });
+    };
 
-    // Initialiseer de knop bij het laden van de pagina
-    updateButtonState();
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initAdminToggle);
+    } else {
+      initAdminToggle();
+    }
   </script>
 </BaseLayout>

@@ -13,7 +13,7 @@ const posts = (await getCollection('blog', ({ data }) => data.draft !== true))
     {posts.length ? (
       <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {posts.map((p) => (
-          <BlogPostPreview key={p.slug} post={p} />
+          <BlogPostPreview post={p} />
         ))}
       </div>
     ) : (

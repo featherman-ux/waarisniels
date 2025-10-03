@@ -67,11 +67,17 @@ export async function POST(context: APIContext) {
 
   // --- FIX 2: Added try/catch block for safety ---
   try {
-    const body = await context.request.json().catch(() => ({} as any));
-    const slug = String(body.slug || '').trim();
-    const message = String(body.message || '').trim();
-    const name = String(body.name || '').trim();
-    const website = String(body.website || '').trim(); // honeypot
+    const body = (await context.request.json().catch(() => null)) as {
+      slug?: unknown;
+      message?: unknown;
+      name?: unknown;
+      website?: unknown;
+    } | null;
+
+    const slug = typeof body?.slug === 'string' ? body.slug.trim() : '';
+    const message = typeof body?.message === 'string' ? body.message.trim() : '';
+    const name = typeof body?.name === 'string' ? body.name.trim() : '';
+    const website = typeof body?.website === 'string' ? body.website.trim() : '';
 
     if (!slug) return bad('Missing slug');
     if (!message) return bad('Message required');
