@@ -15,6 +15,7 @@ const blogCollection = defineCollection({
     description: z.string().optional(),
     pubDate: dateStringToDate,
     author: z.string().optional(),
+    slug: z.string().optional(),
     tags: z.array(z.string()).optional(),
     draft: z.boolean().default(false),
     image: z

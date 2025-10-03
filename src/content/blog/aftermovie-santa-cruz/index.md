@@ -2,6 +2,7 @@
 title: "Santa Cruz Hike Aftermovie"
 description: "Aftermovie van de Santa Cruz Trek in de Cordillera Blanca, Peru"
 pubDate: 2025-09-14
+slug: "aftermovie-santa-cruz"
 image:
   url: "/images/santa-cruz.jpeg"
   alt: "Magisch mooi groepje"
