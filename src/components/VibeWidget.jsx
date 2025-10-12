@@ -1,15 +1,15 @@
 import React, { useState, useEffect } from 'react';
 
 const VIBE_SCHEDULE = [
-  { start: 0, label: '😴💤😴💤😴💤' },
-  { start: 6, label: '🌄🥾 Hiken 🌞' },
-  { start: 8, label: '🥾🏞️ Hiken & Hiken 🌲' },
-  { start: 11, label: '🥾🌄 Meer Hiken 🌳📸' },
-  { start: 14, label: '🥾🏔️ Nog meer Hiken 🗻' },
-  { start: 17, label: '!!! Uitrusten van Hiken !!! ' },
-  { start: 19, label: '🍽️ Avondeten' },
-  { start: 21, label: 'Keimooi aan het pilsen' },
-  { start: 22, label: '😴💤😴💤😴💤' },
+  { start: 0, label: '😴💤 Hoogteslaap' },
+  { start: 6, label: '🌄☕ Zonsopgang boven Titicaca' },
+  { start: 8, label: '🚤🌊 Bootje naar Isla del Sol' },
+  { start: 11, label: '🌞🏞️ Wandelen op het eiland' },
+  { start: 14, label: '🚡🌆 Teleférico door La Paz' },
+  { start: 17, label: '🥟🔥 Verse salteñas scoren' },
+  { start: 19, label: '🍻🎶 Plaza vibes in Sucre' },
+  { start: 21, label: '🌌✨ Sterrenkijken in de Andes' },
+  { start: 23, label: '😴💤 Hoogteslaap' },
 ];
 
 const resolveVibe = (hour) => {
@@ -20,12 +20,12 @@ const resolveVibe = (hour) => {
 };
 
 export function VibeWidget() {
-  const [peruTime, setPeruTime] = useState('');
+  const [boliviaTime, setBoliviaTime] = useState('');
   const [vibe, setVibe] = useState('');
 
   useEffect(() => {
     function updateVibe() {
-      const options = { timeZone: 'America/Lima', hour: '2-digit', minute: '2-digit', hour12: false };
+      const options = { timeZone: 'America/La_Paz', hour: '2-digit', minute: '2-digit', hour12: false };
       const formatter = new Intl.DateTimeFormat('nl-NL', options);
       const parts = formatter.formatToParts(new Date());
 
@@ -36,7 +36,7 @@ export function VibeWidget() {
         if (part.type === 'minute') minute = part.value;
       });
 
-      setPeruTime(`${String(hour).padStart(2, '0')}:${minute}`);
+      setBoliviaTime(`${String(hour).padStart(2, '0')}:${minute}`);
       setVibe(resolveVibe(hour));
     }
 
@@ -45,13 +45,13 @@ export function VibeWidget() {
     return () => clearInterval(interval);
   }, []);
 
-  if (!peruTime) return <div>Locatie wordt ingeladen...</div>;
+  if (!boliviaTime) return <div>Locatie wordt ingeladen...</div>;
 
   return (
     <div className="vibe-widget">
       <div className="vibe-widget-time">
         <span className="location-dot"></span>
-        {peruTime} <span className="timezone">(in Peru)</span>
+        {boliviaTime} <span className="timezone">(in Bolivia)</span>
       </div>
       <div className="vibe-widget-status">{vibe}</div>
     </div>
