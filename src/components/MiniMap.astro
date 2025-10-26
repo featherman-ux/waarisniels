@@ -76,9 +76,13 @@ const PLACES_URL = "/data/places.json";
       const layer = L.geoJSON(geo, {
         style: f => {
           const mode = f?.properties?.mode;
-          if (mode === "flight") return { color: "#ffb703", weight: 3, opacity: 0.9, dashArray: "6 6" };
-          if (mode === "motor") return { color: "#10b981", weight: 3, opacity: 0.9, dashArray: "2 8" };
-          return { color: "#023047", weight: 3, opacity: 0.9 };
+          const modeStyles = {
+            bus: { color: "#4f46e5", weight: 3, opacity: 0.9 },
+            car: { color: "#0284c7", weight: 3, opacity: 0.9, dashArray: "8 4" },
+            motor: { color: "#10b981", weight: 3, opacity: 0.9, dashArray: "2 8" },
+            flight: { color: "#ffb703", weight: 3, opacity: 0.9, dashArray: "6 6" }
+          };
+          return modeStyles[mode] ?? modeStyles.bus;
         }
       }).addTo(map);
       bounds = layer.getBounds();

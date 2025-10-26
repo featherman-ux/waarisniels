@@ -18,12 +18,14 @@ const imgAlt = image?.alt ?? title
 ---
 <article class="rounded-lg border bg-white dark:bg-gray-800 p-4 shadow-sm hover:shadow-md transition">
   <a href={href} class="block">
-    <img
-      src={imgSrc}
-      alt={imgAlt}
-      class="w-full h-44 object-cover rounded-md mb-3"
-      loading="lazy"
-    />
+    <div class="relative mb-3 overflow-hidden rounded-md bg-gray-100 dark:bg-gray-900 aspect-[4/3] md:aspect-[5/3]">
+      <img
+        src={imgSrc}
+        alt={imgAlt}
+        class="absolute inset-0 h-full w-full object-cover md:object-contain md:p-2"
+        loading="lazy"
+      />
+    </div>
     <h3 class="text-xl font-semibold">{title}</h3>
     <p class="text-sm text-gray-500 mb-2">
       {new Date(pubDate).toLocaleDateString('nl-NL')}

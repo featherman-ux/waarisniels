@@ -2,7 +2,7 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 
 const pageTitle = "Kaart";
-const pageDescription = "Eenvoudige, snelle kaart met mijn route en stops (bus, motor, vlucht).";
+const pageDescription = "Eenvoudige, snelle kaart met mijn route en stops (bus, auto, motor, vlucht).";
 ---
 
 <link
@@ -21,6 +21,7 @@ const pageDescription = "Eenvoudige, snelle kaart met mijn route en stops (bus, 
     --clr-primary:   #4f46e5;
     --clr-secondary: #10b981;
     --clr-accent:    #ffb703;
+    --clr-car:       #0284c7;
     --clr-light:     #f8f9fa;
     --clr-dark:      #e3e7ed;
   }
@@ -127,6 +128,9 @@ const pageDescription = "Eenvoudige, snelle kaart met mijn route en stops (bus, 
         <span class="legend-line" style="border-color: var(--clr-primary);"></span>Bus
       </div>
       <div class="legend-item">
+        <span class="legend-line" style="border-color: var(--clr-car); border-style: dashed;"></span>Auto
+      </div>
+      <div class="legend-item">
         <span class="legend-line" style="border-color: var(--clr-secondary); border-style: dotted;"></span>Motor
       </div>
       <div class="legend-item">
@@ -165,12 +169,19 @@ const pageDescription = "Eenvoudige, snelle kaart met mijn route en stops (bus, 
     const places = placesRes.ok ? await placesRes.json() : [];
 
     if (routeGeo) {
+      const rootStyles = getComputedStyle(document.documentElement);
+      const modeStyles = {
+        bus: { color: rootStyles.getPropertyValue('--clr-primary').trim(), dashArray: null },
+        car: { color: rootStyles.getPropertyValue('--clr-car').trim(), dashArray: '8 4' },
+        motor: { color: rootStyles.getPropertyValue('--clr-secondary').trim(), dashArray: '2 8' },
+        flight: { color: rootStyles.getPropertyValue('--clr-accent').trim(), dashArray: '6 6' },
+      };
+
       L.geoJSON(routeGeo, {
         style: ({ properties }) => {
-          const m = properties.mode;
-          if (m === 'flight') return { color: getComputedStyle(document.documentElement).getPropertyValue('--clr-accent').trim(), weight: 4, dashArray: '6 6' };
-          if (m === 'motor') return { color: getComputedStyle(document.documentElement).getPropertyValue('--clr-secondary').trim(), weight: 4, dashArray: '2 8' };
-          return { color: getComputedStyle(document.documentElement).getPropertyValue('--clr-primary').trim(), weight: 4 };
+          const mode = properties.mode;
+          const { color, dashArray } = modeStyles[mode] ?? modeStyles.bus;
+          return { color, weight: 4, dashArray: dashArray ?? undefined };
         },
       }).addTo(map);
     }
