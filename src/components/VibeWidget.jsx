@@ -2,12 +2,12 @@ import React, { useState, useEffect } from 'react';
 
 const VIBE_SCHEDULE = [
   { start: 0, label: '😴💤 Hoogteslaap' },
-  { start: 6, label: '🌄☕ Zonsopgang boven Titicaca' },
-  { start: 8, label: '🚤🌊 Bootje naar Isla del Sol' },
-  { start: 11, label: '🌞🏞️ Wandelen op het eiland' },
-  { start: 14, label: '🚡🌆 Teleférico door La Paz' },
-  { start: 17, label: '🥟🔥 Verse salteñas scoren' },
-  { start: 19, label: '🍻🎶 Plaza vibes in Sucre' },
+  { start: 6, label: '🌄☕ Op zoek naar huurauto' },
+  { start: 8, label: '🚤🌊 Ontbijt' },
+  { start: 11, label: '🌞🏞️ Sucre verkennen' },
+  { start: 14, label: '🚡🌆 Uyuni boeken' },
+  { start: 17, label: '🥟🔥 Verse salteñas nassen' },
+  { start: 19, label: '🍻🎶 Happy hour?!' },
   { start: 21, label: '🌌✨ Sterrenkijken in de Andes' },
   { start: 23, label: '😴💤 Hoogteslaap' },
 ];

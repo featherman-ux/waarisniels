@@ -20,5 +20,10 @@
   { "name": "Cusco", "lat": -13.53195, "lon": -71.96746, "notes": "Vlucht richting de Inca-hoofdstad" },
   { "name": "Isla del Sol", "lat": -16.018, "lon": -69.175, "notes": "Boottocht vanaf Copacabana" },
   { "name": "La Paz", "lat": -16.4897, "lon": -68.1193, "notes": "Teleférico en straatmarkten op hoogte" },
-  { "name": "Sucre", "lat": -19.0196, "lon": -65.2619, "notes": "Witte stad en koloniale charme" }
+  { "name": "Uyuni", "lat": -20.4603, "lon": -66.8265, "notes": "Nachtbus vanuit La Paz; startpunt Salar-highlights" },
+  { "name": "San Pedro de Atacama", "lat": -22.9087, "lon": -68.1997, "notes": "Einde 4x4-tour door de Salar; woestijnbasis" },
+  { "name": "Chañaral", "lat": -26.3479, "lon": -70.6212, "notes": "Roadtrip vanuit San Pedro richting Pacifische kust" },
+  { "name": "Parque Nacional Pan de Azúcar", "lat": -26.1423, "lon": -70.6401, "notes": "Woestijnkust en uitzichten tijdens de autoroute" },
+  { "name": "Calama", "lat": -22.4544, "lon": -68.9294, "notes": "Afsluiter van de roadtrip; bus terug naar Bolivia" },
+  { "name": "Sucre", "lat": -19.0196, "lon": -65.2619, "notes": "Busrit vanaf Uyuni; witte stad en koloniale charme" }
 ]
