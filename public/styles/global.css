@@ -34,6 +34,6 @@
     @apply grid grid-cols-[repeat(auto-fit,minmax(220px,1fr))] gap-2.5 my-4;
   }
   .photo-grid img {
-    @apply w-full h-auto rounded-lg object-cover;
+    @apply w-full h-auto max-h-[480px] rounded-lg object-contain;
   }
 }

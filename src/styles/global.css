@@ -343,8 +343,9 @@ p {
 
 .photo-grid img {
   width: 100%;
-  height: 200px;
-  object-fit: cover;
+  height: auto;
+  max-height: 480px;
+  object-fit: contain;
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-md);
   transition: var(--transition-fast);
@@ -517,6 +518,7 @@ p {
     grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   }
   .photo-grid img {
-    height: 150px;
+    height: auto;
+    max-height: 360px;
   }
 }
