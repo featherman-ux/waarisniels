@@ -25,5 +25,11 @@
   { "name": "Chañaral", "lat": -26.3479, "lon": -70.6212, "notes": "Roadtrip vanuit San Pedro richting Pacifische kust" },
   { "name": "Parque Nacional Pan de Azúcar", "lat": -26.1423, "lon": -70.6401, "notes": "Woestijnkust en uitzichten tijdens de autoroute" },
   { "name": "Calama", "lat": -22.4544, "lon": -68.9294, "notes": "Afsluiter van de roadtrip; bus terug naar Bolivia" },
-  { "name": "Sucre", "lat": -19.0196, "lon": -65.2619, "notes": "Busrit vanaf La Paz; witte stad en koloniale charme" }
+  { "name": "Sucre", "lat": -19.0196, "lon": -65.2619, "notes": "Busrit vanaf La Paz; witte stad en koloniale charme" },
+  { "name": "Santa Cruz de la Sierra", "lat": -17.7833, "lon": -63.1821, "notes": "Bus vanuit Sucre; overstap richting Brazilië" },
+  { "name": "Corumbá (grens Brazilië)", "lat": -19.0083, "lon": -57.6510, "notes": "Grensovergang Bolivia-Brazilië" },
+  { "name": "São Paulo", "lat": -23.5505, "lon": -46.6333, "notes": "Megastad en cultureel centrum" },
+  { "name": "Rio de Janeiro", "lat": -22.9068, "lon": -43.1729, "notes": "Stranden, muziek en uitzicht vanaf de Suikerbroodberg" },
+  { "name": "Salvador", "lat": -12.9714, "lon": -38.5014, "notes": "Historische stad vol ritme, kleur en capoeira" },
+  { "name": "Itacaré", "lat": -14.2770, "lon": -38.9956, "notes": "Surfdorp, yoga, watervallen en jungle vibe" }
 ]

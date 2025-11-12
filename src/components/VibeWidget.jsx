@@ -1,31 +1,30 @@
 import React, { useState, useEffect } from 'react';
 
 const VIBE_SCHEDULE = [
-  { start: 0, label: '😴💤 Hoogteslaap' },
-  { start: 6, label: '🌄☕ Op zoek naar huurauto' },
-  { start: 8, label: '🚤🌊 Ontbijt' },
-  { start: 11, label: '🌞🏞️ Sucre verkennen' },
-  { start: 14, label: '🚡🌆 Uyuni boeken' },
-  { start: 17, label: '🥟🔥 Verse salteñas nassen' },
-  { start: 19, label: '🍻🎶 Happy hour?!' },
-  { start: 21, label: '🌌✨ Sterrenkijken in de Andes' },
-  { start: 23, label: '😴💤 Hoogteslaap' },
+  { start: 0, label: '😴💤 Droomt van golven' },
+  { start: 6, label: '🌅🧘‍♂️ Ochtendyoga aan het strand' },
+  { start: 8, label: '☕🥭 Açaí & koffie ontbijt' },
+  { start: 10, label: '🏄‍♂️🌊 (Kite)surfen in de zon' },
+  { start: 13, label: '🍛🌴 Lunch bij strandtent' },
+  { start: 15, label: '🌞🏖️ Chill of tweede surfsessie' },
+  { start: 17, label: '🍹🌅 Caipirinha bij zonsondergang' },
+  { start: 19, label: '🎶🔥 Live muziek of strandbar' },
+  { start: 22, label: '🌌✨ Nachtduik of sterren kijken' },
+  { start: 23, label: '😴💤 Slapen met geluid van de zee' },
 ];
 
 const resolveVibe = (hour) => {
-  const entry = [...VIBE_SCHEDULE]
-    .filter(({ start }) => start <= hour)
-    .pop();
+  const entry = [...VIBE_SCHEDULE].filter(({ start }) => start <= hour).pop();
   return entry ? entry.label : VIBE_SCHEDULE[VIBE_SCHEDULE.length - 1].label;
 };
 
 export function VibeWidget() {
-  const [boliviaTime, setBoliviaTime] = useState('');
+  const [brazilTime, setBrazilTime] = useState('');
   const [vibe, setVibe] = useState('');
 
   useEffect(() => {
     function updateVibe() {
-      const options = { timeZone: 'America/La_Paz', hour: '2-digit', minute: '2-digit', hour12: false };
+      const options = { timeZone: 'America/Bahia', hour: '2-digit', minute: '2-digit', hour12: false };
       const formatter = new Intl.DateTimeFormat('nl-NL', options);
       const parts = formatter.formatToParts(new Date());
 
@@ -36,7 +35,7 @@ export function VibeWidget() {
         if (part.type === 'minute') minute = part.value;
       });
 
-      setBoliviaTime(`${String(hour).padStart(2, '0')}:${minute}`);
+      setBrazilTime(`${String(hour).padStart(2, '0')}:${minute}`);
       setVibe(resolveVibe(hour));
     }
 
@@ -45,13 +44,13 @@ export function VibeWidget() {
     return () => clearInterval(interval);
   }, []);
 
-  if (!boliviaTime) return <div>Locatie wordt ingeladen...</div>;
+  if (!brazilTime) return <div>Locatie wordt ingeladen...</div>;
 
   return (
     <div className="vibe-widget">
       <div className="vibe-widget-time">
         <span className="location-dot"></span>
-        {boliviaTime} <span className="timezone">(in Bolivia)</span>
+        {brazilTime} <span className="timezone">(in Brazilië)</span>
       </div>
       <div className="vibe-widget-status">{vibe}</div>
     </div>

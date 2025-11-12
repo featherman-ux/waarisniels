@@ -4,422 +4,152 @@
     {
       "type": "Feature",
       "properties": { "name": "Medellín ➜ Cocorná", "mode": "bus", "order": 1 },
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
-          [-75.5812, 6.2442],
-          [-75.5120, 6.2020],
-          [-75.4280, 6.1600],
-          [-75.3370, 6.1200],
-          [-75.2480, 6.0900],
-          [-75.1850, 6.0579]
-        ]
-      }
+      "geometry": { "type": "LineString", "coordinates": [[-75.5812, 6.2442], [-75.5120, 6.2020], [-75.4280, 6.1600], [-75.3370, 6.1200], [-75.2480, 6.0900], [-75.1850, 6.0579]] }
     },
     {
       "type": "Feature",
       "properties": { "name": "Cocorná ➜ Medellín", "mode": "bus", "order": 2 },
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
-          [-75.1850, 6.0579],
-          [-75.2480, 6.0900],
-          [-75.3370, 6.1200],
-          [-75.4280, 6.1600],
-          [-75.5120, 6.2020],
-          [-75.5812, 6.2442]
-        ]
-      }
+      "geometry": { "type": "LineString", "coordinates": [[-75.1850, 6.0579], [-75.2480, 6.0900], [-75.3370, 6.1200], [-75.4280, 6.1600], [-75.5120, 6.2020], [-75.5812, 6.2442]] }
     },
     {
       "type": "Feature",
       "properties": { "name": "Medellín ✈ Santa Marta", "mode": "flight", "order": 3 },
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
-          [-75.5812, 6.2442],
-          [-75.0000, 7.8000],
-          [-74.1990, 11.2408]
-        ]
-      }
+      "geometry": { "type": "LineString", "coordinates": [[-75.5812, 6.2442], [-75.0000, 7.8000], [-74.1990, 11.2408]] }
     },
     {
       "type": "Feature",
       "properties": { "name": "Santa Marta ➜ Riohacha", "mode": "motor", "order": 4 },
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
-          [-74.1990, 11.2408],
-          [-73.5000, 11.4500],
-          [-72.9070, 11.5440]
-        ]
-      }
+      "geometry": { "type": "LineString", "coordinates": [[-74.1990, 11.2408], [-73.5000, 11.4500], [-72.9070, 11.5440]] }
     },
     {
       "type": "Feature",
       "properties": { "name": "Riohacha ➜ Cabo de la Vela", "mode": "motor", "order": 5 },
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
-          [-72.9070, 11.5440],
-          [-72.5500, 11.9000],
-          [-72.1690, 12.2010]
-        ]
-      }
+      "geometry": { "type": "LineString", "coordinates": [[-72.9070, 11.5440], [-72.5500, 11.9000], [-72.1690, 12.2010]] }
     },
     {
       "type": "Feature",
       "properties": { "name": "Cabo de la Vela ➜ Costeño Beach", "mode": "motor", "order": 6 },
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
-          [-72.1690, 12.2010],
-          [-72.9000, 11.9900],
-          [-73.4000, 11.6500],
-          [-73.8160, 11.2650]
-        ]
-      }
+      "geometry": { "type": "LineString", "coordinates": [[-72.1690, 12.2010], [-72.9000, 11.9900], [-73.4000, 11.6500], [-73.8160, 11.2650]] }
     },
     {
       "type": "Feature",
       "properties": { "name": "Costeño Beach ➜ Cartagena", "mode": "bus", "order": 7 },
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
-          [-73.8160, 11.2650],
-          [-74.2000, 10.9500],
-          [-74.7000, 10.7500],
-          [-75.0000, 10.6000],
-          [-75.3000, 10.4500],
-          [-75.4790, 10.3910]
-        ]
-      }
+      "geometry": { "type": "LineString", "coordinates": [[-73.8160, 11.2650], [-74.2000, 10.9500], [-74.7000, 10.7500], [-75.0000, 10.6000], [-75.3000, 10.4500], [-75.4790, 10.3910]] }
     },
     {
       "type": "Feature",
       "properties": { "name": "Cartagena ✈ Quito", "mode": "flight", "order": 8 },
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
-          [-75.4790, 10.3910],
-          [-77.0000, 5.0000],
-          [-78.4678, -0.1807]
-        ]
-      }
+      "geometry": { "type": "LineString", "coordinates": [[-75.4790, 10.3910], [-77.0000, 5.0000], [-78.4678, -0.1807]] }
     },
     {
       "type": "Feature",
       "properties": { "name": "Quito ➜ Quilotoa", "mode": "motor", "order": 9 },
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
-          [-78.4678, -0.1807],
-          [-78.6200, -0.4500],
-          [-78.7800, -0.7000],
-          [-78.9010, -0.8640]
-        ]
-      }
+      "geometry": { "type": "LineString", "coordinates": [[-78.4678, -0.1807], [-78.6200, -0.4500], [-78.7800, -0.7000], [-78.9010, -0.8640]] }
     },
     {
       "type": "Feature",
       "properties": { "name": "Quilotoa ➜ Llullu Llama (Isinliví)", "mode": "motor", "order": 10 },
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
-          [-78.9010, -0.8640],
-          [-78.8600, -0.7500],
-          [-78.7800, -0.6500],
-          [-78.8450, -0.5539]
-        ]
-      }
+      "geometry": { "type": "LineString", "coordinates": [[-78.9010, -0.8640], [-78.8600, -0.7500], [-78.7800, -0.6500], [-78.8450, -0.5539]] }
     },
     {
       "type": "Feature",
       "properties": { "name": "Isinliví ➜ Quito", "mode": "motor", "order": 11 },
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
-          [-78.8450, -0.5539],
-          [-78.7600, -0.4500],
-          [-78.6500, -0.3200],
-          [-78.4678, -0.1807]
-        ]
-      }
+      "geometry": { "type": "LineString", "coordinates": [[-78.8450, -0.5539], [-78.7600, -0.4500], [-78.6500, -0.3200], [-78.4678, -0.1807]] }
     },
     {
       "type": "Feature",
-      "properties": { "name": "Quito ✈ Santa Cruz (Puerto Ayora)", "mode": "flight", "order": 12 },
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
-          [-78.4678, -0.1807],
-          [-84.5000, -0.5000],
-          [-90.3510, -0.7390]
-        ]
-      }
+      "properties": { "name": "Quito ✈ Santa Cruz (Galápagos)", "mode": "flight", "order": 12 },
+      "geometry": { "type": "LineString", "coordinates": [[-78.4678, -0.1807], [-84.5000, -0.5000], [-90.3510, -0.7390]] }
     },
     {
       "type": "Feature",
       "properties": { "name": "Santa Cruz ⇢ Isabela (veerboot)", "mode": "boat", "order": 13 },
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
-          [-90.3510, -0.7390],
-          [-90.6000, -0.8200],
-          [-90.8000, -0.9000],
-          [-90.9650, -0.9550]
-        ]
-      }
+      "geometry": { "type": "LineString", "coordinates": [[-90.3510, -0.7390], [-90.6000, -0.8200], [-90.8000, -0.9000], [-90.9650, -0.9550]] }
     },
     {
       "type": "Feature",
       "properties": { "name": "Isabela ⇢ Santa Cruz (veerboot)", "mode": "boat", "order": 14 },
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
-          [-90.9650, -0.9550],
-          [-90.8000, -0.9000],
-          [-90.6000, -0.8200],
-          [-90.3510, -0.7390]
-        ]
-      }
+      "geometry": { "type": "LineString", "coordinates": [[-90.9650, -0.9550], [-90.8000, -0.9000], [-90.6000, -0.8200], [-90.3510, -0.7390]] }
     },
     {
       "type": "Feature",
       "properties": { "name": "Santa Cruz ⇢ San Cristóbal (veerboot)", "mode": "boat", "order": 15 },
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
-          [-90.3510, -0.7390],
-          [-90.0500, -0.8200],
-          [-89.8000, -0.8700],
-          [-89.6100, -0.9030]
-        ]
-      }
+      "geometry": { "type": "LineString", "coordinates": [[-90.3510, -0.7390], [-90.0500, -0.8200], [-89.8000, -0.8700], [-89.6100, -0.9030]] }
     },
     {
       "type": "Feature",
       "properties": { "name": "San Cristóbal ✈ Guayaquil", "mode": "flight", "order": 16 },
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
-          [-89.6100, -0.9030],
-          [-84.0000, -1.1000],
-          [-79.9220, -2.1700]
-        ]
-      }
+      "geometry": { "type": "LineString", "coordinates": [[-89.6100, -0.9030], [-84.0000, -1.1000], [-79.9220, -2.1700]] }
     },
     {
       "type": "Feature",
       "properties": { "name": "Guayaquil ➜ Máncora", "mode": "bus", "order": 17 },
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
-          [-79.9220, -2.1700],
-          [-80.4500, -2.7000],
-          [-80.8000, -3.4000],
-          [-81.1000, -3.9000],
-          [-81.0530, -4.1060]
-        ]
-      }
+      "geometry": { "type": "LineString", "coordinates": [[-79.9220, -2.1700], [-80.4500, -2.7000], [-80.8000, -3.4000], [-81.1000, -3.9000], [-81.0530, -4.1060]] }
     },
     {
       "type": "Feature",
       "properties": { "name": "Máncora ➜ Huanchaco", "mode": "bus", "order": 18 },
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
-          [-81.0530, -4.1060],
-          [-80.7000, -4.9000],
-          [-80.2000, -5.8000],
-          [-79.9000, -6.7000],
-          [-79.5000, -7.6000],
-          [-79.1410, -8.1050]
-        ]
-      }
+      "geometry": { "type": "LineString", "coordinates": [[-81.0530, -4.1060], [-80.7000, -4.9000], [-80.2000, -5.8000], [-79.9000, -6.7000], [-79.5000, -7.6000], [-79.1410, -8.1050]] }
     },
     {
       "type": "Feature",
       "properties": { "name": "Huanchaco ➜ Huaraz", "mode": "bus", "order": 19 },
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
-          [-79.1410, -8.1050],
-          [-78.7500, -8.5000],
-          [-78.3000, -8.9000],
-          [-77.9500, -9.2000],
-          [-77.7000, -9.4000],
-          [-77.5340, -9.5280]
-        ]
-      }
+      "geometry": { "type": "LineString", "coordinates": [[-79.1410, -8.1050], [-78.7500, -8.5000], [-78.3000, -8.9000], [-77.9500, -9.2000], [-77.7000, -9.4000], [-77.5340, -9.5280]] }
     },
     {
       "type": "Feature",
       "properties": { "name": "Huaraz ➜ Lima", "mode": "bus", "order": 20 },
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
-          [-77.5340, -9.5280],
-          [-77.3000, -9.9500],
-          [-77.1000, -10.6000],
-          [-76.9900, -11.3500],
-          [-77.1000, -11.9000],
-          [-77.0428, -12.0464]
-        ]
-      }
+      "geometry": { "type": "LineString", "coordinates": [[-77.5340, -9.5280], [-77.3000, -9.9500], [-77.1000, -10.6000], [-76.9900, -11.3500], [-77.1000, -11.9000], [-77.0428, -12.0464]] }
     },
     {
       "type": "Feature",
       "properties": { "name": "Lima ✈ Cusco", "mode": "flight", "order": 21 },
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
-          [-77.0428, -12.0464],
-          [-74.5000, -12.8000],
-          [-71.96746, -13.53195]
-        ]
-      }
+      "geometry": { "type": "LineString", "coordinates": [[-77.0428, -12.0464], [-74.5000, -12.8000], [-71.96746, -13.53195]] }
     },
     {
       "type": "Feature",
       "properties": { "name": "Cusco ➜ Isla del Sol", "mode": "bus", "order": 22 },
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
-          [-71.96746, -13.53195],
-          [-71.0000, -14.2000],
-          [-70.2000, -15.0000],
-          [-69.6000, -15.6000],
-          [-69.3000, -15.9500],
-          [-69.1750, -16.0180]
-        ]
-      }
+      "geometry": { "type": "LineString", "coordinates": [[-71.96746, -13.53195], [-71.0000, -14.2000], [-70.2000, -15.0000], [-69.6000, -15.6000], [-69.3000, -15.9500], [-69.1750, -16.0180]] }
     },
     {
       "type": "Feature",
       "properties": { "name": "Isla del Sol ➜ La Paz", "mode": "bus", "order": 23 },
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
-          [-69.1750, -16.0180],
-          [-69.0000, -16.2000],
-          [-68.8000, -16.3500],
-          [-68.5000, -16.4200],
-          [-68.1193, -16.4897]
-        ]
-      }
+      "geometry": { "type": "LineString", "coordinates": [[-69.1750, -16.0180], [-69.0000, -16.2000], [-68.8000, -16.3500], [-68.5000, -16.4200], [-68.1193, -16.4897]] }
     },
     {
       "type": "Feature",
       "properties": { "name": "La Paz ➜ Sucre", "mode": "bus", "order": 24 },
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
-          [-68.1193, -16.4897],
-          [-67.6800, -17.4000],
-          [-67.0500, -18.3000],
-          [-66.5000, -18.9000],
-          [-65.9000, -19.2000],
-          [-65.2619, -19.0196]
-        ]
-      }
+      "geometry": { "type": "LineString", "coordinates": [[-68.1193, -16.4897], [-67.6800, -17.4000], [-67.0500, -18.3000], [-66.5000, -18.9000], [-65.9000, -19.2000], [-65.2619, -19.0196]] }
     },
     {
       "type": "Feature",
-      "properties": { "name": "Uyuni ➜ San Pedro de Atacama", "mode": "car", "order": 25 },
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
-          [-66.8265, -20.4603],
-          [-67.4891, -20.1338],
-          [-67.8500, -21.3000],
-          [-67.8200, -22.2000],
-          [-67.8080, -22.8650],
-          [-68.1997, -22.9087]
-        ]
-      }
+      "properties": { "name": "Sucre ➜ Santa Cruz de la Sierra", "mode": "bus", "order": 32 },
+      "geometry": { "type": "LineString", "coordinates": [[-65.2619, -19.0196], [-65.7000, -18.7000], [-66.0000, -18.3000], [-65.5000, -18.0000], [-64.5000, -17.8000], [-63.1821, -17.7833]] }
     },
     {
       "type": "Feature",
-      "properties": { "name": "San Pedro de Atacama ➜ Chañaral", "mode": "car", "order": 26 },
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
-          [-68.1997, -22.9087],
-          [-68.4000, -23.5000],
-          [-68.9000, -24.5000],
-          [-69.8000, -25.5000],
-          [-70.3000, -25.9000],
-          [-70.6212, -26.3479]
-        ]
-      }
+      "properties": { "name": "Santa Cruz ➜ Corumbá (grens Brazilië)", "mode": "bus", "order": 33 },
+      "geometry": { "type": "LineString", "coordinates": [[-63.1821, -17.7833], [-63.7000, -18.1000], [-64.3000, -18.4000], [-65.0000, -18.6000], [-66.0000, -18.8000], [-57.6510, -19.0083]] }
     },
     {
       "type": "Feature",
-      "properties": { "name": "Chañaral ➜ Parque Nacional Pan de Azúcar", "mode": "car", "order": 27 },
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
-          [-70.6212, -26.3479],
-          [-70.6100, -26.2500],
-          [-70.6401, -26.1423]
-        ]
-      }
+      "properties": { "name": "Corumbá ➜ São Paulo", "mode": "bus", "order": 34 },
+      "geometry": { "type": "LineString", "coordinates": [[-57.6510, -19.0083], [-58.0000, -20.0000], [-57.8000, -21.0000], [-55.0000, -22.0000], [-47.0000, -23.0000], [-46.6333, -23.5505]] }
     },
     {
       "type": "Feature",
-      "properties": { "name": "Parque Nacional Pan de Azúcar ➜ San Pedro de Atacama", "mode": "car", "order": 28 },
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
-          [-70.6401, -26.1423],
-          [-70.2000, -25.6000],
-          [-69.6000, -24.8000],
-          [-69.0000, -23.9000],
-          [-68.5000, -23.2000],
-          [-68.1997, -22.9087]
-        ]
-      }
+      "properties": { "name": "São Paulo ➜ Rio de Janeiro", "mode": "bus", "order": 35 },
+      "geometry": { "type": "LineString", "coordinates": [[-46.6333, -23.5505], [-45.8000, -23.2000], [-44.5000, -23.0000], [-43.9000, -22.8000], [-43.1729, -22.9068]] }
     },
     {
       "type": "Feature",
-      "properties": { "name": "San Pedro de Atacama ➜ Calama", "mode": "car", "order": 29 },
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
-          [-68.1997, -22.9087],
-          [-68.5000, -22.6000],
-          [-68.9294, -22.4544]
-        ]
-      }
+      "properties": { "name": "Rio de Janeiro ✈ Salvador", "mode": "flight", "order": 36 },
+      "geometry": { "type": "LineString", "coordinates": [[-43.1729, -22.9068], [-41.0000, -20.0000], [-39.0000, -15.0000], [-38.5014, -12.9714]] }
     },
     {
       "type": "Feature",
-      "properties": { "name": "Calama ➜ Uyuni", "mode": "bus", "order": 30 },
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
-          [-68.9294, -22.4544],
-          [-68.4000, -21.8000],
-          [-67.9000, -21.0000],
-          [-67.3000, -20.6000],
-          [-66.8265, -20.4603]
-        ]
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": { "name": "Uyuni ➜ Sucre", "mode": "bus", "order": 31 },
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
-          [-66.8265, -20.4603],
-          [-66.4000, -20.0000],
-          [-66.0000, -19.5000],
-          [-65.7000, -19.2000],
-          [-65.2619, -19.0196]
-        ]
-      }
+      "properties": { "name": "Salvador ➜ Itacaré", "mode": "bus", "order": 37 },
+      "geometry": { "type": "LineString", "coordinates": [[-38.5014, -12.9714], [-38.7000, -13.5000], [-38.9000, -13.9000], [-38.9956, -14.2770]] }
     }
   ]
 }
