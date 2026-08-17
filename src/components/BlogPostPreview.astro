@@ -1,20 +1,12 @@
 ---
-export interface Props { post: import('astro:content').CollectionEntry<'blog'> }
-const { post } = Astro.props
-const { title, description, pubDate, image } = post.data
-const href = `/blog/${post.slug}/`
+import type { Post } from '../lib/db';
+import { mediaUrl } from '../lib/media';
 
-const resolveImageSrc = (input?: string) => {
-  if (!input) return '/images/default-post.jpg'
-  try {
-    return new URL(input, Astro.url).href
-  } catch {
-    return '/images/default-post.jpg'
-  }
-}
-
-const imgSrc = resolveImageSrc(image?.url)
-const imgAlt = image?.alt ?? title
+export interface Props { post: Post }
+const { post } = Astro.props;
+const href = `/blog/${post.slug}/`;
+const imgSrc = mediaUrl(post.cover?.key) ?? '/images/homepage.jpeg';
+const imgAlt = post.cover?.alt ?? post.title;
 ---
 <article class="rounded-lg border bg-white dark:bg-gray-800 p-4 shadow-sm hover:shadow-md transition">
   <a href={href} class="block">
@@ -26,12 +18,12 @@ const imgAlt = image?.alt ?? title
         loading="lazy"
       />
     </div>
-    <h3 class="text-xl font-semibold">{title}</h3>
+    <h3 class="text-xl font-semibold">{post.title}</h3>
     <p class="text-sm text-gray-500 mb-2">
-      {new Date(pubDate).toLocaleDateString('nl-NL')}
+      {post.pubDate.toLocaleDateString('nl-NL')}
     </p>
-    {description && (
-      <p class="text-gray-700 dark:text-gray-300 line-clamp-3">{description}</p>
+    {post.description && (
+      <p class="text-gray-700 dark:text-gray-300 line-clamp-3">{post.description}</p>
     )}
     <span class="inline-block mt-3 underline">Lees verder</span>
   </a>

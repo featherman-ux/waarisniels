@@ -1,11 +1,7 @@
 ---
-import { getCollection } from 'astro:content';
+import { getPostBySlug } from '../../lib/db';
 import BlogPostLayout from '../../layouts/BlogPostLayout.astro';
 
-// Since we're using output: 'server', we don't need getStaticPaths
-// The page will be rendered on-demand for each request
-
-// Grab the slug from URL params and fetch the matching post
 const { slug } = Astro.params;
 
 if (!slug) {
@@ -15,11 +11,8 @@ if (!slug) {
   });
 }
 
-const posts = await getCollection('blog', ({ data }) =>
-  import.meta.env.PROD ? !data.draft : true
-);
-
-const post = posts.find((p) => p.slug === slug);
+const db = Astro.locals.runtime.env.DB;
+const post = await getPostBySlug(db, slug, !import.meta.env.PROD);
 
 if (!post) {
   return new Response(null, {

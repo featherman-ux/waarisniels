@@ -6,6 +6,12 @@ dist/
 # dependencies
 node_modules/
 
+# wrangler local state (D1 sqlite emulation, etc.)
+.wrangler/
+
+# gegenereerde migratie-output (scripts/migrate-content.mjs)
+scripts/out/
+
 # logs
 npm-debug.log*
 yarn-debug.log*

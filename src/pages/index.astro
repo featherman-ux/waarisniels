@@ -1,16 +1,13 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import '../styles/home.css';
-import { getCollection } from 'astro:content';
+import { listPosts } from '../lib/db';
 import BlogPostPreview from '../components/BlogPostPreview.astro';
 import HomePopup from '../components/HomePopup.astro';
 import { VibeWidget } from '../components/VibeWidget.jsx';
 
-const latestPosts = (
-  await getCollection('blog', ({ data }) => import.meta.env.PROD ? !data.draft : true)
-)
-  .sort((a, b) => new Date(b.data.pubDate) - new Date(a.data.pubDate))
-  .slice(0, 3);
+const db = Astro.locals.runtime.env.DB;
+const latestPosts = await listPosts(db, { limit: 3 });
 ---
 
 <BaseLayout title="Waar is Niels?" description="Welkom op mijn reisblog">

@@ -1,42 +1,32 @@
-
 ---
-import { getCollection, type CollectionEntry } from 'astro:content';
+import type { Post } from '../lib/db';
+import { getRelatedPosts } from '../lib/db';
+import { renderMarkdown } from '../lib/markdown';
+import { mediaUrl } from '../lib/media';
 import BaseLayout from './BaseLayout.astro';
 import { Comments, ViewCounter, LikeButton } from '../components/EnhancedComponents.jsx';
 import { AIChatBot } from '../components/AIComponents.jsx';
 import { AISummary } from '../components/AISummary.jsx';
-import { FormattedDate } from '../components/FormattedDate';
-import PhotoGallery from '../components/PhotoGallery.astro';
 import Chip from '../components/Chip.astro';
 
 export interface Props {
-  post: CollectionEntry<'blog'>;
+  post: Post;
 }
 
 const { post } = Astro.props;
+const { title, description, pubDate, tags } = post;
 
-if (!post || !post.data) {
-  throw new Error('`post` or `post.data` is missing in BlogPostLayout.astro');
-}
+const db = Astro.locals.runtime.env.DB;
+const contentHtml = renderMarkdown(post.body);
+const heroSrc = mediaUrl(post.cover?.key);
+const heroAlt = post.cover?.alt ?? title;
 
-const { title, description, pubDate, image, tags, photos } = post.data;
-const { Content } = await post.render();
-
-const dateStr = new Date(pubDate).toLocaleDateString('nl-NL', {
+const dateStr = pubDate.toLocaleDateString('nl-NL', {
   year: 'numeric', month: 'long', day: 'numeric',
 });
 
 const currentPath = Astro.url.pathname;
 const siteUrl = import.meta.env.SITE ?? Astro.url.origin ?? 'https://waarisniels.nl';
-
-const toSrc = (input?: string) => {
-  if (!input) return undefined;
-  try {
-    return new URL(input).href;
-  } catch {
-    return new URL(input, Astro.url).href;
-  }
-};
 
 // --- Schema.org Structured Data ---
 const schema = {
@@ -44,71 +34,37 @@ const schema = {
   '@type': 'BlogPosting',
   headline: title,
   description: description ?? title,
-  image: image?.url ? new URL(image.url, siteUrl).href : undefined,
+  image: heroSrc,
   author: {
     '@type': 'Person',
-    name: post.data.author || 'Niels Veerman', // Default author name
+    name: 'Niels Veerman',
   },
   publisher: {
     '@type': 'Organization',
-    name: 'Your Travel Blog', // Your site's name
+    name: 'Your Travel Blog',
     logo: {
       '@type': 'ImageObject',
-      url: new URL('/favicon.svg', siteUrl).href, // Assuming you have a favicon
+      url: new URL('/favicon.svg', siteUrl).href,
     },
   },
   datePublished: pubDate.toISOString(),
-  dateModified: pubDate.toISOString(), // Use pubDate if no modified date is available
+  dateModified: post.updatedAt,
   mainEntityOfPage: {
     '@type': 'WebPage',
     '@id': Astro.url.href,
   },
 };
 
-// --- Get all posts for "Read Next" section using getCollection ---
-const allPosts = await getCollection('blog');
-
-const currentTags = tags || [];
-const currentUrl = Astro.url.pathname;
-
-// 1. Find posts with shared tags
-let relatedPosts = allPosts
-  .filter(p => {
-    // Exclude current post and drafts
-    return p.slug !== post.slug && !p.data.draft;
-  })
-  .map(p => {
-    const sharedTagsCount = p.data.tags?.filter(tag => currentTags.includes(tag)).length || 0;
-    return { post: p, sharedTagsCount };
-  })
-  .filter(item => item.sharedTagsCount > 0)
-  // Sort by most shared tags, then by most recent
-  .sort((a, b) => b.sharedTagsCount - a.sharedTagsCount || new Date(b.post.data.pubDate).getTime() - new Date(a.post.data.pubDate).getTime())
-  .map(item => item.post); // Unwrap to get the post object back
-
-// 2. If not enough related posts, fill with recent posts
-if (relatedPosts.length < 2) {
-  const recentPosts = allPosts
-    .filter(p => {
-      // Exclude current post, drafts, and posts already in relatedPosts
-      return p.slug !== post.slug && !p.data.draft && !relatedPosts.find(rp => rp.slug === p.slug);
-    })
-    .sort((a, b) => new Date(b.data.pubDate).getTime() - new Date(a.data.pubDate).getTime());
-  
-  relatedPosts = [...relatedPosts, ...recentPosts];
-}
-
-// 3. Limit to 2 posts
-const readNextPosts = relatedPosts.slice(0, 2);
+const readNextPosts = await getRelatedPosts(db, post, 2);
 ---
 <script type="application/ld+json" is:inline set:html={JSON.stringify(schema)} />
 <BaseLayout title={title} description={description ?? title}>
   <article class="max-w-3xl mx-auto p-6 prose prose-lg dark:prose-invert">
-    {toSrc(image?.url) && (
+    {heroSrc && (
       <figure class="hero rounded-lg overflow-hidden relative mb-6">
         <img
-          src={toSrc(image.url)}
-          alt={image.alt ?? title}
+          src={heroSrc}
+          alt={heroAlt}
           class="w-full h-auto object-cover"
           loading="lazy"
           decoding="async"
@@ -138,11 +94,7 @@ const readNextPosts = relatedPosts.slice(0, 2);
 
     <AISummary client:load postSlug={post.slug} postContent={post.body} />
 
-    <section class="prose-wrap mb-12">
-      <Content />
-    </section>
-
-    {photos && <PhotoGallery client:visible photos={photos} />}
+    <section class="prose-wrap mb-12" set:html={contentHtml} />
 
     <footer>
       <Comments client:load slug={post.slug} apiUrl={siteUrl} />
@@ -153,20 +105,20 @@ const readNextPosts = relatedPosts.slice(0, 2);
       <section class="read-next mt-16">
         <h2 class="text-2xl font-bold mb-6">Continue Reading</h2>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {readNextPosts.map((post) => (
-            <a href={`/blog/${post.slug}/`} class="post-card border rounded-lg overflow-hidden transition-all hover:shadow-lg">
-          {toSrc(post.data.image?.url) && (
-            <img
-              src={toSrc(post.data.image.url)}
-              alt={post.data.image.alt || ''}
-              class="w-full h-48 object-cover"
-              loading="lazy"
-              decoding="async"
-            />
-          )}
+          {readNextPosts.map((rp) => (
+            <a href={`/blog/${rp.slug}/`} class="post-card border rounded-lg overflow-hidden transition-all hover:shadow-lg">
+              {mediaUrl(rp.cover?.key) && (
+                <img
+                  src={mediaUrl(rp.cover?.key)}
+                  alt={rp.cover?.alt || ''}
+                  class="w-full h-48 object-cover"
+                  loading="lazy"
+                  decoding="async"
+                />
+              )}
               <div class="p-4">
-                <h3 class="font-bold text-lg mb-2">{post.data.title}</h3>
-                <p class="text-gray-600 dark:text-gray-300 mb-3">{post.data.description}</p>
+                <h3 class="font-bold text-lg mb-2">{rp.title}</h3>
+                <p class="text-gray-600 dark:text-gray-300 mb-3">{rp.description}</p>
                 <span class="text-blue-600 dark:text-blue-400 font-medium">Read Post →</span>
               </div>
             </a>

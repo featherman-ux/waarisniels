@@ -16,6 +16,18 @@ binding = "SESSION"
 id = "adadbaa37ca743d5a6c3e3b2d311fb3c" 
 preview_id = "adadbaa37ca743d5a6c3e3b2d311fb3c"
 
+# --- D1: alle posts (zie migrations/0001_init.sql) ---
+[[d1_databases]]
+binding = "DB"
+database_name = "waarisniels-db"
+database_id = "521457be-9610-4e58-9793-b29e78fc0fb9"
+
+# --- R2: alle foto's en video's ---
+[[r2_buckets]]
+binding = "MEDIA"
+bucket_name = "waarisniels-media"
+
+# TODO stap 4: vectorize weg (chatbot verdwijnt)
 [[vectorize]]
 binding = "VECTORIZE_INDEX" # This is how we'll access the index in our code
 index_name = "travel-blog-index"
