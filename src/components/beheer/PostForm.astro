@@ -1,0 +1,283 @@
+---
+import type { Post, Category } from '../../lib/db';
+import { mediaUrl } from '../../lib/media';
+
+export interface Props {
+  post?: Post | null;
+  categories: Category[];
+}
+
+const { post = null, categories } = Astro.props;
+
+const toDateInput = (d?: Date) => (d ? d.toISOString().slice(0, 10) : '');
+
+const fields = {
+  id: post?.id ?? '',
+  title: post?.title ?? '',
+  slug: post?.slug ?? '',
+  category: post?.category ?? categories[0]?.slug ?? 'reis',
+  description: post?.description ?? '',
+  body: post?.body ?? '',
+  pubDate: toDateInput(post?.pubDate) || toDateInput(new Date()),
+  tags: (post?.tags ?? []).join(', '),
+  draft: post?.draft ?? true,
+  locLat: post?.location?.lat ?? '',
+  locLon: post?.location?.lon ?? '',
+  locName: post?.location?.name ?? '',
+  coverKey: post?.cover?.key ?? '',
+  coverAlt: post?.cover?.alt ?? '',
+  placeFact: post?.placeFact ?? '',
+};
+const coverPreview = fields.coverKey ? mediaUrl(fields.coverKey) : null;
+---
+
+<form id="post-form" class="space-y-6 max-w-3xl">
+  <input type="hidden" name="id" value={fields.id} />
+
+  <div>
+    <label class="block text-sm font-medium mb-1" for="title">Titel *</label>
+    <input id="title" name="title" required value={fields.title}
+      class="w-full rounded border px-3 py-2 dark:bg-gray-800" />
+  </div>
+
+  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+    <div>
+      <label class="block text-sm font-medium mb-1" for="slug">Slug (leeg = automatisch)</label>
+      <input id="slug" name="slug" value={fields.slug}
+        class="w-full rounded border px-3 py-2 dark:bg-gray-800" />
+    </div>
+    <div>
+      <label class="block text-sm font-medium mb-1" for="category">Categorie</label>
+      <select id="category" name="category" class="w-full rounded border px-3 py-2 dark:bg-gray-800">
+        {categories.map((c) => (
+          <option value={c.slug} selected={c.slug === fields.category}>{c.label}</option>
+        ))}
+      </select>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+    <div>
+      <label class="block text-sm font-medium mb-1" for="pubDate">Publicatiedatum *</label>
+      <input id="pubDate" name="pubDate" type="date" required value={fields.pubDate}
+        class="w-full rounded border px-3 py-2 dark:bg-gray-800" />
+    </div>
+    <div class="flex items-end">
+      <label class="inline-flex items-center gap-2">
+        <input id="draft" name="draft" type="checkbox" checked={fields.draft} />
+        <span>Concept (nog niet live)</span>
+      </label>
+    </div>
+  </div>
+
+  <div>
+    <label class="block text-sm font-medium mb-1" for="description">Korte omschrijving</label>
+    <textarea id="description" name="description" rows="2"
+      class="w-full rounded border px-3 py-2 dark:bg-gray-800">{fields.description}</textarea>
+  </div>
+
+  <div>
+    <label class="block text-sm font-medium mb-1" for="tags">Tags (komma-gescheiden)</label>
+    <input id="tags" name="tags" value={fields.tags}
+      class="w-full rounded border px-3 py-2 dark:bg-gray-800" />
+  </div>
+
+  <fieldset class="border rounded p-4">
+    <legend class="text-sm font-medium px-1">Cover-afbeelding</legend>
+    <div class="flex items-start gap-4">
+      <div id="cover-preview-wrap" class:list={[coverPreview ? '' : 'hidden']}>
+        <img id="cover-preview" src={coverPreview ?? ''} alt="" class="w-32 h-32 object-cover rounded" />
+      </div>
+      <div class="flex-1 space-y-2">
+        <input id="cover-file" type="file" accept="image/*" />
+        <input type="hidden" id="cover-key" name="coverKey" value={fields.coverKey} />
+        <input id="cover-alt" name="coverAlt" placeholder="Alt-tekst voor de cover" value={fields.coverAlt}
+          class="w-full rounded border px-3 py-2 dark:bg-gray-800" />
+        <p id="cover-status" class="text-sm text-gray-500"></p>
+      </div>
+    </div>
+  </fieldset>
+
+  <fieldset class="border rounded p-4">
+    <legend class="text-sm font-medium px-1">Locatie (optioneel, voor de kaart)</legend>
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <input name="locName" placeholder="Plaatsnaam" value={fields.locName}
+        class="rounded border px-3 py-2 dark:bg-gray-800" />
+      <input name="locLat" type="number" step="any" placeholder="Breedtegraad" value={fields.locLat}
+        class="rounded border px-3 py-2 dark:bg-gray-800" />
+      <input name="locLon" type="number" step="any" placeholder="Lengtegraad" value={fields.locLon}
+        class="rounded border px-3 py-2 dark:bg-gray-800" />
+    </div>
+  </fieldset>
+
+  <div>
+    <div class="flex items-center justify-between mb-1">
+      <label class="block text-sm font-medium" for="body">Inhoud (markdown, HTML mag) *</label>
+      <div class="flex items-center gap-2">
+        <label class="text-sm underline cursor-pointer">
+          + Foto in tekst
+          <input id="inline-photo" type="file" accept="image/*" class="hidden" />
+        </label>
+        <label class="text-sm underline cursor-pointer">
+          + Video in tekst (max 50MB)
+          <input id="inline-video" type="file" accept="video/*" class="hidden" />
+        </label>
+      </div>
+    </div>
+    <textarea id="body" name="body" required rows="18"
+      class="w-full rounded border px-3 py-2 font-mono text-sm dark:bg-gray-800">{fields.body}</textarea>
+    <p id="inline-status" class="text-sm text-gray-500 mt-1"></p>
+  </div>
+
+  <div>
+    <label class="block text-sm font-medium mb-1" for="placeFact">Plek-weetje (optioneel)</label>
+    <textarea id="placeFact" name="placeFact" rows="2"
+      class="w-full rounded border px-3 py-2 dark:bg-gray-800">{fields.placeFact}</textarea>
+  </div>
+
+  <p id="form-error" class="text-red-600 hidden"></p>
+
+  <div class="flex items-center gap-3">
+    <button type="submit" class="rounded bg-gray-900 text-white px-4 py-2 font-semibold hover:opacity-90 dark:bg-gray-100 dark:text-gray-900">
+      Opslaan
+    </button>
+    <a href="/beheer/" class="text-sm underline">Annuleren</a>
+    {post && (
+      <button type="button" id="delete-btn" class="ml-auto text-sm text-red-600 underline">
+        Post verwijderen
+      </button>
+    )}
+  </div>
+</form>
+
+<script>
+  const form = document.getElementById('post-form') as HTMLFormElement;
+  const errorEl = document.getElementById('form-error')!;
+
+  async function upload(file: File): Promise<{ key: string; url: string }> {
+    const fd = new FormData();
+    fd.append('file', file);
+    const res = await fetch('/api/admin/upload', { method: 'POST', body: fd });
+    const data = (await res.json()) as { key: string; url: string; error?: string };
+    if (!res.ok) throw new Error(data.error || 'Upload mislukt');
+    return data;
+  }
+
+  const coverFile = document.getElementById('cover-file') as HTMLInputElement;
+  const coverKeyInput = document.getElementById('cover-key') as HTMLInputElement;
+  const coverPreviewWrap = document.getElementById('cover-preview-wrap')!;
+  const coverPreviewImg = document.getElementById('cover-preview') as HTMLImageElement;
+  const coverStatus = document.getElementById('cover-status')!;
+
+  coverFile?.addEventListener('change', async () => {
+    const file = coverFile.files?.[0];
+    if (!file) return;
+    coverStatus.textContent = 'Uploaden...';
+    try {
+      const { key, url } = await upload(file);
+      coverKeyInput.value = key;
+      coverPreviewImg.src = url;
+      coverPreviewWrap.classList.remove('hidden');
+      coverStatus.textContent = 'Geupload.';
+    } catch (err: any) {
+      coverStatus.textContent = err.message ?? 'Upload mislukt';
+    }
+  });
+
+  const bodyEl = document.getElementById('body') as HTMLTextAreaElement;
+  const inlineStatus = document.getElementById('inline-status')!;
+
+  function insertAtCursor(text: string) {
+    const start = bodyEl.selectionStart ?? bodyEl.value.length;
+    const end = bodyEl.selectionEnd ?? bodyEl.value.length;
+    bodyEl.value = bodyEl.value.slice(0, start) + text + bodyEl.value.slice(end);
+    bodyEl.focus();
+    bodyEl.selectionStart = bodyEl.selectionEnd = start + text.length;
+  }
+
+  document.getElementById('inline-photo')?.addEventListener('change', async (e) => {
+    const file = (e.target as HTMLInputElement).files?.[0];
+    if (!file) return;
+    inlineStatus.textContent = 'Foto uploaden...';
+    try {
+      const { url } = await upload(file);
+      insertAtCursor(`\n<img src="${url}" alt="" />\n`);
+      inlineStatus.textContent = 'Foto toegevoegd — vul de alt-tekst in de tekst zelf aan.';
+    } catch (err: any) {
+      inlineStatus.textContent = err.message ?? 'Upload mislukt';
+    }
+  });
+
+  document.getElementById('inline-video')?.addEventListener('change', async (e) => {
+    const file = (e.target as HTMLInputElement).files?.[0];
+    if (!file) return;
+    inlineStatus.textContent = 'Video uploaden (kan even duren)...';
+    try {
+      const { url } = await upload(file);
+      insertAtCursor(`\n<video controls poster="">\n  <source src="${url}" type="${file.type}" />\n</video>\n`);
+      inlineStatus.textContent = 'Video toegevoegd.';
+    } catch (err: any) {
+      inlineStatus.textContent = err.message ?? 'Upload mislukt';
+    }
+  });
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    errorEl.classList.add('hidden');
+    const fd = new FormData(form);
+
+    const lat = fd.get('locLat');
+    const lon = fd.get('locLon');
+    const name = fd.get('locName');
+    const location =
+      lat && lon
+        ? { lat: Number(lat), lon: Number(lon), name: (name as string) || null }
+        : null;
+
+    const coverKey = (fd.get('coverKey') as string) || '';
+    const cover = coverKey ? { key: coverKey, alt: (fd.get('coverAlt') as string) || '' } : null;
+
+    const payload = {
+      id: (fd.get('id') as string) || undefined,
+      title: fd.get('title') as string,
+      slug: (fd.get('slug') as string) || undefined,
+      category: fd.get('category') as string,
+      description: (fd.get('description') as string) || undefined,
+      body: fd.get('body') as string,
+      pubDate: fd.get('pubDate') as string,
+      tags: (fd.get('tags') as string)
+        .split(',')
+        .map((t) => t.trim())
+        .filter(Boolean),
+      draft: fd.get('draft') === 'on',
+      location,
+      cover,
+      placeFact: (fd.get('placeFact') as string) || undefined,
+    };
+
+    const res = await fetch('/api/admin/posts', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    const data = (await res.json()) as { error?: string };
+    if (!res.ok) {
+      errorEl.textContent = data.error || 'Opslaan mislukt';
+      errorEl.classList.remove('hidden');
+      return;
+    }
+    window.location.href = '/beheer/';
+  });
+
+  document.getElementById('delete-btn')?.addEventListener('click', async () => {
+    const id = (document.querySelector('input[name="id"]') as HTMLInputElement).value;
+    if (!id) return;
+    if (!confirm('Deze post definitief verwijderen?')) return;
+    const res = await fetch(`/api/admin/posts?id=${encodeURIComponent(id)}`, { method: 'DELETE' });
+    if (res.ok) {
+      window.location.href = '/beheer/';
+    } else {
+      alert('Verwijderen mislukt');
+    }
+  });
+</script>
