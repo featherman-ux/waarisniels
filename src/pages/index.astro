@@ -1,13 +1,16 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import '../styles/home.css';
-import { listPosts } from '../lib/db';
+import { listPosts, getLatestLocatedPost } from '../lib/db';
 import BlogPostPreview from '../components/BlogPostPreview.astro';
 import HomePopup from '../components/HomePopup.astro';
 import { VibeWidget } from '../components/VibeWidget.jsx';
 
 const db = Astro.locals.runtime.env.DB;
-const latestPosts = await listPosts(db, { limit: 3 });
+const [latestPosts, latestLocated] = await Promise.all([
+  listPosts(db, { limit: 3 }),
+  getLatestLocatedPost(db),
+]);
 ---
 
 <BaseLayout title="Waar is Niels?" description="Welkom op mijn reisblog">
@@ -30,6 +33,20 @@ const latestPosts = await listPosts(db, { limit: 3 });
 
   <!-- Popup -->
   <HomePopup />
+
+  <!-- Waar is Niels nu -->
+  {latestLocated && (
+    <section class="waar-is-niels-nu">
+      <h2>Waar is Niels nu?</h2>
+      <p class="location">
+        {latestLocated.location?.name ?? 'Onderweg'}
+        {' · '}
+        {latestLocated.pubDate.toLocaleDateString('nl-NL', { day: 'numeric', month: 'long' })}
+      </p>
+      {latestLocated.placeFact && <p class="fact">{latestLocated.placeFact}</p>}
+      <a href={`/blog/${latestLocated.slug}/`}>Lees de laatste post →</a>
+    </section>
+  )}
 
   <!-- Map link -->
   <div class="map-link">

@@ -161,12 +161,14 @@ const pageDescription = "Eenvoudige, snelle kaart met mijn route en stops (bus, 
       detectRetina: true,
     }).addTo(map);
 
-    const [routeRes, placesRes] = await Promise.all([
+    const [routeRes, placesRes, postsRes] = await Promise.all([
       fetch('/data/route.geojson'),
       fetch('/data/places.json'),
+      fetch('/api/map-posts'),
     ]);
     const routeGeo = routeRes.ok ? await routeRes.json() : null;
     const places = placesRes.ok ? await placesRes.json() : [];
+    const postsGeo = postsRes.ok ? await postsRes.json() : null;
 
     if (routeGeo) {
       const rootStyles = getComputedStyle(document.documentElement);
@@ -217,6 +219,28 @@ const pageDescription = "Eenvoudige, snelle kaart met mijn route en stops (bus, 
     });
 
     const group = L.featureGroup(markers);
+
+    // Tweede laag: blogposts met een locatie, uit D1. Andere kleur dan de vaste
+    // route-stops, klik linkt door naar de post.
+    const postFeatures = postsGeo?.features ?? [];
+    const postMarkers = postFeatures.map((f) => {
+      const [lon, lat] = f.geometry.coordinates;
+      const mk = L.circleMarker([lat, lon], {
+        radius: 9,
+        color: '#fff',
+        weight: 2,
+        fillColor: '#ffb703',
+        fillOpacity: 1,
+      }).addTo(map);
+      mk.bindPopup(
+        `<strong>${f.properties.title}</strong><br><a href="/blog/${f.properties.slug}/">Lees de post →</a>`
+      );
+      return mk;
+    });
+
+    if (postMarkers.length) {
+      group.addLayer(L.featureGroup(postMarkers));
+    }
     if (group.getBounds().isValid()) {
       map.fitBounds(group.getBounds().pad(0.1));
     }
@@ -228,7 +252,13 @@ const pageDescription = "Eenvoudige, snelle kaart met mijn route en stops (bus, 
       aiPanel.textContent = defaultHighlight;
     }
 
-    if (currentPlace && aiPanel) {
+    // Bij voorkeur het gecachete weetje van de nieuwste locatie-post (geen live
+    // AI-call per paginabezoek meer). Alleen als er nog geen enkele locatie-post
+    // is, terugvallen op de oude live /api/ai-place-aanroep voor de vaste route.
+    const latestPostFact = postFeatures[postFeatures.length - 1]?.properties?.placeFact;
+    if (latestPostFact && aiPanel) {
+      aiPanel.textContent = latestPostFact;
+    } else if (currentPlace && aiPanel) {
       try {
         const res = await fetch('/api/ai-place', {
           method: 'POST',

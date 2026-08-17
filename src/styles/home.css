@@ -87,3 +87,34 @@
   color: var(--home-blue);
   text-decoration: underline;
 }
+
+.waar-is-niels-nu {
+  background: var(--home-blue);
+  color: #fff;
+  border-radius: 0.75rem;
+  padding: 1.25rem 1.5rem;
+  max-width: 1200px;
+  margin: 0 auto 1.5rem;
+  text-align: center;
+}
+
+.waar-is-niels-nu h2 {
+  font-size: 1.3rem;
+  margin-bottom: 0.4rem;
+}
+
+.waar-is-niels-nu .location {
+  color: var(--home-orange);
+  font-weight: 600;
+}
+
+.waar-is-niels-nu .fact {
+  opacity: 0.9;
+  margin: 0.5rem auto 0.75rem;
+  max-width: 640px;
+}
+
+.waar-is-niels-nu a {
+  color: #fff;
+  text-decoration: underline;
+}
