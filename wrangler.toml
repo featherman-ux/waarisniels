@@ -27,11 +27,6 @@ database_id = "521457be-9610-4e58-9793-b29e78fc0fb9"
 binding = "MEDIA"
 bucket_name = "waarisniels-media"
 
-# TODO stap 4: vectorize weg (chatbot verdwijnt)
-[[vectorize]]
-binding = "VECTORIZE_INDEX" # This is how we'll access the index in our code
-index_name = "travel-blog-index"
-
 # Add this if you don't have it already, for the AI model access
 [ai]
 binding = "AI"

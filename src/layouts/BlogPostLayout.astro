@@ -5,8 +5,6 @@ import { renderMarkdown } from '../lib/markdown';
 import { mediaUrl } from '../lib/media';
 import BaseLayout from './BaseLayout.astro';
 import { Comments, ViewCounter, LikeButton } from '../components/EnhancedComponents.jsx';
-import { AIChatBot } from '../components/AIComponents.jsx';
-import { AISummary } from '../components/AISummary.jsx';
 import Chip from '../components/Chip.astro';
 
 export interface Props {
@@ -92,8 +90,6 @@ const readNextPosts = await getRelatedPosts(db, post, 2);
       {description && <p class="text-lg text-subtle">{description}</p>}
     </header>
 
-    <AISummary client:load postSlug={post.slug} postContent={post.body} />
-
     <section class="prose-wrap mb-12" set:html={contentHtml} />
 
     <footer>
@@ -126,9 +122,6 @@ const readNextPosts = await getRelatedPosts(db, post, 2);
         </div>
       </section>
     )}
-
-    {/* AI Chatbot floating widget */}
-    <AIChatBot apiUrl={siteUrl} client:idle />
   </article>
 </BaseLayout>
 
