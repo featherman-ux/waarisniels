@@ -1,9 +1,8 @@
 import type { APIContext } from 'astro';
 import { jsonResponse } from './_utils';
+import { generatePlaceFact, PLACE_FACT_FALLBACK } from '../../lib/place-fact';
 
 export const prerender = false;
-
-const FALLBACK = 'Geen extra weetje beschikbaar – maar dit plekje blijft sowieso magisch mooi!';
 
 export async function OPTIONS() {
   return jsonResponse(null, 204);
@@ -22,20 +21,10 @@ export async function POST(context: APIContext) {
       return jsonResponse({ error: 'Missing `place` in request body' }, 400);
     }
 
-    const systemPrompt = `Je bent een enthousiaste reisbuddy. Geef één korte alinea (max 35 woorden) over de genoemde plek, met een leuk weetje en waarom het bijzonder is voor reizigers. Gebruik een warme toon, in het Nederlands.`;
-    const userPrompt = `Vertel iets speciaals over ${place}. Extra context: ${notes ?? 'geen extra context'}.`;
-
-    const response = await ai.run('@cf/meta/llama-3.1-8b-instruct', {
-      messages: [
-        { role: 'system', content: systemPrompt },
-        { role: 'user', content: userPrompt },
-      ],
-    });
-
-    const hint = response.response?.trim();
-    return jsonResponse({ highlight: hint || FALLBACK });
+    const highlight = await generatePlaceFact(ai, place, notes);
+    return jsonResponse({ highlight });
   } catch (error) {
     console.error('ai-place endpoint failed', error);
-    return jsonResponse({ highlight: FALLBACK }, 200);
+    return jsonResponse({ highlight: PLACE_FACT_FALLBACK }, 200);
   }
 }

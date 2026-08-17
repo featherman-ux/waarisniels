@@ -8,6 +8,8 @@ import { listCategories } from '../../lib/db';
 const db = Astro.locals.runtime.env.DB;
 const categories = await listCategories(db);
 ---
+<link slot="head" rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script slot="head" src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" defer></script>
 <BaseLayout title="Nieuwe post" description="Nieuwe blogpost">
   <div class="max-w-4xl mx-auto">
     <h1 class="text-3xl font-bold mb-6">Nieuwe post</h1>

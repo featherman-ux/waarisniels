@@ -91,8 +91,13 @@ const coverPreview = fields.coverKey ? mediaUrl(fields.coverKey) : null;
       <div class="flex-1 space-y-2">
         <input id="cover-file" type="file" accept="image/*" />
         <input type="hidden" id="cover-key" name="coverKey" value={fields.coverKey} />
-        <input id="cover-alt" name="coverAlt" placeholder="Alt-tekst voor de cover" value={fields.coverAlt}
-          class="w-full rounded border px-3 py-2 dark:bg-gray-800" />
+        <div class="flex gap-2">
+          <input id="cover-alt" name="coverAlt" placeholder="Alt-tekst voor de cover" value={fields.coverAlt}
+            class="flex-1 rounded border px-3 py-2 dark:bg-gray-800" />
+          <button type="button" id="cover-alt-btn" class="text-sm underline whitespace-nowrap">
+            ✨ Alt-tekst
+          </button>
+        </div>
         <p id="cover-status" class="text-sm text-gray-500"></p>
       </div>
     </div>
@@ -100,12 +105,18 @@ const coverPreview = fields.coverKey ? mediaUrl(fields.coverKey) : null;
 
   <fieldset class="border rounded p-4">
     <legend class="text-sm font-medium px-1">Locatie (optioneel, voor de kaart)</legend>
+    <p class="text-sm text-gray-500 mb-2">
+      Wordt automatisch ingevuld uit de GPS-gegevens van een geüploade foto. Geen GPS
+      gevonden? Tik op de kaart, of versleep de marker om 'm te corrigeren.
+    </p>
+    <div id="loc-map" class="rounded mb-3" style="height: 220px;"></div>
+    <p id="loc-status" class="text-sm text-gray-500 mb-2"></p>
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
       <input name="locName" placeholder="Plaatsnaam" value={fields.locName}
         class="rounded border px-3 py-2 dark:bg-gray-800" />
-      <input name="locLat" type="number" step="any" placeholder="Breedtegraad" value={fields.locLat}
+      <input id="loc-lat" name="locLat" type="number" step="any" placeholder="Breedtegraad" value={fields.locLat}
         class="rounded border px-3 py-2 dark:bg-gray-800" />
-      <input name="locLon" type="number" step="any" placeholder="Lengtegraad" value={fields.locLon}
+      <input id="loc-lon" name="locLon" type="number" step="any" placeholder="Lengtegraad" value={fields.locLon}
         class="rounded border px-3 py-2 dark:bg-gray-800" />
     </div>
   </fieldset>
@@ -151,16 +162,125 @@ const coverPreview = fields.coverKey ? mediaUrl(fields.coverKey) : null;
 </form>
 
 <script>
+  import { gps } from 'exifr';
+
   const form = document.getElementById('post-form') as HTMLFormElement;
   const errorEl = document.getElementById('form-error')!;
 
-  async function upload(file: File): Promise<{ key: string; url: string }> {
+  async function upload(file: File | Blob, filename: string): Promise<{ key: string; url: string }> {
     const fd = new FormData();
-    fd.append('file', file);
+    fd.append('file', file, filename);
     const res = await fetch('/api/admin/upload', { method: 'POST', body: fd });
     const data = (await res.json()) as { key: string; url: string; error?: string };
     if (!res.ok) throw new Error(data.error || 'Upload mislukt');
     return data;
+  }
+
+  // --- Locatie: kaartje + sleepbare marker, gevoed door EXIF-GPS of een tik/sleep ---
+  const locMapEl = document.getElementById('loc-map');
+  const locLatInput = document.getElementById('loc-lat') as HTMLInputElement;
+  const locLonInput = document.getElementById('loc-lon') as HTMLInputElement;
+  const locStatus = document.getElementById('loc-status')!;
+
+  let leafletMap: any;
+  let marker: any;
+
+  function setMarker(lat: number, lon: number, zoom = 12) {
+    locLatInput.value = lat.toFixed(6);
+    locLonInput.value = lon.toFixed(6);
+    if (!leafletMap) return;
+    if (marker) {
+      marker.setLatLng([lat, lon]);
+    } else {
+      // @ts-ignore — Leaflet komt van het CDN-script, geen npm-import
+      marker = L.marker([lat, lon], { draggable: true }).addTo(leafletMap);
+      marker.on('dragend', () => {
+        const pos = marker.getLatLng();
+        locLatInput.value = pos.lat.toFixed(6);
+        locLonInput.value = pos.lng.toFixed(6);
+      });
+    }
+    leafletMap.setView([lat, lon], Math.max(leafletMap.getZoom(), zoom));
+  }
+
+  function initLocationMap() {
+    // @ts-ignore
+    if (typeof L === 'undefined' || !locMapEl) return;
+    const startLat = parseFloat(locLatInput.value) || -2.17;
+    const startLon = parseFloat(locLonInput.value) || -79.92;
+    // @ts-ignore
+    leafletMap = L.map(locMapEl, { scrollWheelZoom: false }).setView(
+      [startLat, startLon],
+      locLatInput.value ? 12 : 3
+    );
+    // @ts-ignore
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap contributors',
+    }).addTo(leafletMap);
+
+    if (locLatInput.value && locLonInput.value) {
+      setMarker(parseFloat(locLatInput.value), parseFloat(locLonInput.value));
+    }
+
+    leafletMap.on('click', (e: any) => setMarker(e.latlng.lat, e.latlng.lng));
+  }
+
+  document.addEventListener('DOMContentLoaded', initLocationMap);
+
+  async function tryAutoLocation(file: File) {
+    if (locLatInput.value && locLonInput.value) return; // niet overschrijven als er al iets staat
+    try {
+      const coords = await gps(file);
+      if (coords?.latitude && coords?.longitude) {
+        setMarker(coords.latitude, coords.longitude);
+        locStatus.textContent = 'Locatie automatisch herkend uit de foto — klopt het niet, versleep de marker.';
+      }
+    } catch {
+      // Geen GPS-EXIF (of geen EXIF-ondersteuning voor dit bestandstype) — geen probleem,
+      // het kaartje blijft gewoon leeg/tik-baar.
+    }
+  }
+
+  // --- Compressie: resize naar max 2000px + WebP, vóór upload (na de EXIF-read hierboven,
+  // want canvas-encoding strípt EXIF — dat is hier ook precies goed voor privacy) ---
+  async function compressImage(file: File, maxDim = 2000, quality = 0.85): Promise<File> {
+    try {
+      const bitmap = await createImageBitmap(file, { imageOrientation: 'from-image' });
+      let { width, height } = bitmap;
+      if (width > maxDim || height > maxDim) {
+        const scale = maxDim / Math.max(width, height);
+        width = Math.round(width * scale);
+        height = Math.round(height * scale);
+      }
+      const canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return file;
+      ctx.drawImage(bitmap, 0, 0, width, height);
+      const blob: Blob | null = await new Promise((resolve) =>
+        canvas.toBlob(resolve, 'image/webp', quality)
+      );
+      if (!blob) return file;
+      const webpName = file.name.replace(/\.[a-zA-Z0-9]+$/, '') + '.webp';
+      return new File([blob], webpName, { type: 'image/webp' });
+    } catch {
+      // Comprimeren mislukt (bv. bestandstype dat de browser niet kan decoderen) —
+      // upload dan gewoon het origineel, beter dan helemaal niets.
+      return file;
+    }
+  }
+
+  // --- Alt-tekst-knopje: op aanvraag, per foto (niet automatisch voor de hele batch) ---
+  async function generateAltText(key: string): Promise<string> {
+    const res = await fetch('/api/admin/alt-text', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ key }),
+    });
+    const data = (await res.json()) as { alt?: string; error?: string };
+    if (!res.ok || !data.alt) throw new Error(data.error || 'Alt-tekst genereren mislukt');
+    return data.alt;
   }
 
   const coverFile = document.getElementById('cover-file') as HTMLInputElement;
@@ -168,19 +288,41 @@ const coverPreview = fields.coverKey ? mediaUrl(fields.coverKey) : null;
   const coverPreviewWrap = document.getElementById('cover-preview-wrap')!;
   const coverPreviewImg = document.getElementById('cover-preview') as HTMLImageElement;
   const coverStatus = document.getElementById('cover-status')!;
+  const coverAltInput = document.getElementById('cover-alt') as HTMLInputElement;
+  const coverAltBtn = document.getElementById('cover-alt-btn') as HTMLButtonElement;
 
   coverFile?.addEventListener('change', async () => {
     const file = coverFile.files?.[0];
     if (!file) return;
-    coverStatus.textContent = 'Uploaden...';
+    coverStatus.textContent = 'Locatie checken...';
+    await tryAutoLocation(file);
+    coverStatus.textContent = 'Comprimeren en uploaden...';
     try {
-      const { key, url } = await upload(file);
+      const compressed = await compressImage(file);
+      const { key, url } = await upload(compressed, compressed.name);
       coverKeyInput.value = key;
       coverPreviewImg.src = url;
       coverPreviewWrap.classList.remove('hidden');
       coverStatus.textContent = 'Geupload.';
     } catch (err: any) {
       coverStatus.textContent = err.message ?? 'Upload mislukt';
+    }
+  });
+
+  coverAltBtn?.addEventListener('click', async () => {
+    if (!coverKeyInput.value) {
+      coverStatus.textContent = 'Upload eerst een cover-foto.';
+      return;
+    }
+    coverAltBtn.disabled = true;
+    coverStatus.textContent = 'Alt-tekst genereren...';
+    try {
+      coverAltInput.value = await generateAltText(coverKeyInput.value);
+      coverStatus.textContent = 'Alt-tekst ingevuld — overschrijfbaar.';
+    } catch (err: any) {
+      coverStatus.textContent = err.message ?? 'Alt-tekst genereren mislukt';
+    } finally {
+      coverAltBtn.disabled = false;
     }
   });
 
@@ -198,11 +340,39 @@ const coverPreview = fields.coverKey ? mediaUrl(fields.coverKey) : null;
   document.getElementById('inline-photo')?.addEventListener('change', async (e) => {
     const file = (e.target as HTMLInputElement).files?.[0];
     if (!file) return;
-    inlineStatus.textContent = 'Foto uploaden...';
+    inlineStatus.textContent = 'Locatie checken...';
+    await tryAutoLocation(file);
+    inlineStatus.textContent = 'Comprimeren en uploaden...';
     try {
-      const { url } = await upload(file);
-      insertAtCursor(`\n<img src="${url}" alt="" />\n`);
-      inlineStatus.textContent = 'Foto toegevoegd — vul de alt-tekst in de tekst zelf aan.';
+      const compressed = await compressImage(file);
+      const { key, url } = await upload(compressed, compressed.name);
+      const tag = `<img src="${url}" alt="" />`;
+      insertAtCursor(`\n${tag}\n`);
+
+      inlineStatus.textContent = 'Foto toegevoegd. ';
+      const altBtn = document.createElement('button');
+      altBtn.type = 'button';
+      altBtn.className = 'underline';
+      altBtn.textContent = '✨ Alt-tekst voor deze foto';
+      altBtn.addEventListener('click', async () => {
+        altBtn.disabled = true;
+        const prevLabel = altBtn.textContent;
+        altBtn.textContent = 'Genereren...';
+        try {
+          const alt = await generateAltText(key);
+          // De src is uniek (uuid-key), dus deze vervanging raakt alleen déze foto.
+          bodyEl.value = bodyEl.value.replace(
+            `src="${url}" alt=""`,
+            `src="${url}" alt="${alt.replace(/"/g, '&quot;')}"`
+          );
+          inlineStatus.textContent = `Alt-tekst ingevuld: "${alt}" — overschrijfbaar in de tekst.`;
+        } catch (err: any) {
+          altBtn.disabled = false;
+          altBtn.textContent = prevLabel;
+          inlineStatus.textContent = err.message ?? 'Alt-tekst genereren mislukt';
+        }
+      });
+      inlineStatus.appendChild(altBtn);
     } catch (err: any) {
       inlineStatus.textContent = err.message ?? 'Upload mislukt';
     }
@@ -213,7 +383,7 @@ const coverPreview = fields.coverKey ? mediaUrl(fields.coverKey) : null;
     if (!file) return;
     inlineStatus.textContent = 'Video uploaden (kan even duren)...';
     try {
-      const { url } = await upload(file);
+      const { url } = await upload(file, file.name);
       insertAtCursor(`\n<video controls poster="">\n  <source src="${url}" type="${file.type}" />\n</video>\n`);
       inlineStatus.textContent = 'Video toegevoegd.';
     } catch (err: any) {

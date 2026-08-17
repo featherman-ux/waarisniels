@@ -17,6 +17,8 @@ if (!post) {
   return new Response(null, { status: 404, statusText: `Post niet gevonden: ${id}` });
 }
 ---
+<link slot="head" rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script slot="head" src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" defer></script>
 <BaseLayout title={`Bewerken: ${post.title}`} description="Post bewerken">
   <div class="max-w-4xl mx-auto">
     <h1 class="text-3xl font-bold mb-6">Bewerken: {post.title}</h1>

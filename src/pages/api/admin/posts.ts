@@ -4,6 +4,7 @@
 import type { APIContext } from 'astro';
 import { upsertPost, deletePost, uniqueSlug, slugify, slugTaken } from '../../../lib/db';
 import { jsonResponse } from '../_utils';
+import { generatePlaceFact } from '../../../lib/place-fact';
 
 export const prerender = false;
 
@@ -50,6 +51,13 @@ export async function POST(context: APIContext) {
     slug = await uniqueSlug(db, payload.title, payload.id);
   }
 
+  let placeFact = payload.placeFact?.trim() || null;
+  const locationName = payload.location?.name?.trim();
+  if (!placeFact && locationName) {
+    const ai = context.locals.runtime.env.AI;
+    placeFact = await generatePlaceFact(ai, locationName);
+  }
+
   try {
     const id = await upsertPost(db, {
       id: payload.id,
@@ -62,7 +70,7 @@ export async function POST(context: APIContext) {
       tags: payload.tags ?? [],
       location: payload.location ?? null,
       cover: payload.cover ?? null,
-      placeFact: payload.placeFact?.trim() || null,
+      placeFact,
       draft: !!payload.draft,
     });
     return jsonResponse({ ok: true, id, slug });
