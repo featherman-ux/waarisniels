@@ -95,19 +95,17 @@ curl -I https://media.waarisniels.nl/images/homepage.jpeg   # verwacht: 200
 > Gebruik **niet** de `*.r2.dev`-URL die R2 ook aanbiedt: die is gerate-limit en niet voor
 > productie bedoeld.
 
-## 4. Bindings in het Pages-project — dashboard
+## 4. Bindings in het Pages-project — vervallen
 
-De deploy loopt nu via `cloudflare/pages-action@v1`, en die action leest **geen** bindings
-uit `wrangler.toml`. Zolang dat zo is, moeten D1 en R2 óók in het dashboard staan:
+~~Handmatig bindings zetten in het dashboard~~ — niet meer nodig. `.github/workflows/deploy.yml`
+gebruikt nu `wrangler pages deploy` in plaats van `cloudflare/pages-action@v1`, en die leest
+D1/R2/KV/AI-bindings rechtstreeks uit `wrangler.toml`. Eén bestand, één waarheid.
 
-1. **Workers & Pages → `waarisniels` → Settings → Functions → Bindings**
-2. **D1 database binding**: variabele `DB` → database `waarisniels-db`
-3. **R2 bucket binding**: variabele `MEDIA` → bucket `waarisniels-media`
-4. Doe dit voor **Production én Preview**.
-5. Daarna één keer opnieuw deployen (bindings gelden pas vanaf de volgende deploy).
-
-In stap 3 van de rebuild stappen we in de workflow over op `wrangler pages deploy`; daarna
-is `wrangler.toml` de enige plek waar bindings staan en kan deze dashboard-stap vervallen.
+> Let op: `wrangler.toml` heeft geen `[env.preview]`-blok, dus preview-deployments (elke
+> branch die niet `main` is) binden aan **dezelfde** productie-D1 en -R2 als main. Een
+> preview-URL (`*.pages.dev`) met een onbeveiligde `/beheer` kan dus net zo goed echte
+> posts aanmaken/verwijderen. Zie de achterdeur-waarschuwing in §5 — die geldt hierdoor
+> dubbel zo hard.
 
 ## 5. Cloudflare Access op /beheer — dashboard
 
@@ -180,13 +178,18 @@ En dan het `[[vectorize]]`-blok uit `wrangler.toml` halen.
 
 | # | Wat | Waar | Klaar? |
 |---|---|---|---|
-| 1 | `wrangler d1 create` + `database_id` in wrangler.toml | terminal | ☐ |
-| 2 | `npm run db:migrate` | terminal | ☐ |
-| 3 | `wrangler r2 bucket create --location weur` | terminal | ☐ |
-| 4 | `media.waarisniels.nl` aan bucket koppelen | dashboard | ☐ |
-| 5 | `DB` + `MEDIA` binding in Pages-project (prod + preview) | dashboard | ☐ |
+| 1 | `wrangler d1 create` + `database_id` in wrangler.toml | terminal | ✅ |
+| 2 | `npm run db:migrate` | terminal | ✅ |
+| 3 | `wrangler r2 bucket create --location weur` | terminal | ✅ |
+| 4 | `media.waarisniels.nl` aan bucket koppelen | dashboard | ✅ |
+| 5 | ~~`DB` + `MEDIA` binding in Pages-project~~ | — | vervallen, zie §4 |
 | 6 | Google login method in Zero Trust | dashboard | ☐ |
 | 7 | Access-app op `beheer` + policy op je e-mail | dashboard | ☐ |
 | 8 | Access-app op `api/admin` | dashboard | ☐ |
 | 9 | pages.dev-achterdeur dicht | dashboard | ☐ |
 | 10 | `vectorize delete` (later, stap 4) | terminal | ☐ |
+| 11 | `CLOUDFLARE_API_TOKEN` secret in GitHub heeft Pages-edit rechten | GitHub repo settings | ☐ (check) |
+
+> Punten 6-9 zijn de enige echte blokkade die nog openstaat: zolang die er niet zijn,
+> is `/beheer` publiek schrijfbaar zodra dit naar `main` gaat. Niet mergen/deployen
+> voor die vier vinkjes staan.
