@@ -27,9 +27,10 @@ jobs:
         run: npm run build  # This runs "astro build" and creates the /dist folder
 
       - name: Deploy to Cloudflare Pages
-        uses: cloudflare/pages-action@v1
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: 41e06ef76f253fc7135939d93e4e12df
-          projectName: "waarisniels"
-          directory: "dist"
+        # wrangler pages deploy (i.p.v. pages-action@v1) leest de D1/R2/KV/AI-bindings
+        # rechtstreeks uit wrangler.toml, zodat dat bestand de enige waarheid is en de
+        # handmatige dashboard-bindings (docs/cloudflare-setup.md §4) kunnen vervallen.
+        run: npx wrangler pages deploy dist --project-name=waarisniels
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: 41e06ef76f253fc7135939d93e4e12df

@@ -1,0 +1,16 @@
+---
+// Beveiliging loopt via Cloudflare Access op het pad /beheer (zie
+// docs/cloudflare-setup.md §5) — deze pagina doet zelf geen auth-check.
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PostForm from '../../components/beheer/PostForm.astro';
+import { listCategories } from '../../lib/db';
+
+const db = Astro.locals.runtime.env.DB;
+const categories = await listCategories(db);
+---
+<BaseLayout title="Nieuwe post" description="Nieuwe blogpost">
+  <div class="max-w-4xl mx-auto">
+    <h1 class="text-3xl font-bold mb-6">Nieuwe post</h1>
+    <PostForm categories={categories} />
+  </div>
+</BaseLayout>

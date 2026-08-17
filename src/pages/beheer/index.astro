@@ -1,0 +1,50 @@
+---
+// Beveiliging loopt via Cloudflare Access op het pad /beheer (zie
+// docs/cloudflare-setup.md §5) — deze pagina doet zelf geen auth-check.
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { listPosts } from '../../lib/db';
+
+const db = Astro.locals.runtime.env.DB;
+const posts = await listPosts(db, { limit: 200, includeDrafts: true });
+---
+<BaseLayout title="Beheer" description="Posts beheren">
+  <div class="max-w-4xl mx-auto">
+    <div class="flex items-center justify-between mb-6">
+      <h1 class="text-3xl font-bold">Beheer</h1>
+      <a href="/beheer/nieuw/" class="rounded bg-gray-900 text-white px-4 py-2 font-semibold hover:opacity-90 dark:bg-gray-100 dark:text-gray-900">
+        + Nieuwe post
+      </a>
+    </div>
+
+    <table class="w-full text-left border-collapse">
+      <thead>
+        <tr class="border-b text-sm text-gray-500">
+          <th class="py-2">Titel</th>
+          <th class="py-2">Datum</th>
+          <th class="py-2">Status</th>
+          <th class="py-2"></th>
+        </tr>
+      </thead>
+      <tbody>
+        {posts.map((p) => (
+          <tr class="border-b">
+            <td class="py-3">{p.title}</td>
+            <td class="py-3 text-sm text-gray-500">{p.pubDate.toLocaleDateString('nl-NL')}</td>
+            <td class="py-3">
+              {p.draft ? (
+                <span class="text-xs rounded-full bg-amber-100 text-amber-800 px-2 py-1">Concept</span>
+              ) : (
+                <span class="text-xs rounded-full bg-green-100 text-green-800 px-2 py-1">Live</span>
+              )}
+            </td>
+            <td class="py-3 text-right">
+              <a href={`/beheer/post/${p.id}/`} class="underline text-sm">Bewerken</a>
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+
+    {posts.length === 0 && <p class="text-gray-500 mt-6">Nog geen posts.</p>}
+  </div>
+</BaseLayout>

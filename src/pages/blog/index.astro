@@ -1,10 +1,10 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { getCollection } from 'astro:content';
 import BlogPostPreview from '../../components/BlogPostPreview.astro';
+import { listPosts } from '../../lib/db';
 
-const posts = (await getCollection('blog', ({ data }) => data.draft !== true))
-  .sort((a, b) => new Date(b.data.pubDate).valueOf() - new Date(a.data.pubDate).valueOf());
+const db = Astro.locals.runtime.env.DB;
+const posts = await listPosts(db, { limit: 100 });
 ---
 
 <BaseLayout title="Blog" description="Alle blogposts">

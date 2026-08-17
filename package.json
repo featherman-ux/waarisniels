@@ -8,29 +8,36 @@
     "build": "astro build",
     "preview": "astro preview",
     "astro": "astro",
-    "route": "node scripts/build-route.mjs"
+    "route": "node scripts/build-route.mjs",
+    "db:migrate": "wrangler d1 execute waarisniels-db --remote --file=migrations/0001_init.sql",
+    "db:migrate:local": "wrangler d1 execute waarisniels-db --local --file=migrations/0001_init.sql",
+    "db:query": "wrangler d1 execute waarisniels-db --remote --command",
+    "migrate:content": "node scripts/migrate-content.mjs"
   },
   "dependencies": {
     "@astrojs/mdx": "^4.3.5",
     "@astrojs/react": "^4.3.1",
-    "@astrojs/sitemap": "^3.5.1",
     "@astrojs/tailwind": "^6.0.2",
     "@tailwindcss/typography": "^0.5.16",
     "@types/react": "^19.1.13",
     "@types/react-dom": "^19.1.9",
     "astro": "^5.13.4",
+    "exifr": "^7.1.3",
     "framer-motion": "^12.23.24",
     "glob": "^11.0.3",
     "gray-matter": "^4.0.3",
     "leaflet": "^1.9.4",
+    "marked": "^18.0.9",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "xdm": "^3.4.0"
   },
   "devDependencies": {
+    "@astrojs/check": "^0.9.10",
     "@astrojs/cloudflare": "^12.6.8",
     "@cloudflare/workers-types": "^4.20250826.0",
     "@types/leaflet": "^1.9.20",
+    "typescript": "^5.9.3",
     "wrangler": "^4.33.0"
   }
 }

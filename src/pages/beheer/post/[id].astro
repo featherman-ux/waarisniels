@@ -1,0 +1,25 @@
+---
+// Beveiliging loopt via Cloudflare Access op het pad /beheer (zie
+// docs/cloudflare-setup.md §5) — deze pagina doet zelf geen auth-check.
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import PostForm from '../../../components/beheer/PostForm.astro';
+import { getPostById, listCategories } from '../../../lib/db';
+
+const { id } = Astro.params;
+if (!id) {
+  return new Response(null, { status: 400, statusText: 'id ontbreekt' });
+}
+
+const db = Astro.locals.runtime.env.DB;
+const [post, categories] = await Promise.all([getPostById(db, id), listCategories(db)]);
+
+if (!post) {
+  return new Response(null, { status: 404, statusText: `Post niet gevonden: ${id}` });
+}
+---
+<BaseLayout title={`Bewerken: ${post.title}`} description="Post bewerken">
+  <div class="max-w-4xl mx-auto">
+    <h1 class="text-3xl font-bold mb-6">Bewerken: {post.title}</h1>
+    <PostForm post={post} categories={categories} />
+  </div>
+</BaseLayout>
