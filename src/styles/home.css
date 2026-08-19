@@ -8,13 +8,9 @@
 
 .home-hero {
   position: relative;
-  width: 100%;
-  min-height: 350px;
-  max-height: 500px;
+  height: min(78vh, 720px);
   overflow: hidden;
-  border-radius: var(--radius-lg);
-  margin-top: 0.75rem;
-  box-shadow: var(--shadow-md);
+  margin-top: -2rem; /* full-bleed: kruipt onder BaseLayout's main-padding uit */
 }
 
 .home-hero img {
@@ -24,7 +20,6 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transform: scale(1.02);
 }
 
 .home-hero::after {
@@ -33,7 +28,7 @@
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(to top, rgba(2, 48, 71, 0.75), transparent 55%);
+  background: linear-gradient(to top, rgba(2, 48, 71, 0.8), transparent 55%);
   pointer-events: none;
 }
 
@@ -43,7 +38,7 @@
   z-index: 1;
   display: grid;
   place-items: end center;
-  padding-bottom: 2.5rem;
+  padding-bottom: clamp(2rem, 6vh, 4rem);
   color: #fff;
   text-align: center;
   padding-inline: 1rem;
@@ -51,15 +46,40 @@
 
 .hero-text h1 {
   font-family: 'Playfair Display', serif;
-  font-size: 2.3rem;
-  margin-bottom: 0.4rem;
-  line-height: 1.2;
+  font-size: var(--step-4);
+  letter-spacing: -0.02em;
+  margin-bottom: 0.5rem;
+  line-height: 1.1;
   text-wrap: balance;
+}
+
+.hero-accent {
+  position: relative;
+}
+
+.hero-accent::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -0.08em;
+  height: 0.08em;
+  background: var(--amber);
+  border-radius: var(--radius-full);
 }
 
 .hero-text p {
   font-size: 1.05rem;
   opacity: 0.95;
+}
+
+.hero-link {
+  display: inline-block;
+  margin-top: 1rem;
+  color: #fff;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 
 .posts {
@@ -103,32 +123,65 @@
   text-decoration: underline;
 }
 
+/* "Waar is Niels nu" — het meest eigen element van de site, dus met gewicht:
+   pulserende locatiedot, plaatsnaam in Playfair, weetje als cursieve quote. */
 .waar-is-niels-nu {
   background: var(--ink);
   color: #fff;
   border-radius: var(--radius-lg);
-  padding: 1.25rem 1.5rem;
+  padding: 2rem 1.5rem;
   text-align: center;
 }
 
-.waar-is-niels-nu h2 {
+.waar-is-niels-nu .location {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
   font-family: 'Playfair Display', serif;
-  font-size: 1.3rem;
-  margin-bottom: 0.4rem;
+  font-size: var(--step-2);
+  margin-bottom: 0.25rem;
 }
 
-.waar-is-niels-nu .location {
-  color: var(--amber);
-  font-weight: 600;
+.waar-is-niels-nu .location-dot {
+  width: 12px;
+  height: 12px;
+  background: var(--amber);
+  border-radius: 50%;
+  margin-right: 0;
+  flex-shrink: 0;
+}
+
+.waar-is-niels-nu .date {
+  opacity: 0.75;
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
 }
 
 .waar-is-niels-nu .fact {
+  font-style: italic;
   opacity: 0.9;
-  margin: 0.5rem auto 0.75rem;
+  margin: 0 auto 0.5rem;
   max-width: 640px;
+  text-wrap: pretty;
+}
+
+.waar-is-niels-nu .coords {
+  font-size: 0.8rem;
+  opacity: 0.6;
+  font-variant-numeric: tabular-nums;
+  margin-bottom: 1rem;
 }
 
 .waar-is-niels-nu a {
   color: #fff;
+  font-weight: 600;
   text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+@media (max-width: 640px) {
+  .home-hero {
+    margin-top: -1.5rem;
+  }
 }

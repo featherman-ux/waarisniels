@@ -2,6 +2,7 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import '../styles/home.css';
 import { listPosts, getLatestLocatedPost } from '../lib/db';
+import { mediaUrl, mediaSrcSet } from '../lib/media';
 import BlogPostPreview from '../components/BlogPostPreview.astro';
 import HomePopup from '../components/HomePopup.astro';
 import { VibeWidget } from '../components/VibeWidget.jsx';
@@ -11,6 +12,17 @@ const [latestPosts, latestLocated] = await Promise.all([
   listPosts(db, { limit: 3 }),
   getLatestLocatedPost(db),
 ]);
+
+// Hero volgt de nieuwste post met een cover — homepage vernieuwt zichzelf bij elke
+// post (bewuste keuze, zie DESIGN_HANDOFF §6.2). Valt terug op de vaste foto als
+// geen enkele van de laatste posts een cover heeft.
+const heroPost = latestPosts.find((p) => p.cover?.key) ?? null;
+const heroImgSrc = heroPost
+  ? mediaUrl(heroPost.cover!.key, { width: 1920 })
+  : '/images/homepage.jpeg';
+const heroImgSrcSet = heroPost ? mediaSrcSet(heroPost.cover!.key, [768, 1280, 1920]) : undefined;
+const heroImgAlt = heroPost ? (heroPost.cover!.alt ?? heroPost.title) : 'Waar is Niels?';
+const heroHref = heroPost ? `/blog/${heroPost.slug}/` : null;
 ---
 
 <BaseLayout title="Waar is Niels?" description="Welkom op mijn reisblog">
@@ -19,15 +31,22 @@ const [latestPosts, latestLocated] = await Promise.all([
 
   <!-- Homepage-hero: eigen klassenaam (home-hero), losstaand van het gedeelde
        .hero-figuur op postpagina's (die twee botsten eerder qua CSS). -->
-  <section class="home-hero">
+  <section class="home-hero full-bleed">
     <img
-      src="/images/homepage.jpeg"
-      alt="Nieuwe hero-afbeelding voor de homepage"
+      src={heroImgSrc}
+      srcset={heroImgSrcSet}
+      sizes="100vw"
+      alt={heroImgAlt}
+      loading="eager"
+      fetchpriority="high"
     />
     <div class="hero-text">
       <div>
-        <h1>Waar is Niels?</h1>
+        <h1>Waar is <span class="hero-accent">Niels</span>?</h1>
         <p>Voorlopig geen updates meer vrees ik!</p>
+        {heroHref && (
+          <a href={heroHref} class="hero-link">Bekijk de laatste post →</a>
+        )}
       </div>
     </div>
   </section>
@@ -38,13 +57,15 @@ const [latestPosts, latestLocated] = await Promise.all([
   <!-- Waar is Niels nu -->
   {latestLocated && (
     <section class="waar-is-niels-nu">
-      <h2>Waar is Niels nu?</h2>
       <p class="location">
+        <span class="location-dot" aria-hidden="true"></span>
         {latestLocated.location?.name ?? 'Onderweg'}
-        {' · '}
-        {latestLocated.pubDate.toLocaleDateString('nl-NL', { day: 'numeric', month: 'long' })}
       </p>
-      {latestLocated.placeFact && <p class="fact">{latestLocated.placeFact}</p>}
+      <p class="date">{latestLocated.pubDate.toLocaleDateString('nl-NL', { day: 'numeric', month: 'long' })}</p>
+      {latestLocated.placeFact && <p class="fact">&ldquo;{latestLocated.placeFact}&rdquo;</p>}
+      {latestLocated.location && (
+        <p class="coords">{latestLocated.location.lat.toFixed(2)}°, {latestLocated.location.lon.toFixed(2)}°</p>
+      )}
       <a href={`/blog/${latestLocated.slug}/`}>Lees de laatste post →</a>
     </section>
   )}
@@ -61,7 +82,7 @@ const [latestPosts, latestLocated] = await Promise.all([
     <h2>Laatste blogposts</h2>
     {latestPosts.length > 0 ? (
       <div class="grid-posts">
-        {latestPosts.map(post => (<BlogPostPreview post={post} />))}
+        {latestPosts.map((post, i) => (<BlogPostPreview post={post} eager={i === 0} />))}
       </div>
     ) : (
       <p style="text-align:center;">Nog geen blogposts beschikbaar.</p>
