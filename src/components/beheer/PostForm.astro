@@ -37,18 +37,18 @@ const coverPreview = fields.coverKey ? mediaUrl(fields.coverKey) : null;
   <div>
     <label class="block text-sm font-medium mb-1" for="title">Titel *</label>
     <input id="title" name="title" required value={fields.title}
-      class="w-full rounded border px-3 py-2 dark:bg-gray-800" />
+      class="w-full rounded border px-3 py-2 bg-card" />
   </div>
 
   <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
     <div>
       <label class="block text-sm font-medium mb-1" for="slug">Slug (leeg = automatisch)</label>
       <input id="slug" name="slug" value={fields.slug}
-        class="w-full rounded border px-3 py-2 dark:bg-gray-800" />
+        class="w-full rounded border px-3 py-2 bg-card" />
     </div>
     <div>
       <label class="block text-sm font-medium mb-1" for="category">Categorie</label>
-      <select id="category" name="category" class="w-full rounded border px-3 py-2 dark:bg-gray-800">
+      <select id="category" name="category" class="w-full rounded border px-3 py-2 bg-card">
         {categories.map((c) => (
           <option value={c.slug} selected={c.slug === fields.category}>{c.label}</option>
         ))}
@@ -60,7 +60,7 @@ const coverPreview = fields.coverKey ? mediaUrl(fields.coverKey) : null;
     <div>
       <label class="block text-sm font-medium mb-1" for="pubDate">Publicatiedatum *</label>
       <input id="pubDate" name="pubDate" type="date" required value={fields.pubDate}
-        class="w-full rounded border px-3 py-2 dark:bg-gray-800" />
+        class="w-full rounded border px-3 py-2 bg-card" />
     </div>
     <div class="flex items-end">
       <label class="inline-flex items-center gap-2">
@@ -73,13 +73,13 @@ const coverPreview = fields.coverKey ? mediaUrl(fields.coverKey) : null;
   <div>
     <label class="block text-sm font-medium mb-1" for="description">Korte omschrijving</label>
     <textarea id="description" name="description" rows="2"
-      class="w-full rounded border px-3 py-2 dark:bg-gray-800">{fields.description}</textarea>
+      class="w-full rounded border px-3 py-2 bg-card">{fields.description}</textarea>
   </div>
 
   <div>
     <label class="block text-sm font-medium mb-1" for="tags">Tags (komma-gescheiden)</label>
     <input id="tags" name="tags" value={fields.tags}
-      class="w-full rounded border px-3 py-2 dark:bg-gray-800" />
+      class="w-full rounded border px-3 py-2 bg-card" />
   </div>
 
   <fieldset class="border rounded p-4">
@@ -93,31 +93,31 @@ const coverPreview = fields.coverKey ? mediaUrl(fields.coverKey) : null;
         <input type="hidden" id="cover-key" name="coverKey" value={fields.coverKey} />
         <div class="flex gap-2">
           <input id="cover-alt" name="coverAlt" placeholder="Alt-tekst voor de cover" value={fields.coverAlt}
-            class="flex-1 rounded border px-3 py-2 dark:bg-gray-800" />
+            class="flex-1 rounded border px-3 py-2 bg-card" />
           <button type="button" id="cover-alt-btn" class="text-sm underline whitespace-nowrap">
             ✨ Alt-tekst
           </button>
         </div>
-        <p id="cover-status" class="text-sm text-gray-500"></p>
+        <p id="cover-status" class="text-sm text-text-subtle"></p>
       </div>
     </div>
   </fieldset>
 
   <fieldset class="border rounded p-4">
     <legend class="text-sm font-medium px-1">Locatie (optioneel, voor de kaart)</legend>
-    <p class="text-sm text-gray-500 mb-2">
+    <p class="text-sm text-text-subtle mb-2">
       Wordt automatisch ingevuld uit de GPS-gegevens van een geüploade foto. Geen GPS
       gevonden? Tik op de kaart, of versleep de marker om 'm te corrigeren.
     </p>
     <div id="loc-map" class="rounded mb-3" style="height: 220px;"></div>
-    <p id="loc-status" class="text-sm text-gray-500 mb-2"></p>
+    <p id="loc-status" class="text-sm text-text-subtle mb-2"></p>
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
       <input name="locName" placeholder="Plaatsnaam" value={fields.locName}
-        class="rounded border px-3 py-2 dark:bg-gray-800" />
+        class="rounded border px-3 py-2 bg-card" />
       <input id="loc-lat" name="locLat" type="number" step="any" placeholder="Breedtegraad" value={fields.locLat}
-        class="rounded border px-3 py-2 dark:bg-gray-800" />
+        class="rounded border px-3 py-2 bg-card" />
       <input id="loc-lon" name="locLon" type="number" step="any" placeholder="Lengtegraad" value={fields.locLon}
-        class="rounded border px-3 py-2 dark:bg-gray-800" />
+        class="rounded border px-3 py-2 bg-card" />
     </div>
   </fieldset>
 
@@ -136,26 +136,26 @@ const coverPreview = fields.coverKey ? mediaUrl(fields.coverKey) : null;
       </div>
     </div>
     <textarea id="body" name="body" required rows="18"
-      class="w-full rounded border px-3 py-2 font-mono text-sm dark:bg-gray-800">{fields.body}</textarea>
-    <p id="inline-status" class="text-sm text-gray-500 mt-1"></p>
-    <div id="inline-photos-list" class="text-sm text-gray-500 mt-1 space-y-1"></div>
+      class="w-full rounded border px-3 py-2 font-mono text-sm bg-card">{fields.body}</textarea>
+    <p id="inline-status" class="text-sm text-text-subtle mt-1"></p>
+    <div id="inline-photos-list" class="text-sm text-text-subtle mt-1 space-y-1"></div>
   </div>
 
   <div>
     <label class="block text-sm font-medium mb-1" for="placeFact">Plek-weetje (optioneel)</label>
     <textarea id="placeFact" name="placeFact" rows="2"
-      class="w-full rounded border px-3 py-2 dark:bg-gray-800">{fields.placeFact}</textarea>
+      class="w-full rounded border px-3 py-2 bg-card">{fields.placeFact}</textarea>
   </div>
 
-  <p id="form-error" class="text-red-600 hidden"></p>
+  <p id="form-error" class="text-danger hidden"></p>
 
   <div class="flex items-center gap-3">
-    <button type="submit" class="rounded bg-gray-900 text-white px-4 py-2 font-semibold hover:opacity-90 dark:bg-gray-100 dark:text-gray-900">
+    <button type="submit" class="min-h-[44px] rounded bg-deep text-white px-5 py-2 font-semibold hover:opacity-90">
       Opslaan
     </button>
-    <a href="/beheer/" class="text-sm underline">Annuleren</a>
+    <a href="/beheer/" class="min-h-[44px] inline-flex items-center text-sm underline">Annuleren</a>
     {post && (
-      <button type="button" id="delete-btn" class="ml-auto text-sm text-red-600 underline">
+      <button type="button" id="delete-btn" class="min-h-[44px] ml-auto text-sm text-danger underline">
         Post verwijderen
       </button>
     )}
