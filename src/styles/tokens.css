@@ -1,59 +1,73 @@
 /* src/styles/tokens.css
- * Eén bron voor kleur, radius en schaduw. Tailwind (tailwind.config.cjs) wijst naar
- * dezelfde variabelen, dus `bg-amber` en `var(--amber)` kunnen nooit uit elkaar lopen.
- * Donkermodus is class-based (.dark op <html>, gezet door het inline script in
- * BaseLayout.astro) — geen @media (prefers-color-scheme) meer, dat was de oorzaak van de
- * halfdonkere site.
+ * Fase 1 van TRANSFORMATIE_PLAN.md: bijna monochroom, één accent. Kleur komt uit de
+ * foto's, niet uit de interface — dat was de grootste reden dat de vorige versie
+ * (DESIGN_HANDOFF.md, fases A-G) niet premium aanvoelde ondanks een correct fundament.
+ * Donkermodus blijft class-based (.dark op <html>, script in BaseLayout.astro).
  */
 :root {
-  /* merk */
-  --ink: #023047; /* diep petrol — koppen, body-tekst. 13.5:1 op paper */
-  --deep: #19788f; /* links & interactieve tekst op licht. 4.96:1 — AA */
-  --mid: #219ebc; /* alléén vlakken, randen, grote tekst. 3.1:1 — geen body-tekst */
-  --sky: #8ecae6; /* zachte vlakken, hover-states */
-  --amber: #ffb703; /* accent & primaire knop (met --ink erop: 7.9:1) */
-  --orange: #fb8500; /* tweede accent, kaart-markers (--ink erop: 5.6:1) */
-  --orange-ink: #b25f00; /* oranje als tekst op licht. 4.5:1 — AA */
-  --danger: #c1121f; /* fouten, verwijder-acties. 6.1:1 op paper */
-
-  /* oppervlak */
-  --paper: #fdfcf9; /* warm wit, geen kil #fff */
+  /* oppervlak — bewust terughoudende grijzen i.p.v. een warme petrol-tint */
+  --paper: #ffffff;
+  --paper-alt: #f5f5f7; /* secties die zich moeten onderscheiden van --paper */
   --card: #ffffff;
-  --line: #e6e1d8;
-  --text: var(--ink);
-  --text-subtle: #5b6b75;
+  --line: rgba(0, 0, 0, 0.08); /* haarlijn i.p.v. schaduw */
 
-  /* vorm */
-  --radius-md: 8px;
-  --radius-lg: 16px;
-  --radius-xl: 24px;
+  /* tekst */
+  --ink: #14181b; /* 17.9:1 op wit */
+  --text: var(--ink);
+  --text-subtle: #6e6e73; /* 5.1:1 — AA */
+
+  /* accent: precies één, spaarzaam. amber is uitsluitend een klein signaal
+     (locatiedot, badge) — nooit tekst, nooit een vlak groter dan een badge. */
+  --accent: #19788f; /* 5.1:1 op wit — links, actieve nav, CTA */
+  --amber: #ffb703;
+  --danger: #b3261e; /* fouten/verwijderen — spaarzaam, geen decoratieve rol */
+
+  /* vorm: twee radii, meer niet */
+  --radius-sm: 12px;
+  --radius-lg: 20px;
   --radius-full: 9999px;
 
-  --shadow-sm: 0 1px 2px 0 rgba(2, 48, 71, 0.06);
-  --shadow-md: 0 4px 6px -1px rgba(2, 48, 71, 0.12), 0 2px 4px -2px rgba(2, 48, 71, 0.08);
-  --shadow-lg: 0 10px 15px -3px rgba(2, 48, 71, 0.16), 0 4px 6px -4px rgba(2, 48, 71, 0.1);
+  /* schaduwen bijna weg — houd er één over voor dingen die écht zweven
+     (lightbox, sticky nav bij scroll) */
+  --shadow-float: 0 12px 32px -8px rgba(0, 0, 0, 0.18);
 
-  --transition-fast: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  --ease: cubic-bezier(0.2, 0, 0, 1); /* snel weg, zacht aankomen */
+  --dur-fast: 120ms; /* directe feedback: hover, focus */
+  --dur-move: 400ms; /* iets verandert van plaats: paneel, lightbox, overgang */
 
   /* fluïde typeschaal */
   --step-0: clamp(1rem, 0.95rem + 0.25vw, 1.125rem); /* body */
   --step-1: clamp(1.25rem, 1.15rem + 0.5vw, 1.5rem); /* h3 */
   --step-2: clamp(1.5rem, 1.3rem + 1vw, 2rem); /* h2 */
   --step-3: clamp(2rem, 1.6rem + 2vw, 3.25rem); /* h1 */
-  --step-4: clamp(2.5rem, 1.8rem + 3.5vw, 4.5rem); /* hero */
+  --step-4: clamp(2.75rem, 2rem + 5vw, 6rem); /* hero — groot durven zijn */
+
+  /* --- Compat-aliassen: laat bestaande var(--deep)/var(--shadow-md)/…-verwijzingen
+     door de hele codebase automatisch naar de nieuwe monochrome tokens wijzen, i.p.v.
+     elk <style>-blok en elke inline style handmatig door te lopen. Nieuw CSS schrijft
+     rechtstreeks tegen --accent/--radius-sm/--radius-lg/--shadow-float hierboven. --- */
+  --deep: var(--accent);
+  --mid: var(--text-subtle);
+  --sky: var(--accent);
+  --orange: var(--accent);
+  --orange-ink: var(--accent);
+  --radius-md: var(--radius-sm);
+  --radius-xl: var(--radius-lg);
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 1px 3px rgba(0, 0, 0, 0.06); /* haast onzichtbaar — de haarlijn doet het werk */
+  --shadow-lg: var(--shadow-float); /* het enige "echte" schaduw dat overblijft */
+  --transition-fast: all var(--dur-fast) var(--ease);
 }
 
 .dark {
-  --paper: #071a26;
-  --card: #0e2a3a;
-  --line: #1c3d4f;
-  --text: #e8eef2; /* 15.1:1 */
-  --text-subtle: #94a9b6; /* 7.3:1 */
-  --deep: #8ecae6; /* links in donker: 9.9:1 */
-  --amber: #ffb703; /* 10.2:1 */
-  --danger: #ff8177;
+  --paper: #0b0b0c;
+  --paper-alt: #151517;
+  --card: #151517;
+  --line: rgba(255, 255, 255, 0.1);
+  --ink: #f5f5f7; /* 18.1:1 */
+  --text-subtle: #98989d; /* 6.9:1 */
+  --accent: #6fc2d8; /* 9.7:1 */
+  --danger: #ff6b60;
 
-  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -2px rgba(0, 0, 0, 0.3);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.45), 0 4px 6px -4px rgba(0, 0, 0, 0.3);
+  --shadow-float: 0 12px 32px -8px rgba(0, 0, 0, 0.5);
 }

@@ -21,21 +21,19 @@ const { text, href, class: className = '' } = Astro.props;
 <style>
   .chip {
     display: inline-block;
-    background: var(--card);
+    background: var(--paper-alt);
     border: 1px solid var(--line);
     border-radius: var(--radius-full);
     padding: 0.25rem 0.75rem;
     font-size: 0.875rem;
-    color: var(--text);
+    color: var(--text-subtle);
     text-decoration: none;
     font-weight: 500;
-    transition: var(--transition-fast);
-    box-shadow: var(--shadow-sm);
+    transition: border-color var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease);
   }
 
   .chip:hover {
-    background: var(--paper);
-    border-color: var(--line);
-    transform: translateY(-1px);
+    border-color: var(--accent);
+    color: var(--accent);
   }
 </style>

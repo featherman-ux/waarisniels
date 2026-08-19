@@ -8,24 +8,23 @@ const pageDescription = "Lees meer over mij en het verhaal achter Waar is Niels?
 <BaseLayout title={pageTitle} description={pageDescription}>
   <style>
     header.hero {
-      background: var(--deep);
-      color: #fff;
+      background: var(--paper-alt);
+      color: var(--ink);
       text-align: center;
-      padding: 4rem 1.5rem;
-      margin-bottom: 1.5rem;
+      padding: clamp(3rem, 6vw, 5rem) 1.5rem;
+      margin-bottom: clamp(2.5rem, 5vw, 4rem);
       border-radius: var(--radius-lg);
-      box-shadow: var(--shadow-md);
     }
     header.hero h1 {
-      font-family: 'Playfair Display', serif;
-      font-size: 2.75rem;
+      font-size: var(--step-3);
+      letter-spacing: -0.03em;
       font-weight: 700;
       margin: 0 0 0.5rem;
     }
     header.hero p {
       font-size: 1.125rem;
       margin: 0;
-      opacity: 0.9;
+      color: var(--text-subtle);
     }
 
     .about-grid {
@@ -43,21 +42,16 @@ const pageDescription = "Lees meer over mij en het verhaal achter Waar is Niels?
       background: var(--card);
       border: 1px solid var(--line);
       border-radius: var(--radius-lg);
-      box-shadow: var(--shadow-sm);
       padding: 2rem;
-      transition: transform 0.2s, box-shadow 0.2s;
       display: flex;
       flex-direction: column;
-    }
-    .card:hover {
-      transform: translateY(-4px);
-      box-shadow: var(--shadow-md);
     }
     .card:first-child { grid-column: 1 / -1; }
 
     .card h2 {
       color: var(--ink);
-      font-size: 1.75rem;
+      font-size: 1.5rem;
+      letter-spacing: -0.025em;
       font-weight: 700;
       margin-top: 0;
       margin-bottom: 1rem;
@@ -72,7 +66,6 @@ const pageDescription = "Lees meer over mij en het verhaal achter Waar is Niels?
       width: 60%;
       max-width: 300px;
       border-radius: var(--radius-lg);
-      box-shadow: var(--shadow-md);
       margin: 1rem auto;
       display: block;
     }
@@ -82,18 +75,17 @@ const pageDescription = "Lees meer over mij en het verhaal achter Waar is Niels?
     }
     .btn-row a {
       display: inline-block;
-      background: var(--amber);
-      color: var(--ink);
-      padding: 0.6rem 1rem;
+      background: var(--ink);
+      color: var(--paper);
+      padding: 0.6rem 1.1rem;
       margin: 0 0.5rem 0.5rem 0;
-      border-radius: var(--radius-md);
+      border-radius: var(--radius-full);
       text-decoration: none;
-      font-weight: 600;
-      transition: var(--transition-fast);
+      font-weight: 500;
+      transition: opacity var(--dur-fast) var(--ease);
     }
     .btn-row a:hover {
-      filter: brightness(1.05);
-      transform: translateY(-1px);
+      opacity: 0.85;
     }
   </style>
 

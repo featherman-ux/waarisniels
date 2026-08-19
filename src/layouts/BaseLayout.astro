@@ -50,7 +50,7 @@ const currentYear = new Date().getFullYear();
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
 
     <ClientRouter />
 
@@ -72,8 +72,8 @@ const currentYear = new Date().getFullYear();
     <header
       id="site-header"
       class:list={[
-        'backdrop-blur sticky top-0 z-50 transition-colors duration-200',
-        isHomepage ? 'header-transparent' : 'bg-card/90 border-b border-line',
+        'site-header sticky top-0 z-50',
+        isHomepage ? 'header-transparent' : 'bg-card border-b border-line',
       ]}
     >
       <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
@@ -98,9 +98,18 @@ const currentYear = new Date().getFullYear();
     </main>
 
     <style>
+      /* TRANSFORMATIE_PLAN.md §5.4: bij scroll van transparant naar een vervaagde,
+         verzadigde glasachtige balk met haarlijn — de "premium" nav-overgang. */
+      .site-header {
+        transition: background-color var(--dur-move) var(--ease), backdrop-filter var(--dur-move) var(--ease), border-color var(--dur-move) var(--ease);
+      }
+      .site-header.bg-card {
+        backdrop-filter: blur(20px) saturate(180%);
+      }
+
       /* Transparant over de hero op de homepage, solide zodra er voorbij gescrold is
-         (zie het script hieronder — luistert naar #hero-sentinel via IntersectionObserver,
-         geen scroll-listener). Alle andere pagina's krijgen meteen de vaste variant. */
+         (zie het script hieronder — luistert naar #hero-sentinel). Alle andere
+         pagina's krijgen meteen de vaste variant. */
       .header-transparent {
         background: transparent;
         border-bottom: 1px solid transparent;
@@ -113,7 +122,8 @@ const currentYear = new Date().getFullYear();
         color: #fff;
       }
       .header-transparent.header-solid {
-        background: color-mix(in srgb, var(--card) 90%, transparent);
+        background: color-mix(in srgb, var(--card) 82%, transparent);
+        backdrop-filter: blur(20px) saturate(180%);
         border-bottom-color: var(--line);
       }
       .header-transparent.header-solid .brand {
@@ -123,7 +133,7 @@ const currentYear = new Date().getFullYear();
         color: var(--text-subtle);
       }
       .header-transparent.header-solid .nav-link[aria-current='page'] {
-        color: var(--deep);
+        color: var(--accent);
       }
     </style>
 
@@ -141,9 +151,12 @@ const currentYear = new Date().getFullYear();
         }
         var observer = new IntersectionObserver(
           function (entries) {
-            header.classList.toggle('header-solid', !entries[0].isIntersecting);
+            // isIntersecting alleen is niet genoeg: de sentinel is óók "niet zichtbaar"
+            // wanneer hij nog ónder de viewport hangt. De positie van zijn rand vertelt
+            // aan welke kant hij eruit is gelopen.
+            header.classList.toggle('header-solid', entries[0].boundingClientRect.top <= 64);
           },
-          { rootMargin: '-64px 0px 0px 0px' }
+          { threshold: [0, 1], rootMargin: '-64px 0px 0px 0px' }
         );
         observer.observe(sentinel);
       });
@@ -236,37 +249,20 @@ const currentYear = new Date().getFullYear();
       })();
     </script>
 
-    <!-- Scroll-reveal voor .reveal-elementen — subtiel (opacity/8px), en nooit op de
-         eerste viewport: wat al zichtbaar is bij het laden verschijnt meteen, zonder op
-         een animatie te wachten. astro:page-load zodat dit ook na een view-transition-
-         navigatie de (nieuwe) .reveal-elementen op de pagina oppakt. -->
+    <!-- Beeld dat landt i.p.v. verschijnt (TRANSFORMATIE_PLAN.md §5.2): .loaded wordt
+         gezet zodra een foto klaar is met laden, ook D1-postbody-content (.photo-grid)
+         waar ik geen onload-attribuut op kan zetten. 'load' bubbelt niet — capture-phase
+         nodig. Al-gecachte afbeeldingen (img.complete) krijgen 'm meteen bij page-load,
+         anders zou het delegated-event nooit meer vuren voor die afbeelding. -->
     <script is:inline>
       document.addEventListener('astro:page-load', function () {
-        var elements = document.querySelectorAll('.reveal:not(.reveal-visible)');
-        if (!elements.length || typeof IntersectionObserver === 'undefined') {
-          elements.forEach(function (el) { el.classList.add('reveal-visible'); });
-          return;
-        }
-        var observer = new IntersectionObserver(
-          function (entries) {
-            entries.forEach(function (entry) {
-              if (entry.isIntersecting) {
-                entry.target.classList.add('reveal-visible');
-                observer.unobserve(entry.target);
-              }
-            });
-          },
-          { threshold: 0.15 }
-        );
-        elements.forEach(function (el) {
-          var rect = el.getBoundingClientRect();
-          if (rect.top < window.innerHeight && rect.bottom > 0) {
-            el.classList.add('reveal-visible'); // al in beeld: meteen tonen, niet animeren
-          } else {
-            observer.observe(el);
-          }
+        document.querySelectorAll('img:not(.loaded)').forEach(function (img) {
+          if (img.complete) img.classList.add('loaded');
         });
       });
+      document.addEventListener('load', function (e) {
+        if (e.target && e.target.tagName === 'IMG') e.target.classList.add('loaded');
+      }, true);
     </script>
 
     <!-- data-astro-rerun: laat Astro dit script bij élke view-transition-navigatie

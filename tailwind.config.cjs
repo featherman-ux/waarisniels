@@ -10,23 +10,29 @@ module.exports = {
     extend: {
       fontFamily: {
         sans: ['Inter', ...defaultTheme.fontFamily.sans],
-        display: ['"Playfair Display"', ...defaultTheme.fontFamily.serif],
+        display: ['Inter', ...defaultTheme.fontFamily.sans],
       },
       colors: {
         // Eén bron: src/styles/tokens.css. Nooit een hex hier hardcoden.
         ink: 'var(--ink)',
-        deep: 'var(--deep)',
-        mid: 'var(--mid)',
-        sky: 'var(--sky)',
-        amber: 'var(--amber)',
-        orange: 'var(--orange)',
-        'orange-ink': 'var(--orange-ink)',
-        danger: 'var(--danger)',
-        paper: 'var(--paper)',
-        card: 'var(--card)',
-        line: 'var(--line)',
         text: 'var(--text)',
         'text-subtle': 'var(--text-subtle)',
+        accent: 'var(--accent)',
+        amber: 'var(--amber)',
+        danger: 'var(--danger)',
+        paper: 'var(--paper)',
+        'paper-alt': 'var(--paper-alt)',
+        card: 'var(--card)',
+        line: 'var(--line)',
+        // Aliassen naar --accent: fase 1 van TRANSFORMATIE_PLAN.md consolideert
+        // deep/mid/sky/orange/orange-ink (allemaal DESIGN_HANDOFF-kleuren) tot één
+        // accent. Bestaande text-deep/bg-sky/…-klassen blijven zo werken zonder dat
+        // elk bestand met een kleurklasse aangepast hoeft te worden.
+        deep: 'var(--accent)',
+        mid: 'var(--text-subtle)',
+        sky: 'var(--accent)',
+        orange: 'var(--accent)',
+        'orange-ink': 'var(--accent)',
       },
       fontSize: {
         'step-0': 'var(--step-0)',
@@ -37,6 +43,17 @@ module.exports = {
       },
       maxWidth: {
         '68ch': '68ch',
+        '80ch': '80ch',
+      },
+      boxShadow: {
+        float: 'var(--shadow-float)',
+      },
+      borderRadius: {
+        sm: 'var(--radius-sm)',
+        lg: 'var(--radius-lg)',
+      },
+      transitionTimingFunction: {
+        DEFAULT: 'var(--ease)',
       },
     },
   },

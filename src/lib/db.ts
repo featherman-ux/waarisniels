@@ -211,6 +211,35 @@ export async function getLatestLocatedPost(db: D1Database): Promise<Post | null>
   return row ? mapRow(row) : null;
 }
 
+/**
+ * De laatste bestemming, voor het funfact-blok op de homepage.
+ *
+ * Werkt óók als een post geen coördinaten heeft (de gemigreerde posts hebben die
+ * niet): valt dan terug op de eerste tag, die in deze blog altijd het land of de
+ * plaats is ("Brazilië", "Peru", "Bolivia"). Zo is er altijd een bestemming om een
+ * funfact over te tonen.
+ */
+export async function getLatestDestination(
+  db: D1Database
+): Promise<{ post: Post; place: string } | null> {
+  const [located, latest] = await Promise.all([
+    getLatestLocatedPost(db),
+    listPosts(db, { limit: 1 }),
+  ]);
+
+  const newest = latest[0] ?? null;
+
+  // Een post mét coördinaten wint, maar alleen als die niet ouder is dan de nieuwste.
+  if (located?.location?.name && (!newest || located.pubDate >= newest.pubDate)) {
+    return { post: located, place: located.location.name };
+  }
+
+  if (!newest) return null;
+
+  const place = newest.location?.name ?? newest.tags[0] ?? null;
+  return place ? { post: newest, place } : null;
+}
+
 export async function listCategories(db: D1Database): Promise<Category[]> {
   const { results } = await db
     .prepare('SELECT slug, label, sort FROM categories ORDER BY sort ASC, label ASC')

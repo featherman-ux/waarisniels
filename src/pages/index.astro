@@ -1,38 +1,43 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import '../styles/home.css';
-import { listPosts, getLatestLocatedPost } from '../lib/db';
-import { mediaUrl } from '../lib/media';
+import { listPosts, getLatestDestination } from '../lib/db';
+import { getCachedPlaceFact } from '../lib/place-fact';
+import { mediaUrl, mediaSrcSet } from '../lib/media';
 import BlogPostPreview from '../components/BlogPostPreview.astro';
-import HomePopup from '../components/HomePopup.astro';
-import { VibeWidget } from '../components/VibeWidget.jsx';
+import MiniMap from '../components/MiniMap.astro';
 
-const db = Astro.locals.runtime.env.DB;
-const [latestPosts, latestLocated] = await Promise.all([
+const { env, ctx } = Astro.locals.runtime;
+const db = env.DB;
+
+const [latestPosts, destination] = await Promise.all([
   listPosts(db, { limit: 3 }),
-  getLatestLocatedPost(db),
+  getLatestDestination(db),
 ]);
 
+// Funfact: eerst het weetje dat al bij de post is opgeslagen, anders één AI-call per
+// plek die 30 dagen in KV blijft staan (zie src/lib/place-fact.ts).
+const funFact = destination
+  ? destination.post.placeFact || (await getCachedPlaceFact(env, destination.place, ctx))
+  : '';
+
 // Hero volgt de nieuwste post met een cover — homepage vernieuwt zichzelf bij elke
-// post (bewuste keuze, zie DESIGN_HANDOFF §6.2). Valt terug op de vaste foto als
-// geen enkele van de laatste posts een cover heeft.
-// TODO: srcset via mediaUrl(key, {width}) zodra Image Transformations aanstaat
-// (Zone -> Speed -> Optimization) — nu uitgezet, zie DESIGN_HANDOFF §7.
+// post. Valt terug op de vaste foto als geen enkele van de laatste posts een cover heeft.
 const heroPost = latestPosts.find((p) => p.cover?.key) ?? null;
-const heroImgSrc = heroPost ? mediaUrl(heroPost.cover!.key) : '/images/homepage.jpeg';
+const heroImgSrc = heroPost ? mediaUrl(heroPost.cover!.key, { width: 1920 }) : '/images/homepage.jpeg';
+const heroImgSrcSet = heroPost ? mediaSrcSet(heroPost.cover!.key, [768, 1280, 1920]) : undefined;
 const heroImgAlt = heroPost ? (heroPost.cover!.alt ?? heroPost.title) : 'Waar is Niels?';
 const heroHref = heroPost ? `/blog/${heroPost.slug}/` : null;
 ---
 
 <BaseLayout title="Waar is Niels?" description="Welkom op mijn reisblog">
-  <!-- Floating Vibe Widget -->
-  <VibeWidget client:load />
+  <div id="hero-sentinel" aria-hidden="true"></div>
 
-  <!-- Homepage-hero: eigen klassenaam (home-hero), losstaand van het gedeelde
-       .hero-figuur op postpagina's (die twee botsten eerder qua CSS). -->
   <section class="home-hero full-bleed">
     <img
       src={heroImgSrc}
+      srcset={heroImgSrcSet}
+      sizes="100vw"
       alt={heroImgAlt}
       loading="eager"
       fetchpriority="high"
@@ -47,36 +52,20 @@ const heroHref = heroPost ? `/blog/${heroPost.slug}/` : null;
       </div>
     </div>
   </section>
-  <div id="hero-sentinel" aria-hidden="true"></div>
 
-  <!-- Popup -->
-  <HomePopup />
-
-  <!-- Waar is Niels nu -->
-  {latestLocated && (
-    <section class="waar-is-niels-nu reveal">
-      <p class="location">
+  {destination && (
+    <section class="destination-fact rise">
+      <p class="eyebrow">Funfact laatste bestemming</p>
+      <p class="place">
         <span class="location-dot" aria-hidden="true"></span>
-        {latestLocated.location?.name ?? 'Onderweg'}
+        {destination.place}
       </p>
-      <p class="date">{latestLocated.pubDate.toLocaleDateString('nl-NL', { day: 'numeric', month: 'long' })}</p>
-      {latestLocated.placeFact && <p class="fact">&ldquo;{latestLocated.placeFact}&rdquo;</p>}
-      {latestLocated.location && (
-        <p class="coords">{latestLocated.location.lat.toFixed(2)}°, {latestLocated.location.lon.toFixed(2)}°</p>
-      )}
-      <a href={`/blog/${latestLocated.slug}/`}>Lees de laatste post →</a>
+      {funFact && <p class="fact">{funFact}</p>}
+      <a href={`/blog/${destination.post.slug}/`}>Lees de laatste post →</a>
     </section>
   )}
 
-  <!-- Map link -->
-  <div class="map-link">
-    <a href="/map">
-      🗺️ Bekijk de kaart met mijn reisroute
-    </a>
-  </div>
-
-  <!-- Latest blog posts -->
-  <section class="posts reveal">
+  <section class="posts rise">
     <h2>Laatste blogposts</h2>
     {latestPosts.length > 0 ? (
       <div class="grid-posts">
@@ -87,4 +76,8 @@ const heroHref = heroPost ? `/blog/${heroPost.slug}/` : null;
     )}
   </section>
 
+  <section class="map-section rise">
+    <h2>De route tot nu toe</h2>
+    <MiniMap />
+  </section>
 </BaseLayout>

@@ -24,12 +24,15 @@ body {
   line-height: 1.6;
   color: var(--text);
   background: var(--paper);
+  letter-spacing: -0.011em; /* Inter oogt standaard net iets te los */
+  font-feature-settings: 'cv11', 'ss01'; /* enkelverdieping-a, rondere l — dichter bij SF Pro */
   transition: background 0.2s, color 0.2s;
 }
 
 /*
  * ===========================================
- * TYPOGRAPHY
+ * TYPOGRAPHY — TRANSFORMATIE_PLAN.md §2: het "duur" zit in tracking, schaal en
+ * gewicht, niet in een apart display-font. Blijf bij Inter voor alles.
  * ===========================================
  */
 h1, h2, h3, h4, h5, h6 {
@@ -39,51 +42,49 @@ h1, h2, h3, h4, h5, h6 {
   text-wrap: balance;
 }
 
-/* Display (Playfair) alleen voor h1/h2 — koppen en sectiekoppen. h3 en kleiner
-   (kaarttitels, UI-labels) blijven Inter, zoals het ontwerpdocument vraagt. */
-h1, h2 {
-  font-family: 'Playfair Display', serif;
-}
-
-h1 { font-size: var(--step-3); letter-spacing: -0.02em; }
-h2 { font-size: var(--step-2); letter-spacing: -0.01em; }
-h3 { font-size: var(--step-1); }
+/* Optische tracking: hoe groter de tekst, hoe strakker. */
+h1, .text-hero { font-size: var(--step-3); letter-spacing: -0.03em; }
+h2 { font-size: var(--step-2); letter-spacing: -0.025em; }
+h3 { font-size: var(--step-1); letter-spacing: -0.02em; }
 
 p {
   margin: 0 0 1rem;
 }
 
-/* Astro <Content />-wrapper: links in posts. */
-.prose-wrap a {
-  color: var(--deep);
-  text-decoration: underline;
-  text-decoration-thickness: 2px;
-  text-decoration-color: color-mix(in srgb, var(--deep) 35%, transparent);
-  transition: var(--transition-fast);
-}
-.prose-wrap a:hover {
-  text-decoration-color: var(--deep);
+/* Datums en cijfers verspringen niet meer bij het laden. */
+time, .tabular-nums {
+  font-variant-numeric: tabular-nums;
 }
 
-/* Chip (voor tags) */
+/* Astro <Content />-wrapper: links in posts. */
+.prose-wrap a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-decoration-thickness: 1.5px;
+  text-decoration-color: color-mix(in srgb, var(--accent) 35%, transparent);
+  transition: color var(--dur-fast) var(--ease);
+}
+.prose-wrap a:hover {
+  text-decoration-color: var(--accent);
+}
+
+/* Chip (voor tags) — haarlijn i.p.v. schaduw */
 .chip {
   display: inline-block;
-  background: var(--card);
+  background: var(--paper-alt);
   border: 1px solid var(--line);
   border-radius: var(--radius-full);
   padding: 0.25rem 0.75rem;
   font-size: 0.875rem;
-  color: var(--text);
+  color: var(--text-subtle);
   text-decoration: none;
   font-weight: 500;
-  transition: var(--transition-fast);
-  box-shadow: var(--shadow-sm);
+  transition: border-color var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease);
 }
 
 .chip:hover {
-  background: var(--paper);
-  border-color: var(--line);
-  transform: translateY(-1px);
+  border-color: var(--accent);
+  color: var(--accent);
 }
 
 /* Comments-sectie */
@@ -105,7 +106,6 @@ p {
   background: var(--card);
   border-radius: var(--radius-lg);
   border: 1px solid var(--line);
-  box-shadow: var(--shadow-sm);
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
@@ -125,9 +125,9 @@ p {
 .comments__form {
   display: grid;
   gap: 0.75rem;
-  background: var(--card);
+  background: var(--paper-alt);
   padding: 1.25rem;
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-sm);
   border: 1px solid var(--line);
 }
 
@@ -136,18 +136,18 @@ p {
   width: 100%;
   padding: 0.75rem 1rem;
   border: 1px solid var(--line);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-sm);
   background: var(--paper);
   font: inherit;
   color: var(--text);
-  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+  transition: border-color var(--dur-fast) var(--ease);
 }
 
 .comments__form input:focus,
 .comments__form textarea:focus {
-  border-color: var(--deep);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--deep) 25%, transparent);
-  outline: none;
+  border-color: var(--accent);
+  outline: 2px solid color-mix(in srgb, var(--accent) 25%, transparent);
+  outline-offset: 1px;
 }
 
 .comments__form textarea {
@@ -160,20 +160,19 @@ p {
   padding: 0.65rem 1.4rem;
   border-radius: 999px;
   border: none;
-  font-weight: 600;
-  background: var(--amber);
-  color: var(--ink);
+  font-weight: 500;
+  background: var(--ink);
+  color: var(--paper);
   cursor: pointer;
-  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+  transition: opacity var(--dur-fast) var(--ease);
 }
 
 .comments__form button:hover:not(:disabled) {
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-md);
+  opacity: 0.85;
 }
 
 .comments__form button:disabled {
-  opacity: 0.6;
+  opacity: 0.5;
   cursor: wait;
 }
 
@@ -189,11 +188,9 @@ p {
 }
 
 .comments__item {
-  background: var(--card);
-  border-radius: var(--radius-md);
-  border: 1px solid var(--line);
+  background: var(--paper-alt);
+  border-radius: var(--radius-sm);
   padding: 1rem 1.25rem;
-  box-shadow: none;
 }
 
 .comments__meta {
@@ -206,7 +203,7 @@ p {
 }
 
 .comments__meta strong {
-  font-weight: 700;
+  font-weight: 600;
   color: var(--text);
 }
 
@@ -222,7 +219,6 @@ p {
 @media (max-width: 640px) {
   .comments {
     padding: 1.5rem;
-    border-radius: var(--radius-lg);
   }
 
   .comments__form {
@@ -235,9 +231,8 @@ p {
 }
 
 /* Fotogrid — klassenaam blijft bestaan, de body-HTML van gemigreerde posts in D1
-   verwijst ernaar (zie CLAUDE_CODE_HANDOFF.md / DESIGN_HANDOFF.md §6.6). Echte
-   masonry via CSS columns: elke foto behoudt zijn eigen beeldverhouding (geen
-   object-fit/vaste hoogte meer), dus geen ongelijke witruimte tussen de foto's. */
+   verwijst ernaar. Echte masonry via CSS columns: elke foto behoudt zijn eigen
+   beeldverhouding, geen ongelijke witruimte. */
 .photo-grid {
   columns: 2;
   column-gap: 1rem;
@@ -256,16 +251,27 @@ p {
   display: block;
   margin-bottom: 1rem;
   break-inside: avoid;
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-md);
-  transition: var(--transition-fast);
+  border-radius: var(--radius-sm);
   cursor: zoom-in;
+  transition: transform var(--dur-move) var(--ease);
 }
 
 .photo-grid img:hover {
   transform: scale(1.02);
-  box-shadow: var(--shadow-lg);
 }
+
+/* Fotogrid komt gespreid in beeld: elke foto ~60ms na de vorige (TRANSFORMATIE_PLAN.md
+   §5.4), puur CSS via nth-child — geen JS. */
+.photo-grid img {
+  animation: rise linear both;
+  animation-timeline: view();
+  animation-range: entry 0% entry 40%;
+}
+.photo-grid img:nth-child(2) { animation-delay: 60ms; }
+.photo-grid img:nth-child(3) { animation-delay: 120ms; }
+.photo-grid img:nth-child(4) { animation-delay: 180ms; }
+.photo-grid img:nth-child(5) { animation-delay: 240ms; }
+.photo-grid img:nth-child(n+6) { animation-delay: 300ms; }
 
 /* Responsieve video-embeds */
 .video-responsive {
@@ -275,7 +281,6 @@ p {
   margin: 1.5rem 0;
   border-radius: var(--radius-lg);
   overflow: hidden;
-  box-shadow: var(--shadow-md);
 }
 
 .video-responsive iframe,
@@ -288,95 +293,13 @@ p {
   border: none;
 }
 
-/* Vibe widget */
-.vibe-widget {
-  margin: 2rem auto;
-  max-width: 360px;
-  padding: 1.5rem;
-  border: 2px solid var(--deep);
-  border-radius: var(--radius-lg);
-  background: var(--card);
-  box-shadow: 0 8px 24px color-mix(in srgb, var(--deep) 20%, transparent);
-  text-align: center;
-  position: relative;
-  overflow: hidden;
-}
-
-.vibe-widget::before {
-  content: '';
-  position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: radial-gradient(circle at center, var(--deep) 0%, transparent 70%);
-  opacity: 0.1;
-  animation: spin 20s linear infinite;
-}
-
-@keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
-
-.vibe-widget-time {
-  font-size: 1.2rem;
-  font-weight: 700;
-  margin-bottom: 0.75rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--ink);
-}
-
 .location-dot {
-  width: 10px;
-  height: 10px;
+  width: 8px;
+  height: 8px;
   background: var(--amber);
   border-radius: 50%;
   margin-right: 0.5rem;
-  animation: pulse 2s infinite cubic-bezier(0.4, 0, 0.6, 1);
-}
-
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
-}
-
-.timezone {
-  font-size: 0.9rem;
-  color: var(--text-subtle);
-  margin-left: 0.5rem;
-}
-
-.vibe-widget-status {
-  font-size: 1.4rem;
-  font-weight: 800;
-  padding: 0.75rem 1.25rem;
-  background: var(--deep);
-  color: white;
-  border-radius: var(--radius-md);
-  display: inline-block;
-  margin-top: 0.75rem;
-  transition: var(--transition-fast);
-  box-shadow: var(--shadow-md);
-}
-
-.vibe-widget-status:hover {
-  transform: translateY(-2px) scale(1.02);
-  box-shadow: var(--shadow-lg);
-}
-
-.vibe-widget a {
-  display: inline-block;
-  margin-top: 1rem;
-  color: var(--deep);
-  text-decoration: none;
-  font-weight: 600;
-}
-
-.vibe-widget a:hover {
-  text-decoration: underline;
+  flex-shrink: 0;
 }
 
 /*
@@ -389,7 +312,6 @@ p {
   margin-bottom: 1.5rem;
   border-radius: var(--radius-lg);
   overflow: hidden;
-  box-shadow: var(--shadow-md);
 }
 .hero img {
   width: 100%;
@@ -401,7 +323,7 @@ p {
 .hero-grad {
   position: absolute;
   inset: 0;
-  background: linear-gradient(to top, rgba(2, 48, 71, 0.5) 0%, transparent 60%);
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.5) 0%, transparent 60%);
 }
 
 .meta-row {
@@ -420,21 +342,43 @@ p {
   margin-inline: calc(50% - 50vw);
 }
 
-/* Scroll-reveal: subtiel, en nooit op de eerste viewport (zie het script in
-   BaseLayout.astro — elementen die al zichtbaar zijn bij het laden worden meteen
-   getoond, geen wachttijd op een animatie voor content die je toch al ziet). */
-.reveal {
-  opacity: 0;
-  transform: translateY(8px);
-  transition: opacity 0.3s ease, transform 0.3s ease;
+/* Scroll-driven reveal (TRANSFORMATIE_PLAN.md §5.1): opdoemen + minimaal omhoog,
+   zodra een element in beeld komt. Geen IntersectionObserver-JS meer nodig — draait
+   op de compositor-thread, dus geen jank. In browsers zonder ondersteuning (Firefox,
+   Safari <17) blijft de content gewoon zichtbaar op zijn plek: geen fallback nodig
+   zolang de begintoestand van .rise zelf zichtbaar is en de animatie alleen *toevoegt*. */
+.rise {
+  animation: rise linear both;
+  animation-timeline: view();
+  animation-range: entry 0% entry 40%;
 }
-.reveal-visible {
+@keyframes rise {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: none; }
+}
+
+/* Beeld dat landt i.p.v. verschijnt (TRANSFORMATIE_PLAN.md §5.2): zachte fade+ontwaas
+   i.p.v. een hard pop-in. .loaded wordt gezet door het delegated load-script in
+   BaseLayout.astro — werkt voor elke foto, ook die uit de D1-postbody. */
+.home-hero img,
+.hero-figure img,
+.photo-grid img,
+.card-cover {
+  opacity: 0;
+  filter: blur(12px);
+  transition: opacity 0.6s var(--ease), filter 0.6s var(--ease);
+}
+.home-hero img.loaded,
+.hero-figure img.loaded,
+.photo-grid img.loaded,
+.card-cover.loaded {
   opacity: 1;
-  transform: translateY(0);
+  filter: blur(0);
 }
 
 /* Lightbox (native <dialog>, zie BaseLayout.astro) — hangt aan elke .photo-grid img
-   via event-delegatie, werkt dus automatisch voor oude én nieuwe posts. */
+   via event-delegatie, werkt dus automatisch voor oude én nieuwe posts. Opent vanuit
+   de aangeklikte foto via transition:name (View Transitions), zie BaseLayout.astro. */
 .lightbox {
   border: none;
   padding: 0;
@@ -443,14 +387,14 @@ p {
   max-height: 92vh;
 }
 .lightbox::backdrop {
-  background: rgba(2, 48, 71, 0.92);
+  background: rgba(0, 0, 0, 0.92);
 }
 .lightbox img {
   display: block;
   margin: auto;
   max-width: 92vw;
   max-height: 92vh;
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-sm);
 }
 .lightbox-close,
 .lightbox-nav {
@@ -466,7 +410,7 @@ p {
   font-size: 1.5rem;
   line-height: 1;
   cursor: pointer;
-  transition: var(--transition-fast);
+  transition: background var(--dur-fast) var(--ease);
 }
 .lightbox-close:hover,
 .lightbox-nav:hover {
@@ -495,7 +439,7 @@ p {
 :focus-visible {
   outline: 2px solid var(--amber);
   outline-offset: 2px;
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-sm);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -505,10 +449,25 @@ p {
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+  /* Scroll-driven animaties beginnen "onzichtbaar" (opacity:0) — zonder de timeline
+     uit te zetten blijft die begintoestand hangen en is de content nooit zichtbaar.
+     Dit is dé bekende valkuil bij animation-timeline + reduced-motion. */
+  .rise, .photo-grid img, .home-hero img {
+    animation-timeline: none;
+    opacity: 1;
+    transform: none;
+  }
 }
 
 /*
  * ===========================================
- * RESPONSIVE
+ * PERFORMANCE
  * ===========================================
  */
+/* Rendert pas als het scrollt in beeld komt — scheelt renderwerk op lange
+   postpagina's. contain-intrinsic-size voorkomt dat de scrollbar springt. */
+.read-next,
+.location-outro {
+  content-visibility: auto;
+  contain-intrinsic-size: 0 400px;
+}

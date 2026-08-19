@@ -18,22 +18,16 @@ const pageDescription = "Eenvoudige, snelle kaart met mijn route en stops (bus, 
 
 <style>
   .hero {
-    background: var(--deep);
-    color: white;
     text-align: center;
-    padding: 3rem 1rem;
-    border-radius: var(--radius-lg);
-    margin-bottom: 2rem;
-    box-shadow: var(--shadow-md);
+    padding: 2rem 1rem 0.5rem;
+    margin-bottom: 1.5rem;
   }
   .hero h1 {
-    font-size: 2rem;
-    font-weight: 700;
-    margin-bottom: .5rem;
+    font-size: var(--step-2);
+    letter-spacing: -0.025em;
   }
   .hero p {
-    font-size: 1rem;
-    opacity: .85;
+    color: var(--text-subtle);
   }
   .card {
     position: relative;
@@ -53,10 +47,10 @@ const pageDescription = "Eenvoudige, snelle kaart met mijn route en stops (bus, 
     flex-wrap: wrap;
     gap: 0.5rem 1rem;
     background: color-mix(in srgb, var(--card) 92%, transparent);
-    backdrop-filter: blur(4px);
+    backdrop-filter: blur(20px) saturate(180%);
     padding: 0.75rem 1rem;
-    border-radius: var(--radius-md);
-    box-shadow: var(--shadow-md);
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--line);
     font-size: 0.85rem;
     max-width: calc(100% - 2rem);
   }
@@ -69,8 +63,9 @@ const pageDescription = "Eenvoudige, snelle kaart met mijn route en stops (bus, 
   .legend-line {
     width: 20px;
     height: 0;
-    border-top-width: 3px;
+    border-top-width: 2.5px;
     border-top-style: solid;
+    border-color: var(--accent);
   }
   .note {
     text-align: center;
@@ -81,10 +76,8 @@ const pageDescription = "Eenvoudige, snelle kaart met mijn route en stops (bus, 
   .map-ai-panel {
     max-width: 720px;
     margin: 0 auto 3rem;
-    background: var(--card);
+    background: var(--paper-alt);
     border-radius: var(--radius-lg);
-    border: 1px solid var(--line);
-    box-shadow: var(--shadow-md);
     padding: 1.5rem;
   }
   .map-ai-panel h3 {
@@ -99,7 +92,6 @@ const pageDescription = "Eenvoudige, snelle kaart met mijn route en stops (bus, 
   }
   @media (max-width: 640px) {
     .map-wrap { height: 400px; }
-    .hero h1 { font-size: 1.75rem; }
     .map-ai-panel { margin-bottom: 2rem; }
   }
 </style>
@@ -119,16 +111,16 @@ const pageDescription = "Eenvoudige, snelle kaart met mijn route en stops (bus, 
     <div id="map" class="map-wrap"></div>
     <div class="legend-panel">
       <div class="legend-item">
-        <span class="legend-line" style="border-color: var(--deep);"></span>Bus
+        <span class="legend-line"></span>Bus
       </div>
       <div class="legend-item">
-        <span class="legend-line" style="border-color: var(--mid); border-style: dashed;"></span>Auto
+        <span class="legend-line" style="border-style: dashed;"></span>Auto
       </div>
       <div class="legend-item">
-        <span class="legend-line" style="border-color: var(--orange); border-style: dotted;"></span>Motor
+        <span class="legend-line" style="border-style: dotted;"></span>Motor
       </div>
       <div class="legend-item">
-        <span class="legend-line" style="border-color: var(--amber); border-style: dashed;"></span>Vlucht
+        <span class="legend-line" style="border-style: dashed; border-top-width: 1.5px;"></span>Vlucht
       </div>
       <div class="legend-item">
         <span class="legend-line" style="width:0;"></span>Stops / steden
@@ -174,19 +166,17 @@ const pageDescription = "Eenvoudige, snelle kaart met mijn route en stops (bus, 
     const rootStyles = getComputedStyle(document.documentElement);
 
     if (routeGeo) {
-      const modeStyles = {
-        bus: { color: rootStyles.getPropertyValue('--deep').trim(), dashArray: null },
-        car: { color: rootStyles.getPropertyValue('--mid').trim(), dashArray: '8 4' },
-        motor: { color: rootStyles.getPropertyValue('--orange').trim(), dashArray: '2 8' },
-        flight: { color: rootStyles.getPropertyValue('--amber').trim(), dashArray: '6 6' },
-      };
+      // Monochroom: één accentkleur voor de hele route, vervoerswijze via
+      // streeppatroon i.p.v. een aparte kleur per modus (TRANSFORMATIE_PLAN.md §3).
+      const accent = rootStyles.getPropertyValue('--accent').trim();
+      const dashByMode = { bus: null, car: '8 4', motor: '2 8', flight: '6 6' };
 
       L.geoJSON(routeGeo, {
-        style: ({ properties }) => {
-          const mode = properties.mode;
-          const { color, dashArray } = modeStyles[mode] ?? modeStyles.bus;
-          return { color, weight: 4, dashArray: dashArray ?? undefined };
-        },
+        style: ({ properties }) => ({
+          color: accent,
+          weight: 4,
+          dashArray: dashByMode[properties.mode] ?? undefined,
+        }),
       }).addTo(map);
     }
 
