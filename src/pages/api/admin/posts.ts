@@ -54,8 +54,11 @@ export async function POST(context: APIContext) {
   let placeFact = payload.placeFact?.trim() || null;
   const locationName = payload.location?.name?.trim();
   if (!placeFact && locationName) {
+    // Een trage AI-call mag het opslaan van de post niet blokkeren — na 8s gewoon
+    // zonder weetje opslaan, Niels kan het later alsnog via /beheer toevoegen.
     const ai = context.locals.runtime.env.AI;
-    placeFact = await generatePlaceFact(ai, locationName);
+    const timeout = new Promise<null>((resolve) => setTimeout(() => resolve(null), 8000));
+    placeFact = await Promise.race([generatePlaceFact(ai, locationName), timeout]);
   }
 
   try {
