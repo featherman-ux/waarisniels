@@ -7,23 +7,17 @@ const pageDescription = "Lees meer over mij en het verhaal achter Waar is Niels?
 
 <BaseLayout title={pageTitle} description={pageDescription}>
   <style>
-    :root { 
-      --orange: #ffb703; 
-      --blue: #4f46e5;
-      --gap: 1.5rem;
-    }
-
-    /* Hero */
     header.hero {
-      background: var(--blue);
+      background: var(--deep);
       color: #fff;
       text-align: center;
       padding: 4rem 1.5rem;
-      margin-bottom: var(--gap);
-      border-radius: .75rem;
-      box-shadow: 0 4px 12px rgba(0,0,0,.1);
+      margin-bottom: 1.5rem;
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-md);
     }
     header.hero h1 {
+      font-family: 'Playfair Display', serif;
       font-size: 2.75rem;
       font-weight: 700;
       margin: 0 0 0.5rem;
@@ -34,38 +28,35 @@ const pageDescription = "Lees meer over mij en het verhaal achter Waar is Niels?
       opacity: 0.9;
     }
 
-    /* Grid */
-    main.container {
+    .about-grid {
       max-width: 900px;
       margin: 0 auto;
-      padding: 0 1.5rem 2rem;
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: var(--gap);
+      gap: 1.5rem;
     }
     @media (max-width: 640px) {
-      main.container { grid-template-columns: 1fr; }
+      .about-grid { grid-template-columns: 1fr; }
     }
 
-    /* Card */
     .card {
-      background: #fff;
-      border: 1px solid #e5e7eb;
-      border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0,0,0,.08);
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-sm);
       padding: 2rem;
-      transition: transform .2s, box-shadow .2s;
+      transition: transform 0.2s, box-shadow 0.2s;
       display: flex;
       flex-direction: column;
     }
     .card:hover {
       transform: translateY(-4px);
-      box-shadow: 0 6px 16px rgba(0,0,0,.12);
+      box-shadow: var(--shadow-md);
     }
     .card:first-child { grid-column: 1 / -1; }
 
     .card h2 {
-      color: var(--blue);
+      color: var(--ink);
       font-size: 1.75rem;
       font-weight: 700;
       margin-top: 0;
@@ -74,36 +65,35 @@ const pageDescription = "Lees meer over mij en het verhaal achter Waar is Niels?
     .card p {
       line-height: 1.6;
       margin-bottom: 1rem;
+      color: var(--text);
     }
 
-    /* Image */
     .hero-img {
       width: 60%;
       max-width: 300px;
-      border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0,0,0,.1);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-md);
       margin: 1rem auto;
       display: block;
     }
 
-    /* Buttons */
     .btn-row {
       margin-top: auto;
     }
     .btn-row a {
       display: inline-block;
-      background: var(--blue);
-      color: #fff;
-      padding: .6rem 1rem;
-      margin: 0 .5rem .5rem 0;
-      border-radius: 8px;
+      background: var(--amber);
+      color: var(--ink);
+      padding: 0.6rem 1rem;
+      margin: 0 0.5rem 0.5rem 0;
+      border-radius: var(--radius-md);
       text-decoration: none;
       font-weight: 600;
-      transition: filter .2s, transform .2s;
+      transition: var(--transition-fast);
     }
     .btn-row a:hover {
-      filter: brightness(1.1);
-      transform: scale(1.03);
+      filter: brightness(1.05);
+      transform: translateY(-1px);
     }
   </style>
 
@@ -112,7 +102,7 @@ const pageDescription = "Lees meer over mij en het verhaal achter Waar is Niels?
     <p>De perfecte pagina om mijn narcisme te voeden!</p>
   </header>
 
-  <main class="container">
+  <div class="about-grid">
     <article class="card">
       <h2>Wie ben ik?</h2>
       <p>Hi, ik ben Niels – data- en code enthousiasteling, reiziger en verhalenverteller. Deze site documenteert mijn avonturen in Zuid-Amerika en technologische projecten die ik achter de schermen bouw.</p>
@@ -142,5 +132,5 @@ const pageDescription = "Lees meer over mij en het verhaal achter Waar is Niels?
         <a href="https://instagram.com/n.veerman" target="_blank" rel="noopener">Instagram</a>
       </div>
     </section>
-  </main>
+  </div>
 </BaseLayout>

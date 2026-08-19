@@ -144,8 +144,8 @@ export function ViewCounter({ path, apiUrl }) {
       <motion.span
         className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium transition-all duration-300 ${
           error
-            ? 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400'
-            : 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400 hover:bg-blue-200 dark:hover:bg-blue-900/30'
+            ? 'bg-danger/10 text-danger'
+            : 'bg-sky/30 text-ink dark:bg-deep/20 dark:text-sky hover:bg-sky/50 dark:hover:bg-deep/30'
         }`}
         initial={{ opacity: 0, scale: 0.8 }}
         animate={{ opacity: isVisible ? 1 : 0.7, scale: 1 }}

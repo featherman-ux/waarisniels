@@ -10,10 +10,10 @@ const PLACES_URL = "/data/places.json";
   }
   .mini-map {
     height: 260px;
-    border-radius: 12px;
+    border-radius: var(--radius-lg);
     overflow: hidden;
-    border: 1px solid #e5e7eb;
-    box-shadow: 0 6px 14px rgba(0,0,0,0.08);
+    border: 1px solid var(--line);
+    box-shadow: var(--shadow-sm);
   }
   .mini-map-link {
     position: absolute;
@@ -26,13 +26,13 @@ const PLACES_URL = "/data/places.json";
     right: 10px;
     bottom: 10px;
     z-index: 25;
-    background: #fff;
-    border: 1px solid #e5e7eb;
+    background: var(--card);
+    border: 1px solid var(--line);
     border-radius: 9999px;
     padding: .35rem .7rem;
     font-size: .9rem;
-    color: #023047;
-    box-shadow: 0 2px 8px rgba(0,0,0,.06);
+    color: var(--ink);
+    box-shadow: var(--shadow-sm);
     text-decoration: none;
   }
 </style>
@@ -76,11 +76,12 @@ const PLACES_URL = "/data/places.json";
       const layer = L.geoJSON(geo, {
         style: f => {
           const mode = f?.properties?.mode;
+          const rootStyles = getComputedStyle(document.documentElement);
           const modeStyles = {
-            bus: { color: "#4f46e5", weight: 3, opacity: 0.9 },
-            car: { color: "#0284c7", weight: 3, opacity: 0.9, dashArray: "8 4" },
-            motor: { color: "#10b981", weight: 3, opacity: 0.9, dashArray: "2 8" },
-            flight: { color: "#ffb703", weight: 3, opacity: 0.9, dashArray: "6 6" }
+            bus: { color: rootStyles.getPropertyValue('--deep').trim(), weight: 3, opacity: 0.9 },
+            car: { color: rootStyles.getPropertyValue('--mid').trim(), weight: 3, opacity: 0.9, dashArray: "8 4" },
+            motor: { color: rootStyles.getPropertyValue('--orange').trim(), weight: 3, opacity: 0.9, dashArray: "2 8" },
+            flight: { color: rootStyles.getPropertyValue('--amber').trim(), weight: 3, opacity: 0.9, dashArray: "6 6" }
           };
           return modeStyles[mode] ?? modeStyles.bus;
         }

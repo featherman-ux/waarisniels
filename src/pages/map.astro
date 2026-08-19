@@ -17,20 +17,12 @@ const pageDescription = "Eenvoudige, snelle kaart met mijn route en stops (bus, 
 ></script>
 
 <style>
-  :root {
-    --clr-primary:   #4f46e5;
-    --clr-secondary: #10b981;
-    --clr-accent:    #ffb703;
-    --clr-car:       #0284c7;
-    --clr-light:     #f8f9fa;
-    --clr-dark:      #e3e7ed;
-  }
   .hero {
-    background: var(--clr-primary);
+    background: var(--deep);
     color: white;
     text-align: center;
     padding: 3rem 1rem;
-    border-radius: 1rem;
+    border-radius: var(--radius-lg);
     margin-bottom: 2rem;
     box-shadow: var(--shadow-md);
   }
@@ -44,8 +36,8 @@ const pageDescription = "Eenvoudige, snelle kaart met mijn route en stops (bus, 
     opacity: .85;
   }
   .card {
-    background: white;
-    border-radius: 1rem;
+    background: var(--card);
+    border-radius: var(--radius-lg);
     overflow: hidden;
     box-shadow: var(--shadow-md);
     max-width: 1280px;
@@ -61,16 +53,16 @@ const pageDescription = "Eenvoudige, snelle kaart met mijn route en stops (bus, 
     flex-wrap: wrap;
     justify-content: center;
     gap: 1rem;
-    background: var(--clr-dark);
+    background: var(--paper);
     padding: 1rem;
     font-size: .95rem;
-    border-radius: 0 0 1rem 1rem;
+    border-radius: 0 0 var(--radius-lg) var(--radius-lg);
   }
   .legend-item {
     display: flex;
     align-items: center;
     gap: .5rem;
-    color: #374151;
+    color: var(--text-subtle);
   }
   .legend-line {
     width: 24px;
@@ -81,26 +73,26 @@ const pageDescription = "Eenvoudige, snelle kaart met mijn route en stops (bus, 
   .note {
     text-align: center;
     margin: 1rem 0;
-    color: var(--clr-text-subtle);
+    color: var(--text-subtle);
     font-size: .9rem;
   }
   .map-ai-panel {
     max-width: 720px;
     margin: 0 auto 3rem;
-    background: white;
-    border-radius: 1rem;
-    border: 1px solid #e2e8f0;
+    background: var(--card);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--line);
     box-shadow: var(--shadow-md);
     padding: 1.5rem;
   }
   .map-ai-panel h3 {
     margin: 0 0 0.5rem;
     font-size: 1.1rem;
-    color: #1f2937;
+    color: var(--ink);
   }
   .map-ai-panel p {
     margin: 0;
-    color: #4b5563;
+    color: var(--text-subtle);
     line-height: 1.6;
   }
   @media (max-width: 640px) {
@@ -125,16 +117,16 @@ const pageDescription = "Eenvoudige, snelle kaart met mijn route en stops (bus, 
     <div id="map" class="map-wrap"></div>
     <div class="legend-bar">
       <div class="legend-item">
-        <span class="legend-line" style="border-color: var(--clr-primary);"></span>Bus
+        <span class="legend-line" style="border-color: var(--deep);"></span>Bus
       </div>
       <div class="legend-item">
-        <span class="legend-line" style="border-color: var(--clr-car); border-style: dashed;"></span>Auto
+        <span class="legend-line" style="border-color: var(--mid); border-style: dashed;"></span>Auto
       </div>
       <div class="legend-item">
-        <span class="legend-line" style="border-color: var(--clr-secondary); border-style: dotted;"></span>Motor
+        <span class="legend-line" style="border-color: var(--orange); border-style: dotted;"></span>Motor
       </div>
       <div class="legend-item">
-        <span class="legend-line" style="border-color: var(--clr-accent); border-style: dashed;"></span>Vlucht
+        <span class="legend-line" style="border-color: var(--amber); border-style: dashed;"></span>Vlucht
       </div>
       <div class="legend-item">
         <span class="legend-line" style="width:0;"></span>Stops / steden
@@ -170,13 +162,14 @@ const pageDescription = "Eenvoudige, snelle kaart met mijn route en stops (bus, 
     const places = placesRes.ok ? await placesRes.json() : [];
     const postsGeo = postsRes.ok ? await postsRes.json() : null;
 
+    const rootStyles = getComputedStyle(document.documentElement);
+
     if (routeGeo) {
-      const rootStyles = getComputedStyle(document.documentElement);
       const modeStyles = {
-        bus: { color: rootStyles.getPropertyValue('--clr-primary').trim(), dashArray: null },
-        car: { color: rootStyles.getPropertyValue('--clr-car').trim(), dashArray: '8 4' },
-        motor: { color: rootStyles.getPropertyValue('--clr-secondary').trim(), dashArray: '2 8' },
-        flight: { color: rootStyles.getPropertyValue('--clr-accent').trim(), dashArray: '6 6' },
+        bus: { color: rootStyles.getPropertyValue('--deep').trim(), dashArray: null },
+        car: { color: rootStyles.getPropertyValue('--mid').trim(), dashArray: '8 4' },
+        motor: { color: rootStyles.getPropertyValue('--orange').trim(), dashArray: '2 8' },
+        flight: { color: rootStyles.getPropertyValue('--amber').trim(), dashArray: '6 6' },
       };
 
       L.geoJSON(routeGeo, {
@@ -229,7 +222,7 @@ const pageDescription = "Eenvoudige, snelle kaart met mijn route en stops (bus, 
         radius: 9,
         color: '#fff',
         weight: 2,
-        fillColor: '#ffb703',
+        fillColor: rootStyles.getPropertyValue('--amber').trim(),
         fillOpacity: 1,
       }).addTo(map);
       mk.bindPopup(

@@ -7,26 +7,26 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     .admin-card {
       max-width: 600px;
       margin: 4rem auto;
-      background: #fff;
-      border: 1px solid #e5e7eb;
-      border-radius: 12px;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-lg);
       padding: 2rem;
       text-align: center;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      box-shadow: var(--shadow-sm);
     }
     .admin-card h1 {
-      color: #023047;
+      color: var(--ink);
       font-size: 1.8rem;
       margin-bottom: 0.5rem;
     }
     .admin-card p {
-      color: #475569;
+      color: var(--text-subtle);
       margin-bottom: 1.5rem;
     }
     .admin-button {
       padding: 0.75rem 1.5rem;
       border: none;
-      border-radius: 8px;
+      border-radius: var(--radius-md);
       color: #fff;
       font-weight: 600;
       cursor: pointer;
@@ -36,15 +36,15 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       background-color: #22c55e; /* Groen */
     }
     .admin-button.inactive {
-      background-color: #ef4444; /* Rood */
+      background-color: var(--danger);
     }
   </style>
 
-  <main class="admin-card">
+  <div class="admin-card">
     <h1>Admin Mode</h1>
     <p>Via deze pagina kun je instellen of jouw bezoeken aan de website moeten worden meegeteld in de analytics.</p>
     <button id="admin-toggle-button" class="admin-button">Status wordt geladen...</button>
-  </main>
+  </div>
 
   <script>
     const storageKey = 'niels_dev_mode';

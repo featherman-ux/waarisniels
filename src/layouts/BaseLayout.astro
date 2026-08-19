@@ -21,8 +21,8 @@ const navLinks = [
 const navClasses = (match: string) => [
   'text-sm sm:text-base px-2 py-1 rounded transition-colors',
   isActive(match)
-    ? 'text-primary dark:text-primary-light underline underline-offset-4'
-    : 'text-gray-700 dark:text-gray-300 hover:text-primary dark:hover:text-primary-light'
+    ? 'text-deep underline underline-offset-4'
+    : 'text-text-subtle hover:text-deep'
 ];
 
 const currentYear = new Date().getFullYear();
@@ -50,12 +50,23 @@ const currentYear = new Date().getFullYear();
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet" />
 
+    <script is:inline>
+      // Zet .dark vóór de eerste paint (localStorage > OS-voorkeur), zodat er geen
+      // witte flits is bij een donkere voorkeur. Enige plek die dit bepaalt — zie
+      // DESIGN_HANDOFF.md §3.3: dit vervangt de oude @media(prefers-color-scheme)-aanpak.
+      (function () {
+        var stored = localStorage.getItem('theme');
+        var dark = stored ? stored === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
+        document.documentElement.classList.toggle('dark', dark);
+      })();
+    </script>
+
     <slot name="head" />
   </head>
-  <body class="bg-gray-50 text-gray-800 dark:bg-gray-900 dark:text-gray-200 antialiased">
-    <header class="bg-white/90 backdrop-blur dark:bg-gray-800/90 shadow-md sticky top-0 z-50">
+  <body class="bg-paper text-text antialiased">
+    <header class="bg-card/90 backdrop-blur border-b border-line sticky top-0 z-50">
       <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
-        <a href="/" class="text-2xl font-bold text-primary dark:text-primary-light">WaarIsNiels?</a>
+        <a href="/" class="text-2xl font-display font-bold text-ink">WaarIsNiels?</a>
 
         <div class="flex items-center gap-3 sm:gap-5">
           {navLinks.map(({ href, match, label }) => (
@@ -71,13 +82,13 @@ const currentYear = new Date().getFullYear();
       </nav>
     </header>
 
-    <main class="container mx-auto px-6 py-8 max-w-[1280px]">
+    <main class="container mx-auto px-6 py-8 max-w-[1152px]">
       <slot />
     </main>
 
-    <footer class="bg-gray-100 dark:bg-gray-800 mt-12 py-8 text-center">
-      <p class="text-gray-600 dark:text-gray-400">&copy; {currentYear} WaarIsNiels.</p>
-      <p class="text-sm text-gray-500 dark:text-gray-500 mt-1">Powered by <a href="https://astro.build" target="_blank" rel="noopener noreferrer" class="hover:text-primary dark:hover:text-primary-light">Astro</a></p>
+    <footer class="border-t border-line mt-16 py-10 text-center">
+      <p class="text-text-subtle">&copy; {currentYear} WaarIsNiels.</p>
+      <p class="text-sm text-text-subtle mt-1">Powered by <a href="https://astro.build" target="_blank" rel="noopener noreferrer" class="hover:text-deep">Astro</a></p>
     </footer>
 
     <script is:inline>

@@ -201,8 +201,8 @@ export function ViewCounter({ path, apiUrl }) {
     <span
       className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium transition-colors duration-150 ${
         status === 'error'
-          ? 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400'
-          : 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-300'
+          ? 'bg-danger/10 text-danger'
+          : 'bg-sky/30 text-ink dark:bg-deep/20 dark:text-sky'
       }`}
       aria-live="polite"
       title={titleText}
