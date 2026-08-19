@@ -1,6 +1,7 @@
 ---
 // src/layouts/BaseLayout.astro
 import '../styles/global.css';
+import { ClientRouter } from 'astro:transitions';
 
 export interface Props {
   title: string;
@@ -51,10 +52,13 @@ const currentYear = new Date().getFullYear();
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet" />
 
+    <ClientRouter />
+
     <script is:inline>
       // Zet .dark vóór de eerste paint (localStorage > OS-voorkeur), zodat er geen
       // witte flits is bij een donkere voorkeur. Enige plek die dit bepaalt — zie
-      // DESIGN_HANDOFF.md §3.3: dit vervangt de oude @media(prefers-color-scheme)-aanpak.
+      // DESIGN_HANDOFF.md §3.3. <html> persisteert over view-transition-navigaties
+      // heen, dus dit hoeft maar één keer per echte paginalading te draaien.
       (function () {
         var stored = localStorage.getItem('theme');
         var dark = stored ? stored === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -123,13 +127,18 @@ const currentYear = new Date().getFullYear();
       }
     </style>
 
+    <!-- Header-transparantie draait via astro:page-load i.p.v. DOMContentLoaded: met
+         <ClientRouter /> aan wisselt de pagina-inhoud client-side, dus dit moet na élke
+         navigatie opnieuw een observer aan de (mogelijk nieuwe) #hero-sentinel hangen. -->
     <script is:inline>
-      // Header start transparant (over de hero), wordt solide zodra #hero-sentinel
-      // (aan het eind van de hero, alleen op de homepage aanwezig) uit beeld scrolt.
-      (function () {
+      document.addEventListener('astro:page-load', function () {
         var header = document.getElementById('site-header');
         var sentinel = document.getElementById('hero-sentinel');
-        if (!header || !sentinel || typeof IntersectionObserver === 'undefined') return;
+        if (!header) return;
+        if (!sentinel || typeof IntersectionObserver === 'undefined') {
+          header.classList.remove('header-solid');
+          return;
+        }
         var observer = new IntersectionObserver(
           function (entries) {
             header.classList.toggle('header-solid', !entries[0].isIntersecting);
@@ -137,7 +146,7 @@ const currentYear = new Date().getFullYear();
           { rootMargin: '-64px 0px 0px 0px' }
         );
         observer.observe(sentinel);
-      })();
+      });
     </script>
 
     <footer class="border-t border-line mt-16 py-10 text-center">
@@ -145,9 +154,10 @@ const currentYear = new Date().getFullYear();
       <p class="text-sm text-text-subtle mt-1">Powered by <a href="https://astro.build" target="_blank" rel="noopener noreferrer" class="hover:text-deep">Astro</a></p>
     </footer>
 
-    <!-- Lightbox voor .photo-grid-foto's (zie global.css .lightbox*). Hangt via
-         event-delegatie aan elke .photo-grid img, dus werkt automatisch op elke
-         pagina met een fotogrid — oude én nieuwe posts. -->
+    <!-- Lightbox voor .photo-grid-foto's (zie global.css .lightbox*). Volledig via
+         event-delegatie op document — geen page-load-herinitialisatie nodig, want elke
+         handler zoekt zijn elementen pas op het moment van de interactie zelf op. Dat
+         maakt 'm vanzelf bestand tegen view-transition-navigaties. -->
     <dialog id="lightbox" class="lightbox">
       <button type="button" id="lightbox-close" aria-label="Sluiten" class="lightbox-close">✕</button>
       <button type="button" id="lightbox-prev" aria-label="Vorige foto" class="lightbox-nav lightbox-prev">‹</button>
@@ -157,19 +167,19 @@ const currentYear = new Date().getFullYear();
 
     <script is:inline>
       (function () {
-        var dialog = document.getElementById('lightbox');
-        var imgEl = document.getElementById('lightbox-img');
-        if (!dialog || !imgEl) return;
-
         var gallery = [];
         var index = 0;
 
         function show() {
+          var imgEl = document.getElementById('lightbox-img');
           var el = gallery[index];
+          if (!imgEl || !el) return;
           imgEl.src = el.currentSrc || el.src;
           imgEl.alt = el.alt || '';
         }
-        function openAt(images, i) {
+        function open(images, i) {
+          var dialog = document.getElementById('lightbox');
+          if (!dialog) return;
           gallery = images;
           index = i;
           show();
@@ -177,7 +187,8 @@ const currentYear = new Date().getFullYear();
           document.body.style.overflow = 'hidden';
         }
         function close() {
-          dialog.close();
+          var dialog = document.getElementById('lightbox');
+          if (dialog) dialog.close();
           document.body.style.overflow = '';
         }
         function next() { index = (index + 1) % gallery.length; show(); }
@@ -185,39 +196,83 @@ const currentYear = new Date().getFullYear();
 
         document.addEventListener('click', function (e) {
           var img = e.target.closest && e.target.closest('.photo-grid img');
-          if (!img) return;
-          var grid = img.closest('.photo-grid');
-          var images = Array.prototype.slice.call(grid.querySelectorAll('img'));
-          openAt(images, images.indexOf(img));
+          if (img) {
+            var grid = img.closest('.photo-grid');
+            var images = Array.prototype.slice.call(grid.querySelectorAll('img'));
+            open(images, images.indexOf(img));
+            return;
+          }
+          var id = e.target && e.target.id;
+          if (id === 'lightbox-close') close();
+          else if (id === 'lightbox-next') next();
+          else if (id === 'lightbox-prev') prev();
+          else if (e.target && e.target.id === 'lightbox') close(); // klik op de backdrop
         });
 
-        document.getElementById('lightbox-close').addEventListener('click', close);
-        document.getElementById('lightbox-next').addEventListener('click', next);
-        document.getElementById('lightbox-prev').addEventListener('click', prev);
-        dialog.addEventListener('click', function (e) {
-          if (e.target === dialog) close(); // klik op de backdrop
-        });
-        dialog.addEventListener('cancel', function (e) {
-          e.preventDefault(); // voorkomt de standaard-close, zodat overflow ook resetop
-          close();
-        });
         document.addEventListener('keydown', function (e) {
-          if (!dialog.open) return;
+          var dialog = document.getElementById('lightbox');
+          if (!dialog || !dialog.open) return;
           if (e.key === 'ArrowRight') next();
           if (e.key === 'ArrowLeft') prev();
         });
 
+        // 'cancel' (Escape bij <dialog>) bubbelt niet — capture-phase nodig om 'm te vangen.
+        document.addEventListener('cancel', function (e) {
+          if (e.target && e.target.id === 'lightbox') {
+            e.preventDefault();
+            close();
+          }
+        }, true);
+
         var touchStartX = 0;
-        dialog.addEventListener('touchstart', function (e) { touchStartX = e.touches[0].clientX; }, { passive: true });
-        dialog.addEventListener('touchend', function (e) {
+        document.addEventListener('touchstart', function (e) {
+          if (e.target.closest && e.target.closest('#lightbox')) touchStartX = e.touches[0].clientX;
+        }, { passive: true });
+        document.addEventListener('touchend', function (e) {
+          if (!(e.target.closest && e.target.closest('#lightbox'))) return;
           var dx = e.changedTouches[0].clientX - touchStartX;
           if (Math.abs(dx) > 50) { dx > 0 ? prev() : next(); }
         }, { passive: true });
       })();
     </script>
 
+    <!-- Scroll-reveal voor .reveal-elementen — subtiel (opacity/8px), en nooit op de
+         eerste viewport: wat al zichtbaar is bij het laden verschijnt meteen, zonder op
+         een animatie te wachten. astro:page-load zodat dit ook na een view-transition-
+         navigatie de (nieuwe) .reveal-elementen op de pagina oppakt. -->
     <script is:inline>
-      // Minimal anonymous pageview ping for analytics
+      document.addEventListener('astro:page-load', function () {
+        var elements = document.querySelectorAll('.reveal:not(.reveal-visible)');
+        if (!elements.length || typeof IntersectionObserver === 'undefined') {
+          elements.forEach(function (el) { el.classList.add('reveal-visible'); });
+          return;
+        }
+        var observer = new IntersectionObserver(
+          function (entries) {
+            entries.forEach(function (entry) {
+              if (entry.isIntersecting) {
+                entry.target.classList.add('reveal-visible');
+                observer.unobserve(entry.target);
+              }
+            });
+          },
+          { threshold: 0.15 }
+        );
+        elements.forEach(function (el) {
+          var rect = el.getBoundingClientRect();
+          if (rect.top < window.innerHeight && rect.bottom > 0) {
+            el.classList.add('reveal-visible'); // al in beeld: meteen tonen, niet animeren
+          } else {
+            observer.observe(el);
+          }
+        });
+      });
+    </script>
+
+    <!-- data-astro-rerun: laat Astro dit script bij élke view-transition-navigatie
+         opnieuw uitvoeren i.p.v. alleen bij de eerste paginalading — anders telt de
+         analytics alleen de allereerste pagina van een bezoek. -->
+    <script is:inline data-astro-rerun>
       (async () => {
         if (typeof window === 'undefined') return;
         try {

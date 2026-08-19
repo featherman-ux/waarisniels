@@ -72,6 +72,7 @@ const readNextPosts = await getRelatedPosts(db, post, 2);
           loading="eager"
           fetchpriority="high"
           decoding="async"
+          transition:name={`cover-${post.id}`}
         />
         <div class="hero-grad absolute inset-0"></div>
         <div class="hero-title-overlay">
@@ -105,7 +106,7 @@ const readNextPosts = await getRelatedPosts(db, post, 2);
 
     <div class="reading-col">
       {post.location && (
-        <section class="location-outro mb-12">
+        <section class="location-outro reveal mb-12">
           <p class="location-outro__place">
             <span class="location-dot" aria-hidden="true"></span>
             {post.location.name ?? 'Onbekende plek'}
@@ -116,7 +117,7 @@ const readNextPosts = await getRelatedPosts(db, post, 2);
       )}
 
       {readNextPosts.length > 0 && (
-        <section class="read-next mb-12">
+        <section class="read-next reveal mb-12">
           <h2 class="text-2xl font-bold mb-6">Lees ook</h2>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             {readNextPosts.map((rp) => (
@@ -231,9 +232,11 @@ const readNextPosts = await getRelatedPosts(db, post, 2);
   }
 </style>
 
-<script is:inline>
+<script is:inline data-astro-rerun>
   // Leesvoortgangsbalk: puur CSS zou animation-timeline:scroll() gebruiken, maar dat
   // heeft nog geen brede ondersteuning — dit is de JS-fallback die de opdracht vraagt.
+  // data-astro-rerun: dit script draait opnieuw bij elke view-transition-navigatie
+  // naar een postpagina, en pakt dan de #reading-progress-bar van díe pagina.
   (function () {
     var bar = document.getElementById('reading-progress');
     if (!bar) return;

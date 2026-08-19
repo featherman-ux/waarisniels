@@ -54,7 +54,7 @@ const heroHref = heroPost ? `/blog/${heroPost.slug}/` : null;
 
   <!-- Waar is Niels nu -->
   {latestLocated && (
-    <section class="waar-is-niels-nu">
+    <section class="waar-is-niels-nu reveal">
       <p class="location">
         <span class="location-dot" aria-hidden="true"></span>
         {latestLocated.location?.name ?? 'Onderweg'}
@@ -76,7 +76,7 @@ const heroHref = heroPost ? `/blog/${heroPost.slug}/` : null;
   </div>
 
   <!-- Latest blog posts -->
-  <section class="posts">
+  <section class="posts reveal">
     <h2>Laatste blogposts</h2>
     {latestPosts.length > 0 ? (
       <div class="grid-posts">

@@ -140,7 +140,10 @@ const pageDescription = "Eenvoudige, snelle kaart met mijn route en stops (bus, 
 </BaseLayout>
 
 <script is:inline defer>
-  document.addEventListener('DOMContentLoaded', async () => {
+  // astro:page-load i.p.v. DOMContentLoaded: met <ClientRouter /> (fase F) wisselt de
+  // pagina-inhoud client-side, dus dit moet ook draaien als je via een link naar /map
+  // navigeert i.p.v. een verse paginalading.
+  document.addEventListener('astro:page-load', async () => {
     if (typeof L === 'undefined') return;
 
     const map = L.map('map', {

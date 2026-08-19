@@ -420,6 +420,19 @@ p {
   margin-inline: calc(50% - 50vw);
 }
 
+/* Scroll-reveal: subtiel, en nooit op de eerste viewport (zie het script in
+   BaseLayout.astro — elementen die al zichtbaar zijn bij het laden worden meteen
+   getoond, geen wachttijd op een animatie voor content die je toch al ziet). */
+.reveal {
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+.reveal-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
 /* Lightbox (native <dialog>, zie BaseLayout.astro) — hangt aan elke .photo-grid img
    via event-delegatie, werkt dus automatisch voor oude én nieuwe posts. */
 .lightbox {

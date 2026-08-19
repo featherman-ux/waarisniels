@@ -238,7 +238,9 @@ const coverPreview = fields.coverKey ? mediaUrl(fields.coverKey) : null;
     leafletMap.on('click', (e: any) => setMarker(e.latlng.lat, e.latlng.lng));
   }
 
-  document.addEventListener('DOMContentLoaded', initLocationMap);
+  // astro:page-load i.p.v. DOMContentLoaded: met <ClientRouter /> (fase F) moet dit ook
+  // draaien bij het client-side wisselen tussen /beheer/nieuw/ en /beheer/post/<id>/.
+  document.addEventListener('astro:page-load', initLocationMap);
 
   function withTimeout<T>(promise: Promise<T>, ms: number, fallback: T): Promise<T> {
     return new Promise((resolve) => {
