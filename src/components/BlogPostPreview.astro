@@ -9,27 +9,39 @@ const coverKey = post.cover?.key;
 const imgSrc = mediaUrl(coverKey, { width: 960 }) ?? mediaUrl(coverKey) ?? '/images/homepage.jpeg';
 const imgSrcSet = coverKey ? mediaSrcSet(coverKey, [480, 960]) : undefined;
 const imgAlt = post.cover?.alt ?? post.title;
+
+// Categorielabels uit migrations/0001_init.sql — als er ooit een derde categorie
+// bijkomt via de D1 categories-tabel, moet die hier ook een label krijgen.
+const CATEGORY_LABELS: Record<string, string> = { reis: 'Reisverhaal', overig: 'Overig' };
+const categoryLabel = CATEGORY_LABELS[post.category] ?? post.category;
+
+const wordCount = post.body.trim().split(/\s+/).filter(Boolean).length;
+const readMinutes = Math.max(1, Math.round(wordCount / 200));
 ---
-<article class="rounded-lg border bg-white dark:bg-gray-800 p-4 shadow-sm hover:shadow-md transition">
+<article class="group rounded-lg bg-card shadow-sm hover:shadow-md transition-shadow duration-200">
   <a href={href} class="block">
-    <div class="relative mb-3 overflow-hidden rounded-md bg-gray-100 dark:bg-gray-900 aspect-[4/3] md:aspect-[5/3]">
+    <div class="relative mb-3 overflow-hidden rounded-md bg-line aspect-[4/3] md:aspect-[5/3]">
       <img
         src={imgSrc}
         srcset={imgSrcSet}
         sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
         alt={imgAlt}
-        class="absolute inset-0 h-full w-full object-cover md:object-contain md:p-2"
+        class="absolute inset-0 h-full w-full object-cover transition-transform duration-200 group-hover:scale-[1.03]"
         loading={eager ? 'eager' : 'lazy'}
         fetchpriority={eager ? 'high' : 'auto'}
       />
+      <span class="absolute left-3 top-3 rounded-full bg-amber px-2.5 py-1 text-xs font-semibold text-ink">
+        {categoryLabel}
+      </span>
     </div>
-    <h3 class="text-xl font-semibold">{post.title}</h3>
-    <p class="text-sm text-gray-500 mb-2">
-      {post.pubDate.toLocaleDateString('nl-NL')}
-    </p>
-    {post.description && (
-      <p class="text-gray-700 dark:text-gray-300 line-clamp-3">{post.description}</p>
-    )}
-    <span class="inline-block mt-3 underline">Lees verder</span>
+    <div class="px-1 pb-4 transition-transform duration-200 group-hover:-translate-y-0.5">
+      <h3 class="text-xl font-semibold">{post.title}</h3>
+      <p class="text-sm text-text-subtle mb-2">
+        {post.pubDate.toLocaleDateString('nl-NL')} · {readMinutes} min leestijd
+      </p>
+      {post.description && (
+        <p class="text-text-subtle line-clamp-3">{post.description}</p>
+      )}
+    </div>
   </a>
 </article>

@@ -11,6 +11,7 @@ const { title, description = 'WaarIsNiels – reisblog & kaart' } = Astro.props;
 
 const path = Astro.url.pathname;
 const isActive = (p: string) => path === p || path.startsWith(p + '/');
+const isHomepage = path === '/';
 
 const navLinks = [
   { href: '/blog/', match: '/blog', label: 'Blog' },
@@ -19,9 +20,9 @@ const navLinks = [
 ];
 
 const navClasses = (match: string) => [
-  'text-sm sm:text-base px-2 py-1 rounded transition-colors',
+  'nav-link text-sm sm:text-base px-2 py-1 rounded transition-colors',
   isActive(match)
-    ? 'text-deep underline underline-offset-4'
+    ? 'text-deep underline underline-offset-4 decoration-amber decoration-2'
     : 'text-text-subtle hover:text-deep'
 ];
 
@@ -64,9 +65,15 @@ const currentYear = new Date().getFullYear();
     <slot name="head" />
   </head>
   <body class="bg-paper text-text antialiased">
-    <header class="bg-card/90 backdrop-blur border-b border-line sticky top-0 z-50">
+    <header
+      id="site-header"
+      class:list={[
+        'backdrop-blur sticky top-0 z-50 transition-colors duration-200',
+        isHomepage ? 'header-transparent' : 'bg-card/90 border-b border-line',
+      ]}
+    >
       <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
-        <a href="/" class="text-2xl font-display font-bold text-ink">WaarIsNiels?</a>
+        <a href="/" class="brand text-2xl font-display font-bold text-ink">WaarIsNiels?</a>
 
         <div class="flex items-center gap-3 sm:gap-5">
           {navLinks.map(({ href, match, label }) => (
@@ -85,6 +92,53 @@ const currentYear = new Date().getFullYear();
     <main class="container mx-auto px-6 py-8 max-w-[1152px]">
       <slot />
     </main>
+
+    <style>
+      /* Transparant over de hero op de homepage, solide zodra er voorbij gescrold is
+         (zie het script hieronder — luistert naar #hero-sentinel via IntersectionObserver,
+         geen scroll-listener). Alle andere pagina's krijgen meteen de vaste variant. */
+      .header-transparent {
+        background: transparent;
+        border-bottom: 1px solid transparent;
+      }
+      .header-transparent .brand,
+      .header-transparent .nav-link {
+        color: #fff;
+      }
+      .header-transparent .nav-link[aria-current='page'] {
+        color: #fff;
+      }
+      .header-transparent.header-solid {
+        background: color-mix(in srgb, var(--card) 90%, transparent);
+        border-bottom-color: var(--line);
+      }
+      .header-transparent.header-solid .brand {
+        color: var(--ink);
+      }
+      .header-transparent.header-solid .nav-link {
+        color: var(--text-subtle);
+      }
+      .header-transparent.header-solid .nav-link[aria-current='page'] {
+        color: var(--deep);
+      }
+    </style>
+
+    <script is:inline>
+      // Header start transparant (over de hero), wordt solide zodra #hero-sentinel
+      // (aan het eind van de hero, alleen op de homepage aanwezig) uit beeld scrolt.
+      (function () {
+        var header = document.getElementById('site-header');
+        var sentinel = document.getElementById('hero-sentinel');
+        if (!header || !sentinel || typeof IntersectionObserver === 'undefined') return;
+        var observer = new IntersectionObserver(
+          function (entries) {
+            header.classList.toggle('header-solid', !entries[0].isIntersecting);
+          },
+          { rootMargin: '-64px 0px 0px 0px' }
+        );
+        observer.observe(sentinel);
+      })();
+    </script>
 
     <footer class="border-t border-line mt-16 py-10 text-center">
       <p class="text-text-subtle">&copy; {currentYear} WaarIsNiels.</p>

@@ -59,83 +59,192 @@ const readNextPosts = await getRelatedPosts(db, post, 2);
 ---
 <script type="application/ld+json" is:inline set:html={JSON.stringify(schema)} />
 <BaseLayout title={title} description={description ?? title}>
-  <article class="max-w-68ch mx-auto p-6 prose prose-lg dark:prose-invert">
+  <div id="reading-progress" class="fixed top-0 left-0 h-[2px] bg-amber z-[60]" style="width: 0%;"></div>
+
+  <article class="prose prose-lg dark:prose-invert max-w-none">
     {heroSrc && (
-      <figure class="hero rounded-lg overflow-hidden relative mb-6">
+      <figure class="hero-figure full-bleed relative mb-8 -mt-8">
         <img
           src={heroSrc}
           srcset={heroSrcSet}
-          sizes="(min-width: 768px) 68ch, 100vw"
+          sizes="100vw"
           alt={heroAlt}
-          class="w-full h-auto object-cover"
+          class="w-full h-[min(70vh,640px)] object-cover"
           loading="eager"
           fetchpriority="high"
           decoding="async"
         />
-        <div class="hero-grad absolute inset-0 bg-gradient-to-t from-black/60"></div>
+        <div class="hero-grad absolute inset-0"></div>
+        <div class="hero-title-overlay">
+          <h1 class="font-display font-bold text-step-4 text-white mb-2">{title}</h1>
+          <p class="text-white/85">{dateStr}</p>
+        </div>
       </figure>
     )}
 
-    <header class="mb-6">
-      <h1 class="font-display font-bold text-step-3 text-ink mb-2">{title}</h1>
-      <p class="text-text-subtle mb-4">{dateStr}</p>
-      {tags?.length && (
-        <div class="flex flex-wrap gap-2 mb-6">
-          {tags.map((t) => (
-            <Chip text={t} />
-          ))}
+    <div class="reading-col">
+      {!heroSrc && <h1 class="font-display font-bold text-step-3 text-ink mb-2">{title}</h1>}
+      <header class="mb-6">
+        {tags?.length && (
+          <div class="flex flex-wrap gap-2 mb-6">
+            {tags.map((t) => (
+              <Chip text={t} />
+            ))}
+          </div>
+        )}
+
+        <div class="flex items-center gap-4 mb-4">
+          <ViewCounter client:idle path={currentPath} apiUrl={siteUrl} />
+          <LikeButton client:idle likeKey={currentPath} apiUrl={siteUrl} />
         </div>
+
+        {description && <p class="text-lg text-text-subtle" style="text-wrap: pretty;">{description}</p>}
+      </header>
+    </div>
+
+    <section class="prose-wrap prose-grid mb-12" set:html={contentHtml} />
+
+    <div class="reading-col">
+      {post.location && (
+        <section class="location-outro mb-12">
+          <p class="location-outro__place">
+            <span class="location-dot" aria-hidden="true"></span>
+            {post.location.name ?? 'Onbekende plek'}
+          </p>
+          {post.placeFact && <p class="location-outro__fact">&ldquo;{post.placeFact}&rdquo;</p>}
+          <a href="/map/" class="location-outro__link">Bekijk op de kaart →</a>
+        </section>
       )}
 
-      <div class="flex items-center gap-4 mb-4">
-        <ViewCounter client:idle path={currentPath} apiUrl={siteUrl} />
-        <LikeButton client:idle likeKey={currentPath} apiUrl={siteUrl} />
-      </div>
+      {readNextPosts.length > 0 && (
+        <section class="read-next mb-12">
+          <h2 class="text-2xl font-bold mb-6">Lees ook</h2>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {readNextPosts.map((rp) => (
+              <a href={`/blog/${rp.slug}/`} class="post-card group border border-line rounded-lg overflow-hidden transition-shadow duration-200 hover:shadow-md">
+                {rp.cover?.key && (
+                  <div class="overflow-hidden">
+                    <img
+                      src={mediaUrl(rp.cover.key, { width: 480 })}
+                      alt={rp.cover?.alt || ''}
+                      class="w-full h-48 object-cover transition-transform duration-200 group-hover:scale-[1.03]"
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  </div>
+                )}
+                <div class="p-4">
+                  <h3 class="font-bold text-lg mb-2">{rp.title}</h3>
+                  <p class="text-text-subtle mb-3">{rp.description}</p>
+                  <span class="text-deep font-medium">Lees verder →</span>
+                </div>
+              </a>
+            ))}
+          </div>
+        </section>
+      )}
 
-      {description && <p class="text-lg text-text-subtle" style="text-wrap: pretty;">{description}</p>}
-    </header>
-
-    <section class="prose-wrap mb-12" set:html={contentHtml} />
-
-    <footer>
-      <Comments client:load slug={post.slug} apiUrl={siteUrl} />
-    </footer>
-
-    <!-- READ NEXT SECTION -->
-    {readNextPosts.length > 0 && (
-      <section class="read-next mt-16">
-        <h2 class="text-2xl font-bold mb-6">Continue Reading</h2>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {readNextPosts.map((rp) => (
-            <a href={`/blog/${rp.slug}/`} class="post-card border rounded-lg overflow-hidden transition-all hover:shadow-lg">
-              {rp.cover?.key && (
-                <img
-                  src={mediaUrl(rp.cover.key, { width: 480 })}
-                  alt={rp.cover?.alt || ''}
-                  class="w-full h-48 object-cover"
-                  loading="lazy"
-                  decoding="async"
-                />
-              )}
-              <div class="p-4">
-                <h3 class="font-bold text-lg mb-2">{rp.title}</h3>
-                <p class="text-text-subtle mb-3">{rp.description}</p>
-                <span class="text-deep font-medium">Read Post →</span>
-              </div>
-            </a>
-          ))}
-        </div>
-      </section>
-    )}
+      <footer>
+        <Comments client:load slug={post.slug} apiUrl={siteUrl} />
+      </footer>
+    </div>
   </article>
 </BaseLayout>
 
 <style>
-  /* Add subtle improvements: larger headings, comfortable reading width */
+  .reading-col {
+    max-width: 68ch;
+    margin-inline: auto;
+    padding-inline: 1.5rem;
+  }
+
   article.prose-wrap :global(p) {
     line-height: 1.7;
   }
-  figure.hero-grad {
+
+  /* Breakout-grid: lopende tekst blijft op 68ch, .photo-grid/.video-responsive
+     mogen breder — precies het tijdschrift-contrast uit DESIGN_HANDOFF §6.5. */
+  .prose-grid {
+    display: grid;
+    grid-template-columns: 1fr min(68ch, 100% - 3rem) 1fr;
+  }
+  .prose-grid > :global(*) {
+    grid-column: 2;
+  }
+  .prose-grid > :global(.photo-grid),
+  .prose-grid > :global(.video-responsive) {
+    grid-column: 1 / -1;
+    width: min(100%, 1100px);
+    justify-self: center;
+  }
+
+  .hero-figure {
+    overflow: hidden;
+  }
+  .hero-grad {
+    background: linear-gradient(to top, rgba(2, 48, 71, 0.75) 0%, rgba(2, 48, 71, 0.1) 45%, transparent 70%);
     pointer-events: none;
   }
+  .hero-title-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 1.5rem;
+    max-width: 68ch;
+    margin-inline: auto;
+  }
+  @media (min-width: 640px) {
+    .hero-title-overlay {
+      padding: 3rem;
+    }
+  }
+
+  .location-outro {
+    background: var(--ink);
+    color: #fff;
+    border-radius: var(--radius-lg);
+    padding: 2rem 1.5rem;
+    text-align: center;
+  }
+  .location-outro__place {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    font-family: 'Playfair Display', serif;
+    font-size: var(--step-2);
+    margin-bottom: 0.5rem;
+  }
+  .location-outro__fact {
+    font-style: italic;
+    opacity: 0.9;
+    max-width: 50ch;
+    margin: 0 auto 1rem;
+    text-wrap: pretty;
+  }
+  .location-outro__link {
+    color: #fff;
+    font-weight: 600;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
 </style>
+
+<script is:inline>
+  // Leesvoortgangsbalk: puur CSS zou animation-timeline:scroll() gebruiken, maar dat
+  // heeft nog geen brede ondersteuning — dit is de JS-fallback die de opdracht vraagt.
+  (function () {
+    var bar = document.getElementById('reading-progress');
+    if (!bar) return;
+    function update() {
+      var doc = document.documentElement;
+      var scrollable = doc.scrollHeight - doc.clientHeight;
+      var pct = scrollable > 0 ? (doc.scrollTop / scrollable) * 100 : 0;
+      bar.style.width = pct + '%';
+    }
+    document.addEventListener('scroll', update, { passive: true });
+    update();
+  })();
+</script>
