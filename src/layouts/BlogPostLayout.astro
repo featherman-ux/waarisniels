@@ -57,7 +57,7 @@ const readNextPosts = await getRelatedPosts(db, post, 2);
 ---
 <script type="application/ld+json" is:inline set:html={JSON.stringify(schema)} />
 <BaseLayout title={title} description={description ?? title}>
-  <article class="max-w-3xl mx-auto p-6 prose prose-lg dark:prose-invert">
+  <article class="max-w-68ch mx-auto p-6 prose prose-lg dark:prose-invert">
     {heroSrc && (
       <figure class="hero rounded-lg overflow-hidden relative mb-6">
         <img
@@ -72,7 +72,7 @@ const readNextPosts = await getRelatedPosts(db, post, 2);
     )}
 
     <header class="mb-6">
-      <h1 class="font-display font-extrabold text-4xl text-ink mb-2">{title}</h1>
+      <h1 class="font-display font-bold text-step-3 text-ink mb-2">{title}</h1>
       <p class="text-text-subtle mb-4">{dateStr}</p>
       {tags?.length && (
         <div class="flex flex-wrap gap-2 mb-6">
@@ -87,7 +87,7 @@ const readNextPosts = await getRelatedPosts(db, post, 2);
         <LikeButton client:idle likeKey={currentPath} apiUrl={siteUrl} />
       </div>
 
-      {description && <p class="text-lg text-text-subtle">{description}</p>}
+      {description && <p class="text-lg text-text-subtle" style="text-wrap: pretty;">{description}</p>}
     </header>
 
     <section class="prose-wrap mb-12" set:html={contentHtml} />
