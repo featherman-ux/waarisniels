@@ -44,7 +44,20 @@ export function VibeWidget() {
     return () => clearInterval(interval);
   }, []);
 
-  if (!brazilTime) return <div>Locatie wordt ingeladen...</div>;
+  // Zelfde .vibe-widget-wrapper (dus dezelfde afmetingen) in beide staten — anders
+  // verspringt de hero eronder zodra dit na hydratie van een kale tekstregel naar de
+  // volle kaart wisselt (gevonden via Lighthouse CLS, zie DESIGN_HANDOFF §7).
+  if (!brazilTime) {
+    return (
+      <div className="vibe-widget">
+        <div className="vibe-widget-time">
+          <span className="location-dot"></span>
+          Locatie wordt ingeladen&hellip;
+        </div>
+        <div className="vibe-widget-status" aria-hidden="true" style={{ visibility: 'hidden' }}>&nbsp;</div>
+      </div>
+    );
+  }
 
   return (
     <div className="vibe-widget">
