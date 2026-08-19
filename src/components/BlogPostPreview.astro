@@ -2,8 +2,8 @@
 import type { Post } from '../lib/db';
 import { mediaUrl } from '../lib/media';
 
-export interface Props { post: Post }
-const { post } = Astro.props;
+export interface Props { post: Post; eager?: boolean }
+const { post, eager = false } = Astro.props;
 const href = `/blog/${post.slug}/`;
 const imgSrc = mediaUrl(post.cover?.key) ?? '/images/homepage.jpeg';
 const imgAlt = post.cover?.alt ?? post.title;
@@ -15,7 +15,8 @@ const imgAlt = post.cover?.alt ?? post.title;
         src={imgSrc}
         alt={imgAlt}
         class="absolute inset-0 h-full w-full object-cover md:object-contain md:p-2"
-        loading="lazy"
+        loading={eager ? 'eager' : 'lazy'}
+        fetchpriority={eager ? 'high' : 'auto'}
       />
     </div>
     <h3 class="text-xl font-semibold">{post.title}</h3>

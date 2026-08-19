@@ -282,7 +282,7 @@ const coverPreview = fields.coverKey ? mediaUrl(fields.coverKey) : null;
     }
   }
 
-  // --- Compressie: resize naar max 2000px + WebP, vóór upload (na de EXIF-read hierboven,
+  // --- Compressie: resize naar max 1600px + WebP kwaliteit 0.72, vóór upload (na de EXIF-read hierboven,
   // want canvas-encoding strípt EXIF — dat is hier ook precies goed voor privacy).
   // Harde timeout: als comprimeren te lang duurt (traag toestel/grote foto), upload
   // gewoon het origineel in plaats van de gebruiker eindeloos te laten wachten. ---
@@ -308,7 +308,7 @@ const coverPreview = fields.coverKey ? mediaUrl(fields.coverKey) : null;
     return new File([blob], webpName, { type: 'image/webp' });
   }
 
-  async function compressImage(file: File, maxDim = 2000, quality = 0.85): Promise<File> {
+  async function compressImage(file: File, maxDim = 1600, quality = 0.72): Promise<File> {
     try {
       return await withTimeout(compressImageInner(file, maxDim, quality), 15000, file);
     } catch (err) {

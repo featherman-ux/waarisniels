@@ -12,8 +12,8 @@ const posts = await listPosts(db, { limit: 100 });
     <h1 class="text-3xl font-bold mb-6">Blog</h1>
     {posts.length ? (
       <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {posts.map((p) => (
-          <BlogPostPreview post={p} />
+        {posts.map((p, i) => (
+          <BlogPostPreview post={p} eager={i === 0} />
         ))}
       </div>
     ) : (
