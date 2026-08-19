@@ -2,7 +2,7 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import '../styles/home.css';
 import { listPosts, getLatestLocatedPost } from '../lib/db';
-import { mediaUrl, mediaSrcSet } from '../lib/media';
+import { mediaUrl } from '../lib/media';
 import BlogPostPreview from '../components/BlogPostPreview.astro';
 import HomePopup from '../components/HomePopup.astro';
 import { VibeWidget } from '../components/VibeWidget.jsx';
@@ -16,11 +16,10 @@ const [latestPosts, latestLocated] = await Promise.all([
 // Hero volgt de nieuwste post met een cover — homepage vernieuwt zichzelf bij elke
 // post (bewuste keuze, zie DESIGN_HANDOFF §6.2). Valt terug op de vaste foto als
 // geen enkele van de laatste posts een cover heeft.
+// TODO: srcset via mediaUrl(key, {width}) zodra Image Transformations aanstaat
+// (Zone -> Speed -> Optimization) — nu uitgezet, zie DESIGN_HANDOFF §7.
 const heroPost = latestPosts.find((p) => p.cover?.key) ?? null;
-const heroImgSrc = heroPost
-  ? mediaUrl(heroPost.cover!.key, { width: 1920 })
-  : '/images/homepage.jpeg';
-const heroImgSrcSet = heroPost ? mediaSrcSet(heroPost.cover!.key, [768, 1280, 1920]) : undefined;
+const heroImgSrc = heroPost ? mediaUrl(heroPost.cover!.key) : '/images/homepage.jpeg';
 const heroImgAlt = heroPost ? (heroPost.cover!.alt ?? heroPost.title) : 'Waar is Niels?';
 const heroHref = heroPost ? `/blog/${heroPost.slug}/` : null;
 ---
@@ -34,8 +33,6 @@ const heroHref = heroPost ? `/blog/${heroPost.slug}/` : null;
   <section class="home-hero full-bleed">
     <img
       src={heroImgSrc}
-      srcset={heroImgSrcSet}
-      sizes="100vw"
       alt={heroImgAlt}
       loading="eager"
       fetchpriority="high"

@@ -1,13 +1,14 @@
 ---
 import type { Post } from '../lib/db';
-import { mediaUrl, mediaSrcSet } from '../lib/media';
+import { mediaUrl } from '../lib/media';
 
 export interface Props { post: Post; eager?: boolean }
 const { post, eager = false } = Astro.props;
 const href = `/blog/${post.slug}/`;
 const coverKey = post.cover?.key;
-const imgSrc = mediaUrl(coverKey, { width: 960 }) ?? mediaUrl(coverKey) ?? '/images/homepage.jpeg';
-const imgSrcSet = coverKey ? mediaSrcSet(coverKey, [480, 960]) : undefined;
+// TODO: srcset via mediaUrl(key, {width}) zodra Image Transformations aanstaat
+// (Zone -> Speed -> Optimization) — nu uitgezet, zie DESIGN_HANDOFF §7.
+const imgSrc = mediaUrl(coverKey) ?? '/images/homepage.jpeg';
 const imgAlt = post.cover?.alt ?? post.title;
 
 // Categorielabels uit migrations/0001_init.sql — als er ooit een derde categorie
@@ -23,8 +24,6 @@ const readMinutes = Math.max(1, Math.round(wordCount / 200));
     <div class="relative mb-3 overflow-hidden rounded-md bg-line aspect-[4/3] md:aspect-[5/3]">
       <img
         src={imgSrc}
-        srcset={imgSrcSet}
-        sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
         alt={imgAlt}
         class="absolute inset-0 h-full w-full object-cover transition-transform duration-200 group-hover:scale-[1.03]"
         loading={eager ? 'eager' : 'lazy'}
