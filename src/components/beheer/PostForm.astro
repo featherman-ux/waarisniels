@@ -283,6 +283,21 @@ const coverPreview = fields.coverKey ? mediaUrl(fields.coverKey) : null;
     }
   }
 
+  // width/height op de <img> reserveren ruimte in de tekst, zodat de pagina niet
+  // springt zodra de foto laadt (DESIGN_HANDOFF §7). Best-effort: lukt het niet, dan
+  // gaat de foto gewoon zonder afmetingen de tekst in.
+  async function getImageDimensions(file: File): Promise<{ width: number; height: number } | null> {
+    try {
+      const bitmap = await withTimeout<ImageBitmap | null>(decodeImage(file), 3000, null);
+      if (!bitmap) return null;
+      const dims = { width: bitmap.width, height: bitmap.height };
+      bitmap.close?.();
+      return dims;
+    } catch {
+      return null;
+    }
+  }
+
   // --- Compressie: resize naar max 1600px + WebP kwaliteit 0.72, vóór upload (na de EXIF-read hierboven,
   // want canvas-encoding strípt EXIF — dat is hier ook precies goed voor privacy).
   // Harde timeout: als comprimeren te lang duurt (traag toestel/grote foto), upload
@@ -435,8 +450,10 @@ const coverPreview = fields.coverKey ? mediaUrl(fields.coverKey) : null;
       inlineStatus.textContent = `${progress}comprimeren en uploaden...`;
       try {
         const compressed = await compressImage(file);
+        const dims = await getImageDimensions(compressed);
         const { key, url } = await upload(compressed, compressed.name);
-        insertAtCursor(`\n<img src="${url}" alt="" />\n`);
+        const dimAttrs = dims ? ` width="${dims.width}" height="${dims.height}"` : '';
+        insertAtCursor(`\n<img src="${url}" alt=""${dimAttrs} />\n`);
         addAltTextRow(key, url, file.name);
       } catch (err: any) {
         failed.push(`${file.name} (${err.message ?? 'onbekende fout'})`);

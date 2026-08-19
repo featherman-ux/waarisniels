@@ -17,13 +17,31 @@ function encodeKey(key: string): string {
     .replace(/#/g, '%23');
 }
 
-/** Legacy pad (/images/...) of R2-key -> volledige media-URL. */
-export function mediaUrl(key?: string | null): string | undefined {
+/**
+ * Legacy pad (/images/...) of R2-key -> volledige media-URL. Met `width` loopt de
+ * afbeelding via Cloudflare Image Transformations (/cdn-cgi/image/...), die automatisch
+ * AVIF/WebP serveert op basis van de browser en op ware grootte i.p.v. de volle R2-pixels.
+ * Vereist dat "Image Transformations" aanstaat voor deze zone (Zone → Speed → Optimization
+ * — dashboard-only, zie docs/cloudflare-setup.md). Staat het uit, dan negeert Cloudflare
+ * de /cdn-cgi/image/-prefix niet — de aanroep faalt dan met een 9422. Zet 'm dus pas aan
+ * in productie voor je deze code met width-parameters live zet.
+ */
+export function mediaUrl(key?: string | null, opts?: { width?: number }): string | undefined {
   if (!key) return undefined;
   const k = key.trim();
   if (!k) return undefined;
-  if (/^https?:\/\//i.test(k)) return k;                 // al absoluut
-  return `${MEDIA_BASE}/${encodeKey(k.replace(/^\/+/, ''))}`;
+  if (/^https?:\/\//i.test(k)) return k;                 // al absoluut, geen transform mogelijk
+  const path = encodeKey(k.replace(/^\/+/, ''));
+  if (opts?.width) {
+    return `${MEDIA_BASE}/cdn-cgi/image/width=${opts.width},format=auto,quality=80/${path}`;
+  }
+  return `${MEDIA_BASE}/${path}`;
+}
+
+/** srcset-string voor een R2-key op de gegeven breedtes (standaard 480/960/1600px). */
+export function mediaSrcSet(key?: string | null, widths: number[] = [480, 960, 1600]): string | undefined {
+  if (!key) return undefined;
+  return widths.map((w) => `${mediaUrl(key, { width: w })} ${w}w`).join(', ');
 }
 
 /**

@@ -2,7 +2,7 @@
 import type { Post } from '../lib/db';
 import { getRelatedPosts } from '../lib/db';
 import { renderMarkdown } from '../lib/markdown';
-import { mediaUrl } from '../lib/media';
+import { mediaUrl, mediaSrcSet } from '../lib/media';
 import BaseLayout from './BaseLayout.astro';
 import { Comments, ViewCounter, LikeButton } from '../components/EnhancedComponents.jsx';
 import Chip from '../components/Chip.astro';
@@ -16,7 +16,9 @@ const { title, description, pubDate, tags } = post;
 
 const db = Astro.locals.runtime.env.DB;
 const contentHtml = renderMarkdown(post.body);
-const heroSrc = mediaUrl(post.cover?.key);
+const coverKey = post.cover?.key;
+const heroSrc = mediaUrl(coverKey, { width: 1600 }) ?? mediaUrl(coverKey);
+const heroSrcSet = coverKey ? mediaSrcSet(coverKey, [640, 1200, 1920]) : undefined;
 const heroAlt = post.cover?.alt ?? title;
 
 const dateStr = pubDate.toLocaleDateString('nl-NL', {
@@ -62,9 +64,12 @@ const readNextPosts = await getRelatedPosts(db, post, 2);
       <figure class="hero rounded-lg overflow-hidden relative mb-6">
         <img
           src={heroSrc}
+          srcset={heroSrcSet}
+          sizes="(min-width: 768px) 68ch, 100vw"
           alt={heroAlt}
           class="w-full h-auto object-cover"
-          loading="lazy"
+          loading="eager"
+          fetchpriority="high"
           decoding="async"
         />
         <div class="hero-grad absolute inset-0 bg-gradient-to-t from-black/60"></div>
@@ -103,9 +108,9 @@ const readNextPosts = await getRelatedPosts(db, post, 2);
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           {readNextPosts.map((rp) => (
             <a href={`/blog/${rp.slug}/`} class="post-card border rounded-lg overflow-hidden transition-all hover:shadow-lg">
-              {mediaUrl(rp.cover?.key) && (
+              {rp.cover?.key && (
                 <img
-                  src={mediaUrl(rp.cover?.key)}
+                  src={mediaUrl(rp.cover.key, { width: 480 })}
                   alt={rp.cover?.alt || ''}
                   class="w-full h-48 object-cover"
                   loading="lazy"

@@ -1,11 +1,13 @@
 ---
 import type { Post } from '../lib/db';
-import { mediaUrl } from '../lib/media';
+import { mediaUrl, mediaSrcSet } from '../lib/media';
 
 export interface Props { post: Post; eager?: boolean }
 const { post, eager = false } = Astro.props;
 const href = `/blog/${post.slug}/`;
-const imgSrc = mediaUrl(post.cover?.key) ?? '/images/homepage.jpeg';
+const coverKey = post.cover?.key;
+const imgSrc = mediaUrl(coverKey, { width: 960 }) ?? mediaUrl(coverKey) ?? '/images/homepage.jpeg';
+const imgSrcSet = coverKey ? mediaSrcSet(coverKey, [480, 960]) : undefined;
 const imgAlt = post.cover?.alt ?? post.title;
 ---
 <article class="rounded-lg border bg-white dark:bg-gray-800 p-4 shadow-sm hover:shadow-md transition">
@@ -13,6 +15,8 @@ const imgAlt = post.cover?.alt ?? post.title;
     <div class="relative mb-3 overflow-hidden rounded-md bg-gray-100 dark:bg-gray-900 aspect-[4/3] md:aspect-[5/3]">
       <img
         src={imgSrc}
+        srcset={imgSrcSet}
+        sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
         alt={imgAlt}
         class="absolute inset-0 h-full w-full object-cover md:object-contain md:p-2"
         loading={eager ? 'eager' : 'lazy'}
