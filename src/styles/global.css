@@ -235,18 +235,27 @@ p {
 }
 
 /* Fotogrid — klassenaam blijft bestaan, de body-HTML van gemigreerde posts in D1
-   verwijst ernaar (zie CLAUDE_CODE_HANDOFF.md / DESIGN_HANDOFF.md §6.6). */
+   verwijst ernaar (zie CLAUDE_CODE_HANDOFF.md / DESIGN_HANDOFF.md §6.6). Echte
+   masonry via CSS columns: elke foto behoudt zijn eigen beeldverhouding (geen
+   object-fit/vaste hoogte meer), dus geen ongelijke witruimte tussen de foto's. */
 .photo-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1rem;
+  columns: 2;
+  column-gap: 1rem;
   margin: 1.5rem 0;
+}
+
+@media (min-width: 768px) {
+  .photo-grid {
+    columns: 3;
+  }
 }
 
 .photo-grid img {
   width: 100%;
-  height: 280px;
-  object-fit: cover;
+  height: auto;
+  display: block;
+  margin-bottom: 1rem;
+  break-inside: avoid;
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-md);
   transition: var(--transition-fast);
@@ -411,6 +420,60 @@ p {
   margin-inline: calc(50% - 50vw);
 }
 
+/* Lightbox (native <dialog>, zie BaseLayout.astro) — hangt aan elke .photo-grid img
+   via event-delegatie, werkt dus automatisch voor oude én nieuwe posts. */
+.lightbox {
+  border: none;
+  padding: 0;
+  background: transparent;
+  max-width: 92vw;
+  max-height: 92vh;
+}
+.lightbox::backdrop {
+  background: rgba(2, 48, 71, 0.92);
+}
+.lightbox img {
+  display: block;
+  margin: auto;
+  max-width: 92vw;
+  max-height: 92vh;
+  border-radius: var(--radius-md);
+}
+.lightbox-close,
+.lightbox-nav {
+  position: fixed;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-full);
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+.lightbox-close:hover,
+.lightbox-nav:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+.lightbox-close {
+  top: 1rem;
+  right: 1rem;
+}
+.lightbox-prev {
+  top: 50%;
+  left: 1rem;
+  transform: translateY(-50%);
+}
+.lightbox-next {
+  top: 50%;
+  right: 1rem;
+  transform: translateY(-50%);
+}
+
 /*
  * ===========================================
  * TOEGANKELIJKHEID
@@ -436,11 +499,3 @@ p {
  * RESPONSIVE
  * ===========================================
  */
-@media (max-width: 768px) {
-  .photo-grid {
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  }
-  .photo-grid img {
-    height: 200px;
-  }
-}

@@ -145,6 +145,77 @@ const currentYear = new Date().getFullYear();
       <p class="text-sm text-text-subtle mt-1">Powered by <a href="https://astro.build" target="_blank" rel="noopener noreferrer" class="hover:text-deep">Astro</a></p>
     </footer>
 
+    <!-- Lightbox voor .photo-grid-foto's (zie global.css .lightbox*). Hangt via
+         event-delegatie aan elke .photo-grid img, dus werkt automatisch op elke
+         pagina met een fotogrid — oude én nieuwe posts. -->
+    <dialog id="lightbox" class="lightbox">
+      <button type="button" id="lightbox-close" aria-label="Sluiten" class="lightbox-close">✕</button>
+      <button type="button" id="lightbox-prev" aria-label="Vorige foto" class="lightbox-nav lightbox-prev">‹</button>
+      <img id="lightbox-img" alt="" />
+      <button type="button" id="lightbox-next" aria-label="Volgende foto" class="lightbox-nav lightbox-next">›</button>
+    </dialog>
+
+    <script is:inline>
+      (function () {
+        var dialog = document.getElementById('lightbox');
+        var imgEl = document.getElementById('lightbox-img');
+        if (!dialog || !imgEl) return;
+
+        var gallery = [];
+        var index = 0;
+
+        function show() {
+          var el = gallery[index];
+          imgEl.src = el.currentSrc || el.src;
+          imgEl.alt = el.alt || '';
+        }
+        function openAt(images, i) {
+          gallery = images;
+          index = i;
+          show();
+          dialog.showModal();
+          document.body.style.overflow = 'hidden';
+        }
+        function close() {
+          dialog.close();
+          document.body.style.overflow = '';
+        }
+        function next() { index = (index + 1) % gallery.length; show(); }
+        function prev() { index = (index - 1 + gallery.length) % gallery.length; show(); }
+
+        document.addEventListener('click', function (e) {
+          var img = e.target.closest && e.target.closest('.photo-grid img');
+          if (!img) return;
+          var grid = img.closest('.photo-grid');
+          var images = Array.prototype.slice.call(grid.querySelectorAll('img'));
+          openAt(images, images.indexOf(img));
+        });
+
+        document.getElementById('lightbox-close').addEventListener('click', close);
+        document.getElementById('lightbox-next').addEventListener('click', next);
+        document.getElementById('lightbox-prev').addEventListener('click', prev);
+        dialog.addEventListener('click', function (e) {
+          if (e.target === dialog) close(); // klik op de backdrop
+        });
+        dialog.addEventListener('cancel', function (e) {
+          e.preventDefault(); // voorkomt de standaard-close, zodat overflow ook resetop
+          close();
+        });
+        document.addEventListener('keydown', function (e) {
+          if (!dialog.open) return;
+          if (e.key === 'ArrowRight') next();
+          if (e.key === 'ArrowLeft') prev();
+        });
+
+        var touchStartX = 0;
+        dialog.addEventListener('touchstart', function (e) { touchStartX = e.touches[0].clientX; }, { passive: true });
+        dialog.addEventListener('touchend', function (e) {
+          var dx = e.changedTouches[0].clientX - touchStartX;
+          if (Math.abs(dx) > 50) { dx > 0 ? prev() : next(); }
+        }, { passive: true });
+      })();
+    </script>
+
     <script is:inline>
       // Minimal anonymous pageview ping for analytics
       (async () => {
