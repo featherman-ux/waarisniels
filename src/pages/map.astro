@@ -36,27 +36,29 @@ const pageDescription = "Eenvoudige, snelle kaart met mijn route en stops (bus, 
     opacity: .85;
   }
   .card {
-    background: var(--card);
-    border-radius: var(--radius-lg);
+    position: relative;
     overflow: hidden;
-    box-shadow: var(--shadow-md);
-    max-width: 1280px;
     margin: 0 auto 2rem;
-    padding: 0; /* no padding: map fills entire card */
   }
   .map-wrap {
-    height: 600px;
+    height: min(80vh, 760px);
     width: 100%;
   }
-  .legend-bar {
+  .legend-panel {
+    position: absolute;
+    right: 1rem;
+    bottom: 1rem;
+    z-index: 400; /* boven Leaflet's eigen panes (max ~650), onder de zoom-controls' klikbereik */
     display: flex;
     flex-wrap: wrap;
-    justify-content: center;
-    gap: 1rem;
-    background: var(--paper);
-    padding: 1rem;
-    font-size: .95rem;
-    border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+    gap: 0.5rem 1rem;
+    background: color-mix(in srgb, var(--card) 92%, transparent);
+    backdrop-filter: blur(4px);
+    padding: 0.75rem 1rem;
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-md);
+    font-size: 0.85rem;
+    max-width: calc(100% - 2rem);
   }
   .legend-item {
     display: flex;
@@ -65,7 +67,7 @@ const pageDescription = "Eenvoudige, snelle kaart met mijn route en stops (bus, 
     color: var(--text-subtle);
   }
   .legend-line {
-    width: 24px;
+    width: 20px;
     height: 0;
     border-top-width: 3px;
     border-top-style: solid;
@@ -113,9 +115,9 @@ const pageDescription = "Eenvoudige, snelle kaart met mijn route en stops (bus, 
     <p id="map-ai-text">niels is in Cusco. Je bent op weg naar Cusco, de historische hoofdstad van de Inca's! Kijk uit het raam en geniet van de adembenemende uitzichten op de Andes. Wacht maar tot je de majestueuze Sacsayhuamán-fortress ziet liggen, een van de meest indrukwekkende overblijfselen van de Inca-keizerlijke tijd.</p>
   </aside>
 
-  <article class="card">
+  <article class="card full-bleed">
     <div id="map" class="map-wrap"></div>
-    <div class="legend-bar">
+    <div class="legend-panel">
       <div class="legend-item">
         <span class="legend-line" style="border-color: var(--deep);"></span>Bus
       </div>
@@ -147,9 +149,13 @@ const pageDescription = "Eenvoudige, snelle kaart met mijn route en stops (bus, 
       inertia: true,
     }).setView([-0.18, -78.47], 6);
 
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '© OpenStreetMap contributors',
-      maxZoom: 18,
+    // CARTO Positron (licht) / Dark Matter (donker) i.p.v. de standaard OSM-tegels —
+    // die zijn druk en bont onder een gekleurde route, CARTO laat de route eruit springen.
+    const isDark = document.documentElement.classList.contains('dark');
+    const cartoTheme = isDark ? 'dark_all' : 'light_all';
+    L.tileLayer(`https://{s}.basemaps.cartocdn.com/${cartoTheme}/{z}/{x}/{y}{r}.png`, {
+      attribution: '© OpenStreetMap contributors © CARTO',
+      maxZoom: 19,
       detectRetina: true,
     }).addTo(map);
 
