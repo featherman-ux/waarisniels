@@ -14,11 +14,11 @@
   /* tekst */
   --ink: #14181b; /* 17.9:1 op wit */
   --text: var(--ink);
-  --text-subtle: #6e6e73; /* 5.1:1 — AA */
+  --text-subtle: #5f5f63; /* 5.8:1 op --paper-alt, 6.4:1 op wit — marge boven AA i.v.m. antialiasing bij kleine tekst */
 
   /* accent: precies één, spaarzaam. amber is uitsluitend een klein signaal
      (locatiedot, badge) — nooit tekst, nooit een vlak groter dan een badge. */
-  --accent: #19788f; /* 5.1:1 op wit — links, actieve nav, CTA */
+  --accent: #166a7e; /* 5.7:1 op --paper-alt, 6.2:1 op wit — marge boven AA i.v.m. antialiasing bij kleine tekst */
   --amber: #ffb703;
   --danger: #b3261e; /* fouten/verwijderen — spaarzaam, geen decoratieve rol */
 
