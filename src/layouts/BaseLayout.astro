@@ -22,9 +22,7 @@ const navLinks = [
 
 const navClasses = (match: string) => [
   'nav-link text-sm sm:text-base px-2 py-1 rounded transition-colors',
-  isActive(match)
-    ? 'text-deep underline underline-offset-4 decoration-amber decoration-2'
-    : 'text-text-subtle hover:text-deep'
+  isActive(match) ? 'text-accent' : 'text-text-subtle hover:text-accent'
 ];
 
 const currentYear = new Date().getFullYear();
@@ -134,6 +132,38 @@ const currentYear = new Date().getFullYear();
       }
       .header-transparent.header-solid .nav-link[aria-current='page'] {
         color: var(--accent);
+      }
+
+      /* Animerende underline i.p.v. platte kleurverandering: groeit vanaf links bij
+         hover, staat permanent aan op de actieve pagina. Amber blijft het actieve
+         signaal (zelfde rol als de locatiedot elders), accent is het hover-signaal. */
+      .nav-link {
+        position: relative;
+      }
+      .nav-link::after {
+        content: '';
+        position: absolute;
+        left: 0.5rem;
+        right: 0.5rem;
+        bottom: -2px;
+        height: 2px;
+        background: var(--accent);
+        transform: scaleX(0);
+        transform-origin: left;
+        transition: transform var(--dur-move) var(--ease);
+      }
+      .nav-link:hover::after {
+        transform: scaleX(1);
+      }
+      .nav-link[aria-current='page']::after {
+        background: var(--amber);
+        transform: scaleX(1);
+      }
+      .header-transparent .nav-link::after {
+        background: rgba(255, 255, 255, 0.9);
+      }
+      .header-transparent .nav-link[aria-current='page']::after {
+        background: var(--amber);
       }
     </style>
 
