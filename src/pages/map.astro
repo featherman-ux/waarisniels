@@ -144,15 +144,16 @@ const pageDescription = "Eenvoudige, snelle kaart met mijn route en stops (bus, 
       inertia: true,
     }).setView([-0.18, -78.47], 6);
 
-    // CARTO Positron (licht) / Dark Matter (donker) i.p.v. de standaard OSM-tegels —
-    // die zijn druk en bont onder een gekleurde route, CARTO laat de route eruit springen.
+    // Esri Gray Canvas (licht/donker) i.p.v. de standaard OSM-tegels — die zijn druk
+    // en bont onder een gekleurde route, dit monochrome basiskaartje laat de route
+    // eruit springen. (CARTO's gratis anonieme tegels zijn gestopt — tonen nu een
+    // "API key required"-watermerk — vandaar de overstap.) Base + Reference (labels)
+    // als twee lagen, zoals Esri's eigen Leaflet-voorbeelden dat opzetten.
     const isDark = document.documentElement.classList.contains('dark');
-    const cartoTheme = isDark ? 'dark_all' : 'light_all';
-    L.tileLayer(`https://{s}.basemaps.cartocdn.com/${cartoTheme}/{z}/{x}/{y}{r}.png`, {
-      attribution: '© OpenStreetMap contributors © CARTO',
-      maxZoom: 19,
-      detectRetina: true,
-    }).addTo(map);
+    const esriTheme = isDark ? 'Dark_Gray' : 'Light_Gray';
+    const tileOpts = { maxZoom: 16, attribution: 'Tiles &copy; Esri' };
+    L.tileLayer(`https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_${esriTheme}_Base/MapServer/tile/{z}/{y}/{x}`, tileOpts).addTo(map);
+    L.tileLayer(`https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_${esriTheme}_Reference/MapServer/tile/{z}/{y}/{x}`, tileOpts).addTo(map);
 
     const [routeRes, placesRes, postsRes] = await Promise.all([
       fetch('/data/route.geojson'),

@@ -58,10 +58,15 @@ const PLACES_URL = "/data/places.json";
       zoomControl: false
     });
 
+    // CARTO's gratis anonieme tegels zijn gestopt (tonen nu een "API key required"-
+    // watermerk) — Esri's Gray Canvas basemaps zijn het dichtstbijzijnde monochrome
+    // alternatief zonder account/key. Base + Reference (labels) als twee lagen,
+    // zoals Esri's eigen Leaflet-voorbeelden dat opzetten.
     const isDark = document.documentElement.classList.contains('dark');
-    L.tileLayer(`https://{s}.basemaps.cartocdn.com/${isDark ? 'dark_all' : 'light_all'}/{z}/{x}/{y}{r}.png`, {
-      attribution: "© OpenStreetMap contributors © CARTO"
-    }).addTo(map);
+    const esriTheme = isDark ? 'Dark_Gray' : 'Light_Gray';
+    const tileOpts = { maxZoom: 16, attribution: 'Tiles &copy; Esri' };
+    L.tileLayer(`https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_${esriTheme}_Base/MapServer/tile/{z}/{y}/{x}`, tileOpts).addTo(map);
+    L.tileLayer(`https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_${esriTheme}_Reference/MapServer/tile/{z}/{y}/{x}`, tileOpts).addTo(map);
 
     map.setView([-2.17, -79.922], 6);
 
