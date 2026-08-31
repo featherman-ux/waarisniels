@@ -41,21 +41,26 @@ export async function generatePlaceFact(
   }
 }
 
+/** Waar Niels nu woont, voor het "Niels zit nu in"-blok op de homepage. */
+export const CURRENT_LOCATION = 'Athene';
+
 /**
- * Funfact met KV-cache: één AI-call per plek, daarna 30 dagen gratis uit KV.
+ * Feitje over de huidige woonplaats, één keer per dag ververst uit KV i.p.v. een
+ * live AI-call per bezoeker — de key bevat de datum, dus elke dag levert vanzelf
+ * een nieuwe (mogelijk andere) funfact op.
  *
  * Bij een cache-miss wachten we maximaal 2,5s zodat de homepage nooit op het model
  * blijft hangen; de call zelf loopt via waitUntil door en vult de cache, zodat de
  * eerstvolgende bezoeker 'm wél ziet.
  */
-export async function getCachedPlaceFact(
+export async function getCurrentLocationFact(
   env: { ANALYTICS_KV?: KVNamespace; AI?: AiBinding },
-  place: string,
   ctx?: { waitUntil?: (p: Promise<unknown>) => void }
 ): Promise<string> {
-  if (!place || !env.AI) return PLACE_FACT_FALLBACK;
+  if (!env.AI) return PLACE_FACT_FALLBACK;
 
-  const key = `placefact:v1:${place.toLowerCase().replace(/\s+/g, '-')}`;
+  const today = new Date().toISOString().slice(0, 10);
+  const key = `placefact:v1:daily:${CURRENT_LOCATION.toLowerCase()}:${today}`;
   const kv = env.ANALYTICS_KV;
 
   if (kv) {
@@ -63,9 +68,9 @@ export async function getCachedPlaceFact(
     if (cached !== null) return cached;
   }
 
-  const pending = generatePlaceFact(env.AI, place).then(async (fact) => {
+  const pending = generatePlaceFact(env.AI, CURRENT_LOCATION).then(async (fact) => {
     if (kv && fact) {
-      await kv.put(key, fact, { expirationTtl: 60 * 60 * 24 * 30 });
+      await kv.put(key, fact, { expirationTtl: 60 * 60 * 48 });
     }
     return fact;
   });

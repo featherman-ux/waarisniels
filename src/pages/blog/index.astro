@@ -9,7 +9,8 @@ const posts = await listPosts(db, { limit: 100 });
 
 <BaseLayout title="Blog" description="Alle blogposts">
   <section class="container mx-auto px-6 py-10">
-    <h1 class="text-3xl font-bold mb-6">Blog</h1>
+    <h1 class="text-3xl font-bold mb-2">Blog</h1>
+    <p class="text-text-subtle mb-6">Soms een post over een plek waar ik ben geweest, soms over waar ik toevallig mee bezig ben. Ik doe dit vooral voor mezelf omdat ik het leuk vind — en soms stuur ik het door naar anderen.</p>
     {posts.length ? (
       <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {posts.map((p, i) => (

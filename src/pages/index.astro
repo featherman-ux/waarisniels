@@ -1,8 +1,8 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import '../styles/home.css';
-import { listPosts, getLatestDestination } from '../lib/db';
-import { getCachedPlaceFact } from '../lib/place-fact';
+import { listPosts } from '../lib/db';
+import { getCurrentLocationFact, CURRENT_LOCATION } from '../lib/place-fact';
 import { mediaUrl, mediaSrcSet } from '../lib/media';
 import BlogPostPreview from '../components/BlogPostPreview.astro';
 import MiniMap from '../components/MiniMap.astro';
@@ -10,16 +10,10 @@ import MiniMap from '../components/MiniMap.astro';
 const { env, ctx } = Astro.locals.runtime;
 const db = env.DB;
 
-const [latestPosts, destination] = await Promise.all([
+const [latestPosts, locationFact] = await Promise.all([
   listPosts(db, { limit: 3 }),
-  getLatestDestination(db),
+  getCurrentLocationFact(env, ctx),
 ]);
-
-// Funfact: eerst het weetje dat al bij de post is opgeslagen, anders één AI-call per
-// plek die 30 dagen in KV blijft staan (zie src/lib/place-fact.ts).
-const funFact = destination
-  ? destination.post.placeFact || (await getCachedPlaceFact(env, destination.place, ctx))
-  : '';
 
 // Hero volgt de nieuwste post met een cover — homepage vernieuwt zichzelf bij elke
 // post. Valt terug op de vaste foto als geen enkele van de laatste posts een cover heeft.
@@ -45,7 +39,7 @@ const heroHref = heroPost ? `/blog/${heroPost.slug}/` : null;
     <div class="hero-text">
       <div>
         <h1>Waar is <span class="hero-accent">Niels</span>?</h1>
-        <p>Voorlopig geen updates meer vrees ik!</p>
+        <p>Van september tot maart zit ik in Athene — hopelijk volgen er nog een paar Athene-posts.</p>
         {heroHref && (
           <a href={heroHref} class="hero-link">Bekijk de laatste post →</a>
         )}
@@ -53,17 +47,15 @@ const heroHref = heroPost ? `/blog/${heroPost.slug}/` : null;
     </div>
   </section>
 
-  {destination && (
-    <section class="destination-fact">
-      <p class="eyebrow">Funfact laatste bestemming</p>
-      <p class="place">
-        <span class="location-dot" aria-hidden="true"></span>
-        {destination.place}
-      </p>
-      {funFact && <p class="fact">{funFact}</p>}
-      <a href={`/blog/${destination.post.slug}/`}>Lees de laatste post →</a>
-    </section>
-  )}
+  <section class="destination-fact">
+    <p class="eyebrow">Niels zit nu in</p>
+    <p class="place">
+      <span class="location-dot" aria-hidden="true"></span>
+      {CURRENT_LOCATION}
+    </p>
+    {locationFact && <p class="fact">{locationFact}</p>}
+    <a href="/blog/">Bekijk mijn blog →</a>
+  </section>
 
   <section class="posts rise">
     <h2>Laatste blogposts</h2>
