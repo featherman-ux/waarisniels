@@ -32,7 +32,8 @@ const currentYear = new Date().getFullYear();
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link rel="icon" href="/favicon.svg" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <meta name="generator" content={Astro.generator} />
 
     <title>{`${title} | WaarIsNiels`}</title>
@@ -75,7 +76,13 @@ const currentYear = new Date().getFullYear();
       ]}
     >
       <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
-        <a href="/" class="brand text-2xl font-display font-bold text-ink">WaarIsNiels?</a>
+        <a href="/" class="brand flex items-center gap-2 text-2xl font-display font-bold text-ink">
+          <svg width="20" height="20" viewBox="0 0 100 100" aria-hidden="true" class="shrink-0">
+            <path d="M50 10 28 50 50 90Z" fill="currentColor" />
+            <path d="M50 10 72 50 50 90Z" fill="var(--accent)" />
+          </svg>
+          WaarIsNiels?
+        </a>
 
         <div class="flex items-center gap-3 sm:gap-5">
           {navLinks.map(({ href, match, label }) => (
