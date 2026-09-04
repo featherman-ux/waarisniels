@@ -188,7 +188,9 @@
 
 @media (max-width: 640px) {
   .home-hero {
-    margin-top: -1.5rem;
+    /* zelfde -4rem headercompensatie als de basisregel hierboven, alleen de
+       main-padding-helft blijft -1.5rem i.p.v. -2rem op mobiel. */
+    margin-top: -5.5rem;
   }
 }
 
