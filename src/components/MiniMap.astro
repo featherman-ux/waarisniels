@@ -1,7 +1,3 @@
----
-const ROUTE_URL  = "/data/route.geojson";
-const PLACES_URL = "/data/places.json";
----
 <style>
   .mini-map-wrap {
     position: relative;
@@ -75,7 +71,7 @@ const PLACES_URL = "/data/places.json";
     const accent = rootStyles.getPropertyValue('--accent').trim();
 
     try {
-      const res = await fetch(ROUTE_URL);
+      const res = await fetch('/data/route.geojson');
       const geo = await res.json();
       // Monochroom: één accentkleur voor de hele route, vervoerswijze via
       // streeppatroon i.p.v. een aparte kleur per modus.
@@ -91,7 +87,7 @@ const PLACES_URL = "/data/places.json";
     }
 
     try {
-      const res = await fetch(PLACES_URL);
+      const res = await fetch('/data/places.json');
       const places = await res.json();
       const markers = places
         .filter(p => typeof p.lat === "number" && typeof p.lon === "number")
