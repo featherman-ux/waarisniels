@@ -10,7 +10,11 @@
   position: relative;
   height: min(78vh, 720px);
   overflow: hidden;
-  margin-top: -2rem; /* full-bleed: kruipt onder BaseLayout's main-padding uit */
+  /* -2rem trekt 'm onder BaseLayout's main-padding uit, de overige -4rem onder de
+     sticky header (py-4 + text-2xl-inhoud ≈ 64px) — anders staat de header alleen
+     ín de flow vóór de hero i.p.v. ergover, en is "transparant over de foto" in
+     werkelijkheid gewoon witte tekst op de witte paginabackground. */
+  margin-top: -6rem;
 }
 
 .home-hero img {
