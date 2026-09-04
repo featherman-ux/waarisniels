@@ -119,7 +119,19 @@ const currentYear = new Date().getFullYear();
         background: transparent;
         border-bottom: 1px solid transparent;
       }
-      .header-transparent .brand,
+      /* .brand krijgt zijn kleur via een custom property i.p.v. rechtstreekse
+         .header-transparent(.header-solid) .brand-overrides: Vite's CSS-minifier
+         (esbuild) bleek de .header-transparent-ancestor van .brand tijdens het
+         minifyen te laten vallen zodra diezelfde eindselector in twee losse regels
+         voorkwam (bij .nav-link gebeurde dat niet) — .brand stond zo permanent op
+         var(--ink), ook met wit tekst nodig over de hero-foto. Eén regel voor .brand
+         i.p.v. twee ontwijkt dat triggerpatroon volledig. */
+      .header-transparent {
+        --brand-color: #fff;
+      }
+      .brand {
+        color: var(--brand-color, var(--ink));
+      }
       .header-transparent .nav-link {
         color: #fff;
       }
@@ -127,12 +139,10 @@ const currentYear = new Date().getFullYear();
         color: #fff;
       }
       .header-transparent.header-solid {
+        --brand-color: var(--ink);
         background: color-mix(in srgb, var(--card) 82%, transparent);
         backdrop-filter: blur(20px) saturate(180%);
         border-bottom-color: var(--line);
-      }
-      .header-transparent.header-solid .brand {
-        color: var(--ink);
       }
       .header-transparent.header-solid .nav-link {
         color: var(--text-subtle);
