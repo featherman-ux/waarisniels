@@ -267,10 +267,109 @@ const currentYear = new Date().getFullYear();
       });
     </script>
 
-    <footer class="border-t border-line mt-16 py-10 text-center">
-      <p class="text-text-subtle">&copy; {currentYear} WaarIsNiels.</p>
-      <p class="text-sm text-text-subtle mt-1">Powered by <a href="https://astro.build" target="_blank" rel="noopener noreferrer" class="hover:text-deep">Astro</a></p>
+    <footer class="site-footer">
+      <div class="footer-inner">
+        <div class="footer-brand">
+          <p class="footer-wordmark">WaarIsNiels?</p>
+          <p class="footer-blurb">
+            Reisverhalen en een kaart met waar ik ben geweest. Geschreven door
+            Niels Veerman.
+          </p>
+        </div>
+
+        <nav class="footer-col" aria-label="Lezen">
+          <h2>Lezen</h2>
+          <a href="/blog/">Alle posts</a>
+          <a href="/map/">Kaart</a>
+          <a href="/rss.xml">RSS-feed</a>
+        </nav>
+
+        <nav class="footer-col" aria-label="Over">
+          <h2>Over</h2>
+          <a href="/about/">Over Niels</a>
+          <a href="/colofon/">Colofon</a>
+          <a href="mailto:veerman.niels@gmail.com">Mail</a>
+          <a href="https://instagram.com/n.veerman" target="_blank" rel="noopener noreferrer">Instagram</a>
+        </nav>
+      </div>
+
+      <div class="footer-bottom">
+        <p>&copy; {currentYear} Niels Veerman</p>
+        <p>
+          Gebouwd met <a href="https://astro.build" target="_blank" rel="noopener noreferrer">Astro</a>
+          op Cloudflare — <a href="/colofon/">hoe precies</a>.
+        </p>
+      </div>
     </footer>
+
+    <style>
+      .site-footer {
+        border-top: 1px solid var(--line);
+        margin-top: 5rem;
+        padding: 3rem 1.5rem 2rem;
+      }
+      .footer-inner {
+        max-width: 1152px;
+        margin-inline: auto;
+        display: grid;
+        gap: 2.5rem;
+        grid-template-columns: 1fr;
+      }
+      @media (min-width: 640px) {
+        .footer-inner {
+          grid-template-columns: 2fr 1fr 1fr;
+          gap: 3rem;
+        }
+      }
+      .footer-wordmark {
+        font-weight: 700;
+        font-size: 1.15rem;
+        color: var(--ink);
+        margin-bottom: 0.5rem;
+      }
+      .footer-blurb {
+        color: var(--text-subtle);
+        max-width: 34ch;
+        line-height: 1.6;
+      }
+      .footer-col h2 {
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: var(--text-subtle);
+        margin-bottom: 0.75rem;
+      }
+      .footer-col a {
+        display: block;
+        color: var(--ink);
+        text-decoration: none;
+        padding: 0.3rem 0;
+        font-size: 0.95rem;
+      }
+      .footer-col a:hover {
+        color: var(--accent);
+      }
+      .footer-bottom {
+        max-width: 1152px;
+        margin: 2.5rem auto 0;
+        padding-top: 1.5rem;
+        border-top: 1px solid var(--line);
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        gap: 0.5rem;
+        font-size: 0.85rem;
+        color: var(--text-subtle);
+      }
+      .footer-bottom a {
+        color: var(--text-subtle);
+        text-decoration: underline;
+        text-underline-offset: 2px;
+      }
+      .footer-bottom a:hover {
+        color: var(--accent);
+      }
+    </style>
 
     <!-- Lightbox voor .photo-grid-foto's (zie global.css .lightbox*). Volledig via
          event-delegatie op document — geen page-load-herinitialisatie nodig, want elke

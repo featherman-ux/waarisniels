@@ -1,0 +1,233 @@
+---
+// src/pages/colofon.astro
+// Dubbele functie: uitleg voor wie nieuwsgierig is, en portfolio voor wie
+// wil zien wat ik gebouwd heb. Bewust één pagina i.p.v. een losse projectsite.
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+
+const pageTitle = 'Colofon';
+const pageDescription =
+  'Hoe waarisniels.nl gebouwd is: Astro op Cloudflare Workers, met D1 als CMS, R2 voor de media en Workers AI voor de kleine dingen.';
+
+const stack = [
+  {
+    naam: 'Astro 5 + React',
+    rol: 'Framework',
+    uitleg:
+      'Server-rendered op de Cloudflare-edge. Alleen de onderdelen die echt interactief zijn (reacties, likes, teller) worden als React-eiland geladen; de rest is gewone HTML.',
+  },
+  {
+    naam: 'Cloudflare Workers',
+    rol: 'Hosting',
+    uitleg:
+      'Geen server om te beheren, en de site draait dicht bij de bezoeker. Publieke pagina’s worden op de edge gecachet met stale-while-revalidate.',
+  },
+  {
+    naam: 'Cloudflare D1',
+    rol: 'Database & CMS',
+    uitleg:
+      'Alle posts staan in SQLite in plaats van in markdown-bestanden, zodat ik onderweg vanaf mijn telefoon kan schrijven via /beheer zonder te hoeven deployen.',
+  },
+  {
+    naam: 'Cloudflare R2',
+    rol: 'Foto’s en video',
+    uitleg:
+      'Media staat achter een eigen domein met Image Transformations ervoor: één bestand, en de browser krijgt AVIF of WebP op precies de breedte die hij nodig heeft.',
+  },
+  {
+    naam: 'Workers AI',
+    rol: 'De kleine dingen',
+    uitleg:
+      'Genereert een weetje bij een bestemming (één keer, daarna gecachet in KV) en stelt alt-teksten voor bij nieuwe foto’s. Handmatig te overschrijven — het model heeft geen laatste woord.',
+  },
+  {
+    naam: 'Leaflet + Esri',
+    rol: 'De kaart',
+    uitleg:
+      'Route als GeoJSON, vervoerswijze via streeppatroon in plaats van een kleur per modus. Monochrome basiskaart, zodat de route zelf het enige gekleurde element is.',
+  },
+];
+
+const zelfgebouwd = [
+  {
+    wat: 'Eigen CMS',
+    waarom:
+      'Posts schrijven, foto’s uploaden en publiceren gebeurt op /beheer, beveiligd met Cloudflare Access. Geen WordPress, geen plugin die volgend jaar stukgaat.',
+  },
+  {
+    wat: 'Eigen reactiesysteem',
+    waarom:
+      'Reacties staan in dezelfde database als de posts. Scheelt een externe dienst die trackt, advertenties toont of ineens geld kost.',
+  },
+  {
+    wat: 'Eigen statistieken',
+    waarom:
+      'Een pageview is een POST naar een eigen endpoint. Geen Google Analytics, geen cookiebanner, geen bezoekersprofiel dat ergens anders belandt.',
+  },
+  {
+    wat: 'Leesvoortgang zonder JavaScript',
+    waarom:
+      'De balk bovenaan een post loopt op scroll-driven CSS-animatie. Browsers die het niet kennen tonen simpelweg geen balk — niks kapot.',
+  },
+];
+
+Astro.response.headers.set(
+  'Cache-Control',
+  'public, max-age=0, s-maxage=3600, stale-while-revalidate=86400'
+);
+---
+
+<BaseLayout title={pageTitle} description={pageDescription}>
+  <section class="colofon">
+    <Breadcrumbs
+      crumbs={[
+        { name: 'Home', href: '/' },
+        { name: 'Colofon', href: '/colofon/' },
+      ]}
+    />
+
+    <h1>Hoe deze site gebouwd is</h1>
+    <p class="lead">
+      Deze site is deels een reisblog en deels een excuus om dingen uit te proberen.
+      Alles hieronder draait op de gratis lagen van Cloudflare, wat betekent dat de
+      hele site ongeveer niets per maand kost — en dat er geen advertentie, tracker
+      of cookiebanner tussen jou en een blogpost staat.
+    </p>
+
+    <h2>De stack</h2>
+    <div class="stack">
+      {stack.map((item) => (
+        <article class="stack-item">
+          <p class="stack-rol">{item.rol}</p>
+          <h3>{item.naam}</h3>
+          <p class="stack-uitleg">{item.uitleg}</p>
+        </article>
+      ))}
+    </div>
+
+    <h2>Wat ik zelf gebouwd heb in plaats van ingeplugd</h2>
+    <dl class="zelf">
+      {zelfgebouwd.map((item) => (
+        <div class="zelf-item">
+          <dt>{item.wat}</dt>
+          <dd>{item.waarom}</dd>
+        </div>
+      ))}
+    </dl>
+
+    <h2>Waar ik tegenaan liep</h2>
+    <ul class="notes">
+      <li>
+        De gratis kaarttegels van CARTO zijn gestopt en tonen sinds kort een
+        watermerk. De kaart draait nu op Esri&apos;s Gray Canvas, dat geen account vraagt.
+      </li>
+      <li>
+        De CSS-minifier liet bij het bouwen een selector vallen, waardoor het logo
+        in de navigatie wit-op-wit onzichtbaar werd. Opgelost door de kleur via een
+        custom property te zetten in plaats van via twee losse regels.
+      </li>
+      <li>
+        Lijstpagina&apos;s haalden de volledige tekst van elke post op om er alleen
+        de leestijd uit te rekenen. Die telling gebeurt nu in de database zelf.
+      </li>
+    </ul>
+
+    <p class="outro">
+      Vragen over hoe iets werkt, of iets soortgelijks nodig?
+      <a href="mailto:veerman.niels@gmail.com">Stuur een mail.</a>
+    </p>
+  </section>
+</BaseLayout>
+
+<style>
+  .colofon {
+    max-width: 68ch;
+    margin-inline: auto;
+    padding: 2rem 1.5rem 0;
+  }
+  .colofon h1 {
+    font-size: var(--step-3);
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    margin-bottom: 1rem;
+  }
+  .colofon h2 {
+    font-size: var(--step-2);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin: 3rem 0 1.25rem;
+  }
+  .lead {
+    font-size: 1.125rem;
+    line-height: 1.7;
+    color: var(--text-subtle);
+    text-wrap: pretty;
+  }
+  .stack {
+    display: grid;
+    gap: 1rem;
+  }
+  @media (min-width: 640px) {
+    .stack {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+  .stack-item {
+    background: var(--paper-alt);
+    border-radius: var(--radius-lg);
+    padding: 1.25rem 1.35rem;
+  }
+  .stack-rol {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-subtle);
+    margin-bottom: 0.35rem;
+  }
+  .stack-item h3 {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 0.5rem;
+  }
+  .stack-uitleg {
+    color: var(--text-subtle);
+    line-height: 1.6;
+    font-size: 0.95rem;
+    text-wrap: pretty;
+  }
+  .zelf {
+    display: grid;
+    gap: 1.5rem;
+  }
+  .zelf-item dt {
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 0.35rem;
+  }
+  .zelf-item dd {
+    margin: 0;
+    color: var(--text-subtle);
+    line-height: 1.7;
+    text-wrap: pretty;
+  }
+  .notes {
+    list-style: disc;
+    padding-left: 1.25rem;
+    display: grid;
+    gap: 0.85rem;
+    color: var(--text-subtle);
+    line-height: 1.7;
+  }
+  .outro {
+    margin: 3rem 0 1rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--line);
+    color: var(--text-subtle);
+  }
+  .outro a {
+    color: var(--accent);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+</style>
