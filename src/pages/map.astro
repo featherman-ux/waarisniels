@@ -1,5 +1,22 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+import { getPostsWithLocation } from '../lib/db';
+import { COUNTRIES, postMatchesCountry, placesInCountry } from '../lib/taxonomy';
+
+// De kaart zelf is JavaScript en dus onzichtbaar voor crawlers en voor iedereen
+// zonder JS. Deze lijst eronder is dezelfde data als HTML: elk land, welke stops
+// erin liggen en welke posts erbij horen.
+const db = Astro.locals.runtime.env.DB;
+const locatedPosts = await getPostsWithLocation(db);
+
+const perLand = COUNTRIES.map((country) => ({
+  country,
+  stops: placesInCountry(country.slug),
+  posts: locatedPosts
+    .filter((p) => postMatchesCountry(p.tags, country.slug))
+    .sort((a, b) => b.pubDate.getTime() - a.pubDate.getTime()),
+})).filter((entry) => entry.stops.length > 0 || entry.posts.length > 0);
 
 const pageTitle = "Kaart";
 const pageDescription = "Eenvoudige, snelle kaart met mijn route en stops (bus, auto, motor, vlucht).";
@@ -99,9 +116,142 @@ Astro.response.headers.set(
     .map-wrap { height: 400px; }
     .map-ai-panel { margin-bottom: 2rem; }
   }
+
+  .map-crumbs {
+    max-width: 1152px;
+    margin: 1rem auto 0;
+    padding-inline: 1.5rem;
+  }
+  .route-index {
+    max-width: 1152px;
+    margin: 4rem auto 0;
+    padding-inline: 1.5rem;
+  }
+  .route-index h2 {
+    font-size: var(--step-2);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin-bottom: 0.5rem;
+  }
+  .route-intro {
+    color: var(--text-subtle);
+    max-width: 60ch;
+    margin-bottom: 2rem;
+  }
+  .route-grid {
+    display: grid;
+    gap: 1.25rem;
+    grid-template-columns: 1fr;
+  }
+  @media (min-width: 720px) {
+    .route-grid { grid-template-columns: 1fr 1fr; }
+  }
+  @media (min-width: 1040px) {
+    .route-grid { grid-template-columns: repeat(3, 1fr); }
+  }
+  .route-card {
+    background: var(--paper-alt);
+    border-radius: var(--radius-lg);
+    padding: 1.25rem 1.35rem;
+  }
+  .route-card h3 {
+    font-size: 1.05rem;
+    font-weight: 700;
+    margin-bottom: 0.4rem;
+  }
+  .route-card h3 a {
+    color: var(--ink);
+    text-decoration: none;
+  }
+  .route-card h3 a:hover {
+    color: var(--accent);
+  }
+  .route-stops {
+    font-size: 0.85rem;
+    color: var(--text-subtle);
+    line-height: 1.5;
+    margin-bottom: 0.85rem;
+  }
+  .route-posts {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 0.5rem;
+  }
+  .route-posts a {
+    color: var(--accent);
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 0.95rem;
+  }
+  .route-posts a:hover {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .route-meta {
+    display: block;
+    font-size: 0.8rem;
+    color: var(--text-subtle);
+  }
+  .route-empty {
+    font-size: 0.85rem;
+    color: var(--text-subtle);
+    font-style: italic;
+  }
+
+  /* Leaflet zet zijn popups buiten deze component in de DOM, dus :global. */
+  :global(.map-pop) {
+    max-width: 15rem;
+  }
+  :global(.map-pop-thumb) {
+    width: 100%;
+    height: 6.5rem;
+    object-fit: cover;
+    border-radius: var(--radius-sm);
+    margin-bottom: 0.5rem;
+    display: block;
+  }
+  :global(.map-pop-place) {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-subtle);
+    margin: 0 0 0.25rem;
+  }
+  :global(.map-pop-title) {
+    display: block;
+    font-size: 0.95rem;
+    line-height: 1.3;
+    margin-bottom: 0.2rem;
+  }
+  :global(.map-pop-meta) {
+    margin: 0 0 0.4rem;
+    font-size: 0.78rem;
+    color: var(--text-subtle);
+  }
+  :global(.map-pop-desc) {
+    margin: 0 0 0.5rem;
+    font-size: 0.85rem;
+    line-height: 1.45;
+  }
+  :global(.map-pop-link) {
+    display: block;
+    font-weight: 600;
+  }
+  :global(.map-pop-land) {
+    display: block;
+    margin-top: 0.25rem;
+    font-size: 0.8rem;
+    color: var(--text-subtle) !important;
+  }
 </style>
 
 <BaseLayout title={pageTitle} description={pageDescription}>
+  <div class="map-crumbs">
+    <Breadcrumbs crumbs={[{ name: 'Home', href: '/' }, { name: 'Kaart', href: '/map/' }]} />
+  </div>
+
   <section class="hero">
     <h1>{pageTitle}</h1>
     <p>Hier ben ik allemaal geweest. Hopelijk is deze kaart ooit helemaal vol.</p>
@@ -134,6 +284,41 @@ Astro.response.headers.set(
   </article>
 
   <p class="note">Kaartdata wordt lokaal gecachet voor vlottere navigatie.</p>
+
+  <section class="route-index">
+    <h2>De route per land</h2>
+    <p class="route-intro">
+      Dezelfde stops als op de kaart, maar dan als lijst — handig als je iets
+      specifieks zoekt, en het werkt ook als de kaart niet laadt.
+    </p>
+
+    <div class="route-grid">
+      {perLand.map((entry) => (
+        <article class="route-card">
+          <h3>
+            <a href={`/blog/land/${entry.country.slug}/`}>{entry.country.name}</a>
+          </h3>
+          {entry.stops.length > 0 && (
+            <p class="route-stops">{entry.stops.map((s) => s.name).join(' · ')}</p>
+          )}
+          {entry.posts.length > 0 ? (
+            <ul class="route-posts">
+              {entry.posts.map((post) => (
+                <li>
+                  <a href={`/blog/${post.slug}/`}>{post.title}</a>
+                  <span class="route-meta">
+                    {post.location?.name ?? ''}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p class="route-empty">Nog geen post met een locatie hier.</p>
+          )}
+        </article>
+      ))}
+    </div>
+  </section>
 </BaseLayout>
 
 <script is:inline defer>
@@ -208,11 +393,70 @@ Astro.response.headers.set(
       shadowSize: [50, 50],
     });
 
+    const postFeaturesRaw = postsGeo?.features ?? [];
+
+    const escapeHtml = (value) =>
+      String(value ?? '').replace(/[&<>"']/g, (c) =>
+        ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])
+      );
+
+    // Een route-stop is interessanter als er een post bij hoort. Match eerst op
+    // naam, anders op afstand (~55 km per 0,5 graad) — de coordinaten van een post
+    // liggen zelden exact op de stop.
+    const postForPlace = (place) => {
+      const byName = postFeaturesRaw.find(
+        (f) => (f.properties.placeName ?? '').toLowerCase() === place.name.toLowerCase()
+      );
+      if (byName) return byName;
+      return postFeaturesRaw.find((f) => {
+        const [lon, lat] = f.geometry.coordinates;
+        return Math.abs(lat - place.lat) < 0.5 && Math.abs(lon - place.lon) < 0.5;
+      });
+    };
+
+    const postPopup = (props, { compact } = {}) => {
+      const thumb = props.thumb
+        ? `<img class="map-pop-thumb" src="${escapeHtml(props.thumb)}" alt="" loading="lazy" />`
+        : '';
+      const desc =
+        !compact && props.description
+          ? `<p class="map-pop-desc">${escapeHtml(props.description)}</p>`
+          : '';
+      const meta = [props.date, props.readMinutes ? `${props.readMinutes} min` : null]
+        .filter(Boolean)
+        .join(' · ');
+      const land = props.country
+        ? `<a class="map-pop-land" href="/blog/land/${escapeHtml(props.country.slug)}/">Alles uit ${escapeHtml(props.country.name)} →</a>`
+        : '';
+      return `<div class="map-pop">
+        ${thumb}
+        <strong class="map-pop-title">${escapeHtml(props.title)}</strong>
+        <p class="map-pop-meta">${escapeHtml(meta)}</p>
+        ${desc}
+        <a class="map-pop-link" href="/blog/${escapeHtml(props.slug)}/">Lees de post →</a>
+        ${land}
+      </div>`;
+    };
+
     const markers = places.map((p, index) => {
       const mk = L.marker([p.lat, p.lon], {
         icon: index === places.length - 1 ? currentIcon : defaultIcon,
       }).addTo(map);
-      mk.bindPopup(`<strong>${p.name}</strong>${p.notes ? '<br>' + p.notes : ''}`);
+
+      const match = postForPlace(p);
+      if (match) {
+        // Stop met post: de popup wordt de post, want dat is waar je heen wilt.
+        mk.bindPopup(
+          `<div class="map-pop"><p class="map-pop-place">${escapeHtml(p.name)}</p></div>` +
+            postPopup(match.properties, { compact: true })
+        );
+      } else {
+        mk.bindPopup(
+          `<div class="map-pop"><strong class="map-pop-title">${escapeHtml(p.name)}</strong>` +
+            (p.notes ? `<p class="map-pop-desc">${escapeHtml(p.notes)}</p>` : '') +
+            '</div>'
+        );
+      }
       return mk;
     });
 
@@ -220,7 +464,7 @@ Astro.response.headers.set(
 
     // Tweede laag: blogposts met een locatie, uit D1. Andere kleur dan de vaste
     // route-stops, klik linkt door naar de post.
-    const postFeatures = postsGeo?.features ?? [];
+    const postFeatures = postFeaturesRaw;
     const postMarkers = postFeatures.map((f) => {
       const [lon, lat] = f.geometry.coordinates;
       const mk = L.circleMarker([lat, lon], {
@@ -230,9 +474,7 @@ Astro.response.headers.set(
         fillColor: rootStyles.getPropertyValue('--amber').trim(),
         fillOpacity: 1,
       }).addTo(map);
-      mk.bindPopup(
-        `<strong>${f.properties.title}</strong><br><a href="/blog/${f.properties.slug}/">Lees de post →</a>`
-      );
+      mk.bindPopup(postPopup(f.properties));
       return mk;
     });
 
