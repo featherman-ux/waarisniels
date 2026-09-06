@@ -14,7 +14,7 @@ import {
   countByStatus,
 } from '../../../lib/subscribers';
 import { newPostMail, sendBatch, sendMail, MailNotConfiguredError } from '../../../lib/mail';
-import { jsonResponse } from '../_utils';
+import { jsonResponse, requireAccess } from '../_utils';
 
 export const prerender = false;
 
@@ -32,11 +32,17 @@ export async function OPTIONS() {
 
 /** Handig om te zien hoeveel mensen er op de lijst staan voor je op verzenden drukt. */
 export async function GET(context: APIContext) {
+  const denied = requireAccess(context);
+  if (denied) return denied;
+
   const db = context.locals.runtime.env.DB;
   return jsonResponse(await countByStatus(db));
 }
 
 export async function POST(context: APIContext) {
+  const denied = requireAccess(context);
+  if (denied) return denied;
+
   const env = context.locals.runtime.env;
   const db = env.DB;
 

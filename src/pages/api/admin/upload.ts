@@ -3,7 +3,7 @@
 // docs/cloudflare-setup.md §5) — dit endpoint doet zelf geen auth-check.
 import type { APIContext } from 'astro';
 import { newUploadKey, mediaUrl, mediaTypeFor } from '../../../lib/media';
-import { jsonResponse } from '../_utils';
+import { jsonResponse, requireAccess } from '../_utils';
 
 export const prerender = false;
 
@@ -15,6 +15,9 @@ export async function OPTIONS() {
 }
 
 export async function POST(context: APIContext) {
+  const denied = requireAccess(context);
+  if (denied) return denied;
+
   const media = context.locals.runtime.env.MEDIA;
 
   const form = await context.request.formData();

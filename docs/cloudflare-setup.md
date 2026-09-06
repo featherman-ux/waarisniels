@@ -127,8 +127,19 @@ Dit is de beveiliging van de upload-pagina. Geen eigen wachtwoordsysteem.
 5. Test op je telefoon: `https://waarisniels.nl/beheer` → Google-login → pagina.
    In een incognitovenster met een ander account → geweigerd.
 
-> **Achterdeur:** Access geldt voor `waarisniels.nl`, niet voor de
-> `*.waarisniels.pages.dev`-URL's van Pages. Zet daarom een derde Access-app op
+> **Achterdeur — grotendeels gedicht in de code.** Access geldt voor
+> `waarisniels.nl`, niet voor de `*.waarisniels.pages.dev`-URL's van Pages.
+> `requireAccess()` in `src/pages/api/_utils.ts` eist daarom bij elk
+> `/api/admin`-endpoint én elke `/beheer`-pagina dat Access een
+> `Cf-Access-Jwt-Assertion`-header heeft meegestuurd. Die ontbreekt op pages.dev,
+> dus daar valt alles dicht met een 403. Localhost is uitgezonderd zodat
+> `wrangler pages dev` blijft werken.
+>
+> Dat is een aanwezigheidscontrole, geen handtekeningverificatie: Access blijft de
+> echte authenticatie. Wil je het strenger, verifieer de JWT dan tegen
+> `https://<team>.cloudflareaccess.com/cdn-cgi/access/certs`.
+>
+> Wil je het gat helemaal dicht, zet dan alsnog een derde Access-app op
 > `waarisniels.pages.dev` (path leeg = hele site), of schakel in het Pages-project
 > *Settings → Builds → Preview deployments* de publieke previews uit.
 

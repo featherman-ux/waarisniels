@@ -1,4 +1,10 @@
 ---
+import { requireAccess } from '../../pages/api/_utils';
+
+// Zelfde reden als in de admin-API: Access dekt waarisniels.nl, niet de
+// pages.dev-preview-URL's, en die praten met dezelfde productiedatabase.
+const denied = requireAccess({ request: Astro.request, url: Astro.url });
+if (denied) return denied;
 // Beveiliging loopt via Cloudflare Access op het pad /beheer (zie
 // docs/cloudflare-setup.md §5) — deze pagina doet zelf geen auth-check.
 import BaseLayout from '../../layouts/BaseLayout.astro';

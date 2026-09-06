@@ -7,7 +7,7 @@
 // kost een Workers AI-call per foto, en niet elke foto heeft een alt-tekst
 // nodig (zie CLAUDE_CODE_HANDOFF.md P2.4).
 import type { APIContext } from 'astro';
-import { jsonResponse } from '../_utils';
+import { jsonResponse, requireAccess } from '../_utils';
 
 export const prerender = false;
 
@@ -16,6 +16,9 @@ export async function OPTIONS() {
 }
 
 export async function POST(context: APIContext) {
+  const denied = requireAccess(context);
+  if (denied) return denied;
+
   const ai = context.locals.runtime.env.AI;
   const media = context.locals.runtime.env.MEDIA;
 

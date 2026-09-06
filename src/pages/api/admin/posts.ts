@@ -3,7 +3,7 @@
 // docs/cloudflare-setup.md §5) — dit endpoint doet zelf geen auth-check.
 import type { APIContext } from 'astro';
 import { upsertPost, deletePost, uniqueSlug, slugify, slugTaken } from '../../../lib/db';
-import { jsonResponse } from '../_utils';
+import { jsonResponse, requireAccess } from '../_utils';
 import { generatePlaceFact } from '../../../lib/place-fact';
 
 export const prerender = false;
@@ -28,6 +28,9 @@ interface PostPayload {
 }
 
 export async function POST(context: APIContext) {
+  const denied = requireAccess(context);
+  if (denied) return denied;
+
   const db = context.locals.runtime.env.DB;
 
   let payload: PostPayload;
@@ -84,6 +87,9 @@ export async function POST(context: APIContext) {
 }
 
 export async function DELETE(context: APIContext) {
+  const denied = requireAccess(context);
+  if (denied) return denied;
+
   const db = context.locals.runtime.env.DB;
   const id = context.url.searchParams.get('id');
   if (!id) return jsonResponse({ error: 'id ontbreekt' }, 400);
