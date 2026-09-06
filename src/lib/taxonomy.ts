@@ -125,3 +125,31 @@ export function placesInCountry(slug: string): Place[] {
 export function allPlaces(): Place[] {
   return (placesData as Place[]).map((p) => ({ ...p, country: PLACE_COUNTRY[p.name] }));
 }
+
+/** Hoort deze post bij dit land? Kijkt naar alle tags van de post. */
+export function postMatchesCountry(tags: string[], slug: string): boolean {
+  return tags.some((t) => countryForTag(t)?.slug === slug);
+}
+
+/** De landen waar daadwerkelijk posts over bestaan, in reisvolgorde van COUNTRIES. */
+export function countriesWithPosts(posts: { tags: string[] }[]): (Country & { count: number })[] {
+  return COUNTRIES.map((country) => ({
+    ...country,
+    count: posts.filter((p) => postMatchesCountry(p.tags, country.slug)).length,
+  })).filter((c) => c.count > 0);
+}
+
+/** Alle niet-land-tags met hun aantal, aflopend. Voor het tagoverzicht. */
+export function themeTags(posts: { tags: string[] }[]): { label: string; slug: string; count: number }[] {
+  const seen = new Map<string, { label: string; slug: string; count: number }>();
+  for (const post of posts) {
+    for (const tag of post.tags) {
+      if (countryForTag(tag)) continue; // landen hebben hun eigen hub
+      const slug = tagSlug(tag);
+      const entry = seen.get(slug);
+      if (entry) entry.count += 1;
+      else seen.set(slug, { label: tag, slug, count: 1 });
+    }
+  }
+  return [...seen.values()].sort((a, b) => b.count - a.count || a.label.localeCompare(b.label));
+}

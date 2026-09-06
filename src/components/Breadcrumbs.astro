@@ -1,0 +1,66 @@
+---
+// Kruimelpad + bijbehorend BreadcrumbList-schema uit één bron, zodat wat Google
+// leest en wat de bezoeker ziet niet uit elkaar kunnen lopen.
+export interface Crumb {
+  name: string;
+  href: string;
+}
+
+export interface Props {
+  crumbs: Crumb[];
+}
+
+const { crumbs } = Astro.props;
+const siteUrl = (import.meta.env.SITE ?? Astro.url.origin).replace(/\/$/, '');
+
+const schema = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: crumbs.map((c, i) => ({
+    '@type': 'ListItem',
+    position: i + 1,
+    name: c.name,
+    item: `${siteUrl}${c.href}`,
+  })),
+};
+---
+<script type="application/ld+json" is:inline set:html={JSON.stringify(schema)} />
+
+<nav class="breadcrumbs" aria-label="Kruimelpad">
+  {crumbs.map((crumb, i) =>
+    i === crumbs.length - 1 ? (
+      <span aria-current="page">{crumb.name}</span>
+    ) : (
+      <>
+        <a href={crumb.href}>{crumb.name}</a>
+        <span aria-hidden="true">/</span>
+      </>
+    )
+  )}
+</nav>
+
+<style>
+  .breadcrumbs {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.875rem;
+    color: var(--text-subtle);
+    margin-bottom: 1.25rem;
+  }
+  .breadcrumbs a {
+    color: var(--text-subtle);
+    text-decoration: none;
+  }
+  .breadcrumbs a:hover {
+    color: var(--accent);
+  }
+  .breadcrumbs [aria-current='page'] {
+    color: var(--ink);
+    max-width: 40ch;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+</style>

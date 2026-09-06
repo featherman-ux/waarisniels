@@ -7,6 +7,7 @@ import BaseLayout from './BaseLayout.astro';
 import { Comments, ViewCounter, LikeButton } from '../components/EnhancedComponents.jsx';
 import Chip from '../components/Chip.astro';
 import { tagHref } from '../lib/taxonomy';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
 
 export interface Props {
   post: Post;
@@ -65,23 +66,11 @@ const schema = {
   },
 };
 
-// Kruimelpad als data: één bron voor zowel de zichtbare nav als het schema.
 const crumbs = [
   { name: 'Home', href: '/' },
   { name: 'Blog', href: '/blog/' },
   { name: title, href: `/blog/${post.slug}/` },
 ];
-
-const breadcrumbSchema = {
-  '@context': 'https://schema.org',
-  '@type': 'BreadcrumbList',
-  itemListElement: crumbs.map((c, i) => ({
-    '@type': 'ListItem',
-    position: i + 1,
-    name: c.name,
-    item: `${siteUrl.replace(/\/$/, '')}${c.href}`,
-  })),
-};
 
 const readNextPosts = await getRelatedPosts(db, post, 2);
 
@@ -94,7 +83,6 @@ Astro.response.headers.set(
 );
 ---
 <script type="application/ld+json" is:inline set:html={JSON.stringify(schema)} />
-<script type="application/ld+json" is:inline set:html={JSON.stringify(breadcrumbSchema)} />
 <BaseLayout
   title={title}
   description={description ?? title}
@@ -129,13 +117,7 @@ Astro.response.headers.set(
     )}
 
     <div class="reading-col">
-      <nav class="breadcrumbs" aria-label="Kruimelpad">
-        <a href="/">Home</a>
-        <span aria-hidden="true">/</span>
-        <a href="/blog/">Blog</a>
-        <span aria-hidden="true">/</span>
-        <span aria-current="page">{title}</span>
-      </nav>
+      <Breadcrumbs crumbs={crumbs} />
 
       {!heroSrc && <h1 class="font-display font-bold text-step-3 text-ink mb-2">{title}</h1>}
       <header class="mb-6">
@@ -209,30 +191,6 @@ Astro.response.headers.set(
 </BaseLayout>
 
 <style>
-  .breadcrumbs {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 0.4rem;
-    font-size: 0.875rem;
-    color: var(--text-subtle);
-    margin-bottom: 1.25rem;
-  }
-  .breadcrumbs a {
-    color: var(--text-subtle);
-    text-decoration: none;
-  }
-  .breadcrumbs a:hover {
-    color: var(--accent);
-  }
-  .breadcrumbs [aria-current='page'] {
-    color: var(--ink);
-    max-width: 32ch;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
   .reading-col {
     max-width: 68ch;
     margin-inline: auto;

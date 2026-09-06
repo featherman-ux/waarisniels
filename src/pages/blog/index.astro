@@ -1,24 +1,191 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import BlogPostPreview from '../../components/BlogPostPreview.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import Chip from '../../components/Chip.astro';
 import { listPosts } from '../../lib/db';
+import { countriesWithPosts, themeTags } from '../../lib/taxonomy';
 
 const db = Astro.locals.runtime.env.DB;
 const posts = await listPosts(db, { limit: 100 });
+
+const countries = countriesWithPosts(posts);
+const tags = themeTags(posts).slice(0, 14);
+
+// Zoekindex per kaart: titel + samenvatting + tags, alles kleingeletterd zonder
+// accenten, zodat "Galapagos" ook "Galápagos" vindt.
+const searchKey = (p: (typeof posts)[number]) =>
+  [p.title, p.description ?? '', ...p.tags]
+    .join(' ')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase();
+
+Astro.response.headers.set(
+  'Cache-Control',
+  'public, max-age=0, s-maxage=300, stale-while-revalidate=86400'
+);
 ---
 
-<BaseLayout title="Blog" description="Alle blogposts">
+<BaseLayout
+  title="Blog"
+  description="Alle reisverhalen van WaarIsNiels, per land en per onderwerp te doorzoeken."
+>
   <section class="container mx-auto px-6 py-10">
+    <Breadcrumbs crumbs={[{ name: 'Home', href: '/' }, { name: 'Blog', href: '/blog/' }]} />
+
     <h1 class="text-3xl font-bold mb-2">Blog</h1>
-    <p class="text-text-subtle mb-6">Soms een post over een plek waar ik ben geweest, soms over waar ik toevallig mee bezig ben. Ik doe dit vooral voor mezelf omdat ik het leuk vind — en soms stuur ik het door naar anderen.</p>
+    <p class="text-text-subtle mb-8 max-w-[60ch]">
+      Soms een post over een plek waar ik ben geweest, soms over waar ik toevallig mee bezig ben.
+      Ik doe dit vooral voor mezelf omdat ik het leuk vind — en soms stuur ik het door naar anderen.
+    </p>
+
+    {countries.length > 0 && (
+      <nav class="facet" aria-label="Posts per land">
+        <h2 class="facet-label">Per land</h2>
+        <div class="chip-row">
+          {countries.map((c) => (
+            <Chip text={`${c.name} (${c.count})`} href={`/blog/land/${c.slug}/`} />
+          ))}
+        </div>
+      </nav>
+    )}
+
+    {tags.length > 0 && (
+      <nav class="facet" aria-label="Posts per onderwerp">
+        <h2 class="facet-label">Per onderwerp</h2>
+        <div class="chip-row">
+          {tags.map((t) => (
+            <Chip text={`${t.label} (${t.count})`} href={`/blog/tag/${t.slug}/`} />
+          ))}
+        </div>
+      </nav>
+    )}
+
+    <div class="searchbar">
+      <label class="sr-only" for="post-search">Zoek in posts</label>
+      <input
+        id="post-search"
+        type="search"
+        placeholder="Zoek op titel, plek of onderwerp…"
+        autocomplete="off"
+      />
+      <p id="search-status" class="search-status" role="status" aria-live="polite"></p>
+    </div>
+
     {posts.length ? (
-      <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      <div id="post-grid" class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {posts.map((p, i) => (
-          <BlogPostPreview post={p} eager={i === 0} />
+          <div class="post-cell" data-search={searchKey(p)}>
+            <BlogPostPreview post={p} eager={i === 0} />
+          </div>
         ))}
       </div>
     ) : (
       <p>Geen posts gepubliceerd.</p>
     )}
+
+    <p id="search-empty" class="search-empty" hidden>
+      Niets gevonden. Probeer een land, een plaatsnaam of een onderwerp.
+    </p>
   </section>
 </BaseLayout>
+
+<style>
+  .facet {
+    margin-bottom: 1.5rem;
+  }
+  .facet-label {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-subtle);
+    margin-bottom: 0.6rem;
+  }
+  .chip-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  .searchbar {
+    margin: 2rem 0 2rem;
+  }
+  .searchbar input {
+    width: 100%;
+    max-width: 26rem;
+    padding: 0.65rem 1rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-full);
+    background: var(--card);
+    color: var(--ink);
+    font-size: 0.95rem;
+  }
+  .searchbar input:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+  .search-status {
+    margin-top: 0.5rem;
+    font-size: 0.85rem;
+    color: var(--text-subtle);
+    min-height: 1.2em;
+  }
+  .search-empty {
+    margin-top: 2rem;
+    color: var(--text-subtle);
+  }
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+</style>
+
+<script>
+  // Zoeken zonder netwerkverkeer: de index staat al als data-attribuut op elke
+  // kaart, dus filteren is puur DOM. Bij honderd posts nog steeds instant, en het
+  // werkt zonder JS gewoon als volledige lijst.
+  function initPostSearch() {
+    const input = document.getElementById('post-search') as HTMLInputElement | null;
+    const grid = document.getElementById('post-grid');
+    const status = document.getElementById('search-status');
+    const empty = document.getElementById('search-empty');
+    if (!input || !grid) return;
+
+    const cells = Array.from(grid.querySelectorAll<HTMLElement>('.post-cell'));
+    const total = cells.length;
+
+    const normalize = (s: string) =>
+      s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+
+    function apply() {
+      const terms = normalize(input!.value).split(/\s+/).filter(Boolean);
+      let shown = 0;
+
+      for (const cell of cells) {
+        const key = cell.dataset.search ?? '';
+        const match = terms.every((t) => key.includes(t));
+        cell.hidden = !match;
+        if (match) shown += 1;
+      }
+
+      if (empty) empty.hidden = shown !== 0;
+      if (status) {
+        status.textContent = terms.length
+          ? `${shown} van ${total} posts`
+          : '';
+      }
+    }
+
+    input.addEventListener('input', apply);
+    apply();
+  }
+
+  document.addEventListener('astro:page-load', initPostSearch);
+</script>

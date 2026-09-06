@@ -1,0 +1,103 @@
+---
+// Tagarchief: /blog/tag/hiking/
+// Landen horen hier niet thuis — die hebben een eigen hub met route-informatie,
+// dus /blog/tag/peru/ stuurt permanent door naar /blog/land/peru/.
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import Breadcrumbs from '../../../components/Breadcrumbs.astro';
+import BlogPostPreview from '../../../components/BlogPostPreview.astro';
+import Chip from '../../../components/Chip.astro';
+import { listPosts } from '../../../lib/db';
+import { mediaUrl } from '../../../lib/media';
+import { countryForTag, tagSlug, themeTags } from '../../../lib/taxonomy';
+
+const { tag } = Astro.params;
+const slug = tag ? tagSlug(tag) : '';
+
+const asCountry = slug ? countryForTag(slug) : undefined;
+if (asCountry) {
+  return Astro.redirect(`/blog/land/${asCountry.slug}/`, 301);
+}
+
+const db = Astro.locals.runtime.env.DB;
+const allPosts = await listPosts(db, { limit: 200 });
+const posts = allPosts.filter((p) => p.tags.some((t) => tagSlug(t) === slug));
+
+if (posts.length === 0) {
+  return new Response(null, { status: 404, statusText: 'Tag niet gevonden' });
+}
+
+// Toon het label precies zoals het in de posts staat, niet de geslugde vorm.
+const label = posts[0].tags.find((t) => tagSlug(t) === slug) ?? slug;
+const description = `${posts.length} ${posts.length === 1 ? 'post' : 'posts'} met de tag "${label}" op WaarIsNiels.`;
+const ogImage = mediaUrl(posts[0].cover?.key, { width: 1200 });
+
+const otherTags = themeTags(allPosts)
+  .filter((t) => t.slug !== slug)
+  .slice(0, 12);
+
+Astro.response.headers.set(
+  'Cache-Control',
+  'public, max-age=0, s-maxage=300, stale-while-revalidate=86400'
+);
+---
+
+<BaseLayout title={label} description={description} image={ogImage}>
+  <section class="hub">
+    <Breadcrumbs
+      crumbs={[
+        { name: 'Home', href: '/' },
+        { name: 'Blog', href: '/blog/' },
+        { name: label, href: `/blog/tag/${slug}/` },
+      ]}
+    />
+
+    <h1>{label}</h1>
+    <p class="hub-sub">{description}</p>
+
+    <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      {posts.map((p, i) => <BlogPostPreview post={p} eager={i === 0} />)}
+    </div>
+
+    {otherTags.length > 0 && (
+      <nav class="hub-siblings" aria-label="Andere tags">
+        <h2>Andere tags</h2>
+        <div class="chip-row">
+          {otherTags.map((t) => <Chip text={t.label} href={`/blog/tag/${t.slug}/`} />)}
+        </div>
+      </nav>
+    )}
+  </section>
+</BaseLayout>
+
+<style>
+  .hub {
+    max-width: 1152px;
+    margin-inline: auto;
+    padding: 2rem 1.5rem 0;
+  }
+  .hub h1 {
+    font-size: var(--step-3);
+    font-weight: 700;
+    letter-spacing: -0.025em;
+    margin-bottom: 0.25rem;
+  }
+  .hub-sub {
+    color: var(--text-subtle);
+    margin-bottom: 2rem;
+  }
+  .hub h2 {
+    font-size: var(--step-1);
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+  }
+  .chip-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  .hub-siblings {
+    margin-top: 3.5rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--line);
+  }
+</style>

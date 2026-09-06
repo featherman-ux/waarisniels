@@ -1,0 +1,181 @@
+---
+// Landhub: /blog/land/peru/
+// Bewust volledig afgeleid — geen handgeschreven introtekst per land, zodat er
+// niets is dat verouderd raakt zodra er een post bijkomt.
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import Breadcrumbs from '../../../components/Breadcrumbs.astro';
+import BlogPostPreview from '../../../components/BlogPostPreview.astro';
+import Chip from '../../../components/Chip.astro';
+import { listPosts } from '../../../lib/db';
+import { mediaUrl } from '../../../lib/media';
+import { countryBySlug, postMatchesCountry, placesInCountry, COUNTRIES } from '../../../lib/taxonomy';
+
+const { land } = Astro.params;
+const country = land ? countryBySlug(land) : undefined;
+
+if (!country) {
+  return new Response(null, { status: 404, statusText: 'Land niet gevonden' });
+}
+
+const db = Astro.locals.runtime.env.DB;
+const allPosts = await listPosts(db, { limit: 200 });
+const posts = allPosts.filter((p) => postMatchesCountry(p.tags, country.slug));
+
+if (posts.length === 0) {
+  return new Response(null, { status: 404, statusText: 'Nog geen posts uit dit land' });
+}
+
+const stops = placesInCountry(country.slug);
+
+const monthYear = (d: Date) =>
+  d.toLocaleDateString('nl-NL', { month: 'long', year: 'numeric' });
+
+// posts komt aflopend op datum binnen
+const newest = posts[0].pubDate;
+const oldest = posts[posts.length - 1].pubDate;
+const periode =
+  monthYear(oldest) === monthYear(newest)
+    ? monthYear(newest)
+    : `${monthYear(oldest)} – ${monthYear(newest)}`;
+
+const description = `Alle ${posts.length} posts uit ${country.name} op WaarIsNiels (${periode})${
+  stops.length ? `, met ${stops.length} stops op de route` : ''
+}.`;
+
+const ogImage = mediaUrl(posts[0].cover?.key, { width: 1200 });
+
+// Andere landen waar wel posts over bestaan, voor de voetnavigatie.
+const siblings = COUNTRIES.filter(
+  (c) => c.slug !== country.slug && allPosts.some((p) => postMatchesCountry(p.tags, c.slug))
+);
+
+Astro.response.headers.set(
+  'Cache-Control',
+  'public, max-age=0, s-maxage=300, stale-while-revalidate=86400'
+);
+---
+
+<BaseLayout title={country.name} description={description} image={ogImage}>
+  <section class="hub">
+    <Breadcrumbs
+      crumbs={[
+        { name: 'Home', href: '/' },
+        { name: 'Blog', href: '/blog/' },
+        { name: country.name, href: `/blog/land/${country.slug}/` },
+      ]}
+    />
+
+    <h1>{country.name}</h1>
+    <p class="hub-region">{country.region}</p>
+
+    <dl class="hub-facts">
+      <div>
+        <dt>Posts</dt>
+        <dd>{posts.length}</dd>
+      </div>
+      <div>
+        <dt>Periode</dt>
+        <dd>{periode}</dd>
+      </div>
+      {stops.length > 0 && (
+        <div>
+          <dt>Stops op de route</dt>
+          <dd>{stops.length}</dd>
+        </div>
+      )}
+    </dl>
+
+    {stops.length > 0 && (
+      <div class="hub-stops">
+        <h2>Waar ik was</h2>
+        <div class="chip-row">
+          {stops.map((s) => <Chip text={s.name} />)}
+        </div>
+        <a class="hub-maplink" href="/map/">Bekijk de route op de kaart →</a>
+      </div>
+    )}
+
+    <h2 class="hub-postheading">Posts uit {country.name}</h2>
+    <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      {posts.map((p, i) => <BlogPostPreview post={p} eager={i === 0} />)}
+    </div>
+
+    {siblings.length > 0 && (
+      <nav class="hub-siblings" aria-label="Andere landen">
+        <h2>Andere landen</h2>
+        <div class="chip-row">
+          {siblings.map((c) => <Chip text={c.name} href={`/blog/land/${c.slug}/`} />)}
+        </div>
+      </nav>
+    )}
+  </section>
+</BaseLayout>
+
+<style>
+  .hub {
+    max-width: 1152px;
+    margin-inline: auto;
+    padding: 2rem 1.5rem 0;
+  }
+  .hub h1 {
+    font-size: var(--step-3);
+    font-weight: 700;
+    letter-spacing: -0.025em;
+    margin-bottom: 0.25rem;
+  }
+  .hub-region {
+    color: var(--text-subtle);
+    margin-bottom: 1.5rem;
+  }
+  .hub-facts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2rem;
+    padding: 1.25rem 1.5rem;
+    background: var(--paper-alt);
+    border-radius: var(--radius-lg);
+    margin-bottom: 2.5rem;
+  }
+  .hub-facts dt {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-subtle);
+    margin-bottom: 0.2rem;
+  }
+  .hub-facts dd {
+    margin: 0;
+    font-size: var(--step-1);
+    font-weight: 600;
+    color: var(--ink);
+  }
+  .hub h2 {
+    font-size: var(--step-1);
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+  }
+  .chip-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  .hub-stops {
+    margin-bottom: 2.5rem;
+  }
+  .hub-maplink {
+    display: inline-block;
+    margin-top: 1rem;
+    color: var(--accent);
+    font-weight: 500;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .hub-postheading {
+    margin-bottom: 1.25rem;
+  }
+  .hub-siblings {
+    margin-top: 3.5rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--line);
+  }
+</style>
