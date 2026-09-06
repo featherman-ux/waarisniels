@@ -1,14 +1,21 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Breadcrumbs from '../components/Breadcrumbs.astro';
-import { getPostsWithLocation } from '../lib/db';
+import { getPostsWithLocation, listPosts } from '../lib/db';
 import { COUNTRIES, postMatchesCountry, placesInCountry } from '../lib/taxonomy';
+import { buildJourneyFacts, getJourneySummary } from '../lib/journey';
 
 // De kaart zelf is JavaScript en dus onzichtbaar voor crawlers en voor iedereen
 // zonder JS. Deze lijst eronder is dezelfde data als HTML: elk land, welke stops
 // erin liggen en welke posts erbij horen.
-const db = Astro.locals.runtime.env.DB;
+const { env, ctx } = Astro.locals.runtime;
+const db = env.DB;
 const locatedPosts = await getPostsWithLocation(db);
+
+// Samenvatting van de hele reis i.p.v. een weetje over één plek. De feiten komen
+// uit de posts; het model mag er alleen twee zinnen van maken (zie lib/journey.ts).
+const journeyFacts = buildJourneyFacts(await listPosts(db, { limit: 200 }));
+const journeySummary = await getJourneySummary(env, journeyFacts, ctx);
 
 const perLand = COUNTRIES.map((country) => ({
   country,
@@ -30,11 +37,11 @@ Astro.response.headers.set(
 <link
   slot="head"
   rel="stylesheet"
-  href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+  href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css"
 />
 <script
   slot="head"
-  src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+  src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"
   defer
 ></script>
 
@@ -102,10 +109,25 @@ Astro.response.headers.set(
     border-radius: var(--radius-lg);
     padding: 1.5rem;
   }
-  .map-ai-panel h3 {
-    margin: 0 0 0.5rem;
-    font-size: 1.1rem;
+  .map-ai-eyebrow {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0 0 0.6rem;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-subtle);
+  }
+  .map-ai-meta {
+    margin-top: 0.75rem;
+    font-size: 0.8rem;
+    color: var(--text-subtle);
+  }
+  #map-ai-text {
+    font-size: 1.05rem;
     color: var(--ink);
+    text-wrap: pretty;
   }
   .map-ai-panel p {
     margin: 0;
@@ -257,9 +279,15 @@ Astro.response.headers.set(
     <p>Hier ben ik allemaal geweest. Hopelijk is deze kaart ooit helemaal vol.</p>
   </section>
 
-  <aside id="map-ai-panel" class="map-ai-panel" aria-live="polite">
-    <h3>AI Reisbuddy</h3>
-    <p id="map-ai-text">niels is in Cusco. Je bent op weg naar Cusco, de historische hoofdstad van de Inca's! Kijk uit het raam en geniet van de adembenemende uitzichten op de Andes. Wacht maar tot je de majestueuze Sacsayhuamán-fortress ziet liggen, een van de meest indrukwekkende overblijfselen van de Inca-keizerlijke tijd.</p>
+  <aside id="map-ai-panel" class="map-ai-panel">
+    <p class="map-ai-eyebrow">
+      <span class="location-dot" aria-hidden="true"></span>
+      De reis tot nu toe
+    </p>
+    <p id="map-ai-text">{journeySummary}</p>
+    <p class="map-ai-meta">
+      {journeyFacts.countries.length} landen · {journeyFacts.postCount} posts · nu in {journeyFacts.currentLocation}
+    </p>
   </aside>
 
   <article class="card full-bleed">
@@ -325,8 +353,27 @@ Astro.response.headers.set(
   // astro:page-load i.p.v. DOMContentLoaded: met <ClientRouter /> (fase F) wisselt de
   // pagina-inhoud client-side, dus dit moet ook draaien als je via een link naar /map
   // navigeert i.p.v. een verse paginalading.
-  document.addEventListener('astro:page-load', async () => {
-    if (typeof L === 'undefined') return;
+  // Leaflet staat op een <script defer>. Bij een view-transition-navigatie kan
+  // astro:page-load vóór dat script vuren — dan bestond L nog niet en stopte deze
+  // handler er definitief mee, met een lege kaart als resultaat. Op een trage
+  // mobiele verbinding gebeurde dat vaker dan op wifi, vandaar "soms".
+  function whenLeaflet(callback, tries) {
+    tries = tries || 0;
+    if (typeof L !== 'undefined') return callback();
+    if (tries > 100) return console.warn('[map] Leaflet is niet geladen');
+    setTimeout(function () { whenLeaflet(callback, tries + 1); }, 100);
+  }
+
+  document.addEventListener('astro:page-load', function () {
+    whenLeaflet(initMap);
+  });
+
+  async function initMap() {
+    const container = document.getElementById('map');
+    // Zonder deze vlag gooit Leaflet "Map container is already initialized" zodra
+    // je via de nav terugkomt op deze pagina.
+    if (!container || container.dataset.ready) return;
+    container.dataset.ready = 'true';
 
     const map = L.map('map', {
       scrollWheelZoom: true,
@@ -370,8 +417,6 @@ Astro.response.headers.set(
         }),
       }).addTo(map);
     }
-
-    const currentPlace = places[places.length - 1];
 
     const defaultIcon = L.icon({
       iconUrl: '/images/marker-icon.png',
@@ -485,32 +530,11 @@ Astro.response.headers.set(
       map.fitBounds(group.getBounds().pad(0.1));
     }
 
-    const aiPanel = document.getElementById('map-ai-text');
-    const defaultHighlight = "niels is in Cusco. Je bent op weg naar Cusco, de historische hoofdstad van de Inca's! Kijk uit het raam en geniet van de adembenemende uitzichten op de Andes. Wacht maar tot je de majestueuze Sacsayhuamán-fortress ziet liggen, een van de meest indrukwekkende overblijfselen van de Inca-keizerlijke tijd.";
-
-    if (aiPanel) {
-      aiPanel.textContent = defaultHighlight;
+    // Zie MiniMap: staat de container bij het aanmaken nog op 0px, dan blijft de
+    // kaart een grijs vlak tot er iets resizet. Dit dwingt een hermeting af.
+    if (typeof ResizeObserver !== 'undefined') {
+      const ro = new ResizeObserver(function () { map.invalidateSize(); });
+      ro.observe(container);
     }
-
-    // Bij voorkeur het gecachete weetje van de nieuwste locatie-post (geen live
-    // AI-call per paginabezoek meer). Alleen als er nog geen enkele locatie-post
-    // is, terugvallen op de oude live /api/ai-place-aanroep voor de vaste route.
-    const latestPostFact = postFeatures[postFeatures.length - 1]?.properties?.placeFact;
-    if (latestPostFact && aiPanel) {
-      aiPanel.textContent = latestPostFact;
-    } else if (currentPlace && aiPanel) {
-      try {
-        const res = await fetch('/api/ai-place', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ place: currentPlace.name, notes: currentPlace.notes }),
-        });
-        const data = res.ok ? await res.json() : null;
-        aiPanel.textContent = data?.highlight || defaultHighlight;
-      } catch (error) {
-        console.warn('AI highlight mislukt', error);
-        aiPanel.textContent = defaultHighlight;
-      }
-    }
-  });
+  }
 </script>

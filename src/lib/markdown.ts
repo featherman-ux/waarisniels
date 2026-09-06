@@ -4,7 +4,7 @@
 // <video> en YouTube-<iframe>. Het is uitsluitend eigen content, geen user input.
 
 import { marked } from 'marked';
-import { rewriteLegacyMedia } from './media';
+import { MEDIA_BASE, rewriteLegacyMedia } from './media';
 
 marked.setOptions({
   gfm: true,
@@ -37,6 +37,52 @@ function autoGroupImages(html: string): string {
 }
 
 /**
+ * Foto's in een postbody kwamen tot nu toe op ware grootte binnen: gemeten op
+ * /blog/colombia/ een bestand van 1536x2048 voor een cel van ~350px breed. Op een
+ * telefoon is dat het verschil tussen een pagina die meteen staat en een die
+ * seconden staat te laden.
+ *
+ * rewriteLegacyMedia() zet /images/... om naar het mediadomein, maar zonder
+ * transformatie. Hier gaat elke media-URL alsnog door Cloudflare Image
+ * Transformations, met een srcset zodat de browser zelf de juiste maat kiest.
+ * Al getransformeerde URL's (/cdn-cgi/image/...) worden overgeslagen.
+ */
+const BODY_WIDTHS = [480, 768, 1200, 1600];
+
+function transformed(path: string, width: number): string {
+  return `${MEDIA_BASE}/cdn-cgi/image/width=${width},format=auto,quality=80/${path}`;
+}
+
+function addResponsiveSources(html: string): string {
+  const mediaSrc = new RegExp(
+    `src=(\"|')${MEDIA_BASE.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}/([^\"']+)\\1`,
+    'gi'
+  );
+
+  return html.replace(/<img\b[^>]*>/gi, (tag) => {
+    if (/\bsrcset\s*=/i.test(tag)) return tag;          // al geregeld
+    if (tag.includes('/cdn-cgi/image/')) return tag;      // al getransformeerd
+
+    let path: string | null = null;
+    tag.replace(mediaSrc, (_m, _q, p: string) => {
+      path = p;
+      return _m;
+    });
+    if (!path) return tag;
+
+    const srcset = BODY_WIDTHS.map((w) => `${transformed(path!, w)} ${w}w`).join(', ');
+    // Ruim genomen: een foto die de volle breedte van een grid pakt mag nooit
+    // wazig zijn. Iets te veel ophalen is beter dan een korrelige openingsfoto.
+    const sizes = '(min-width: 768px) 50vw, 100vw';
+
+    return tag.replace(
+      /<img\b/i,
+      `<img srcset="${srcset}" sizes="${sizes}"`
+    ).replace(mediaSrc, `src="${transformed(path, 1200)}"`);
+  });
+}
+
+/**
  * Elke foto in een postbody lui laden en asynchroon decoderen. Scheelt op een
  * post met twintig foto's het grootste deel van het laadwerk bij de eerste paint.
  */
@@ -53,7 +99,7 @@ function addImageLoadingHints(html: string): string {
 export function renderMarkdown(md: string): string {
   if (!md) return '';
   const html = marked.parse(md) as string;
-  return addImageLoadingHints(autoGroupImages(rewriteLegacyMedia(html)));
+  return addImageLoadingHints(addResponsiveSources(autoGroupImages(rewriteLegacyMedia(html))));
 }
 
 /** Platte tekst, voor excerpts / AI-prompts / meta-descriptions. */

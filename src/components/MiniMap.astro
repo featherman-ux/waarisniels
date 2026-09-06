@@ -43,9 +43,23 @@
 <script defer src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <script type="module" is:inline>
-  document.addEventListener("astro:page-load", async () => {
+  // Zelfde valkuil als op /map: leaflet.js staat op defer, en bij een
+  // view-transition-navigatie (of gewoon een trage mobiele verbinding) is
+  // window.L er nog niet wanneer astro:page-load vuurt. De oude code stopte dan
+  // en probeerde het nooit meer — de homepage toonde een leeg kaartvlak. Nu
+  // wachten we tot Leaflet er is.
+  function whenLeaflet(callback, tries) {
+    tries = tries || 0;
+    if (window.L) return callback();
+    if (tries > 100) return console.warn("[MiniMap] Leaflet is niet geladen");
+    setTimeout(function () { whenLeaflet(callback, tries + 1); }, 100);
+  }
+
+  document.addEventListener("astro:page-load", () => whenLeaflet(initMiniMap));
+
+  async function initMiniMap() {
     const container = document.getElementById("mini-map");
-    if (!container || !window.L || container.dataset.ready) return;
+    if (!container || container.dataset.ready) return;
     container.dataset.ready = "true";
 
     const map = L.map("mini-map", {
@@ -106,5 +120,14 @@
     if (bounds && bounds.isValid()) {
       map.fitBounds(bounds.pad(0.25));
     }
-  });
+
+    // Leaflet meet de container bij het aanmaken. Staat die op dat moment nog op
+    // 0px (fonts/layout nog niet klaar op een telefoon), dan blijft de kaart een
+    // grijs vlak tot er iets anders een resize triggert. Deze observer vertelt
+    // Leaflet alsnog dat hij opnieuw moet meten.
+    if (typeof ResizeObserver !== "undefined") {
+      const ro = new ResizeObserver(() => map.invalidateSize());
+      ro.observe(container);
+    }
+  }
 </script>
