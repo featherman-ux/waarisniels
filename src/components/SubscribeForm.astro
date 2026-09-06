@@ -175,7 +175,10 @@ const formId = `subscribe-${Math.random().toString(36).slice(2, 8)}`;
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(Object.fromEntries(new FormData(form) as any)),
           });
-          const data = await res.json().catch(() => ({}));
+          const data = (await res.json().catch(() => ({}))) as {
+            message?: string;
+            error?: string;
+          };
 
           if (status) {
             if (res.ok) {

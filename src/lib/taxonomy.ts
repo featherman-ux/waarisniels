@@ -94,8 +94,12 @@ export function tagSlug(tag: string): string {
 
 const ALIAS_INDEX = new Map<string, Country>();
 for (const country of COUNTRIES) {
-  ALIAS_INDEX.set(normalize(country.name), country);
-  for (const alias of country.aliases) ALIAS_INDEX.set(normalize(alias), country);
+  // Zowel de genormaliseerde vorm ("sao paulo") als de slug-vorm ("sao-paulo"),
+  // zodat /blog/tag/sao-paulo/ ook naar de landhub doorstuurt.
+  for (const value of [country.name, country.slug, ...country.aliases]) {
+    ALIAS_INDEX.set(normalize(value), country);
+    ALIAS_INDEX.set(tagSlug(value), country);
+  }
 }
 
 /** Is deze tag een land (of een plaats die eenduidig bij één land hoort)? */
