@@ -15,8 +15,9 @@ const imgAlt = post.cover?.alt ?? post.title;
 const CATEGORY_LABELS: Record<string, string> = { reis: 'Reisverhaal', overig: 'Overig' };
 const categoryLabel = CATEGORY_LABELS[post.category] ?? post.category;
 
-const wordCount = post.body.trim().split(/\s+/).filter(Boolean).length;
-const readMinutes = Math.max(1, Math.round(wordCount / 200));
+// Leestijd komt uit de SQL-query (zie src/lib/db.ts) — lijstpagina's halen de
+// body niet meer op, dus hier valt niets meer te tellen.
+const readMinutes = post.readMinutes;
 ---
 <article class="group">
   <a href={href} class="block">

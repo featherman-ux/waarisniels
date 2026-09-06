@@ -1,8 +1,10 @@
 ---
 // src/pages/analytics-dashboard.astro
 import BaseLayout from '../layouts/BaseLayout.astro';
+
+Astro.response.headers.set('Cache-Control', 'private, no-store');
 ---
-<BaseLayout title="Niels Veerman's Analytics Dashboard">
+<BaseLayout title="Analytics" description="Bezoekcijfers van waarisniels.nl" noindex>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css" slot="head" />
   <script src="https://cdn.jsdelivr.net/npm/apexcharts" slot="head"></script>
   <script is:inline src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js" slot="head"></script>

@@ -3,6 +3,11 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
 const pageTitle = "Over Niels";
 const pageDescription = "Lees meer over mij en het verhaal achter Waar is Niels?";
+
+Astro.response.headers.set(
+  'Cache-Control',
+  'public, max-age=0, s-maxage=3600, stale-while-revalidate=86400'
+);
 ---
 
 <BaseLayout title={pageTitle} description={pageDescription}>

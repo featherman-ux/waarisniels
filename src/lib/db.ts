@@ -26,6 +26,8 @@ export interface Post {
   media: MediaItem[];
   cover: { key: string; alt: string | null } | null;
   placeFact: string | null;
+  /** Geschatte leestijd in minuten, berekend in SQL i.p.v. uit de body hier. */
+  readMinutes: number;
   draft: boolean;
   createdAt: string;
   updatedAt: string;
@@ -43,7 +45,7 @@ interface PostRow {
   title: string;
   slug: string;
   description: string | null;
-  body: string;
+  body?: string;
   pub_date: string;
   tags: string | null;
   loc_lat: number | null;
@@ -56,11 +58,26 @@ interface PostRow {
   draft: number;
   created_at: string;
   updated_at: string;
+  read_minutes: number | null;
 }
 
-const POST_COLUMNS = `id, category, title, slug, description, body, pub_date, tags,
+// Leestijd wordt in SQLite zelf berekend (aantal spaties + 1 ~ aantal woorden),
+// zodat lijstpagina's de volledige body niet meer hoeven op te halen alleen om
+// "3 min leestijd" te kunnen tonen. Scheelt bij honderd posts megabytes per
+// pageview, en bespaart een migratie.
+const READ_MINUTES_SQL = `MAX(1, CAST(
+  (LENGTH(body) - LENGTH(REPLACE(body, ' ', '')) + 1) / 200.0 + 0.5 AS INTEGER
+)) AS read_minutes`;
+
+const BASE_COLUMNS = `id, category, title, slug, description, pub_date, tags,
   loc_lat, loc_lon, loc_name, media, cover_key, cover_alt, place_fact, draft,
   created_at, updated_at`;
+
+/** Voor lijsten en feeds: alles behalve de body. */
+const LIST_COLUMNS = `${BASE_COLUMNS}, ${READ_MINUTES_SQL}`;
+
+/** Voor een enkele post die daadwerkelijk gerenderd wordt. */
+const POST_COLUMNS = `${BASE_COLUMNS}, body, ${READ_MINUTES_SQL}`;
 
 function parseJson<T>(raw: string | null | undefined, fallback: T): T {
   if (!raw) return fallback;
@@ -79,7 +96,9 @@ function mapRow(row: PostRow): Post {
     title: row.title,
     slug: row.slug,
     description: row.description,
-    body: row.body,
+    // Lijstquery's laten de body bewust weg; alles wat 'm nodig heeft gebruikt
+    // getPostBySlug/getPostById.
+    body: row.body ?? '',
     pubDate: new Date(row.pub_date),
     tags: parseJson<string[]>(row.tags, []),
     location:
@@ -92,6 +111,7 @@ function mapRow(row: PostRow): Post {
     draft: row.draft === 1,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
+    readMinutes: row.read_minutes ?? 1,
   };
 }
 
@@ -103,10 +123,12 @@ export interface ListOptions {
   limit?: number;
   offset?: number;
   includeDrafts?: boolean;
+  /** Alleen aanzetten als je de markdown van elke post echt nodig hebt. */
+  withBody?: boolean;
 }
 
 export async function listPosts(db: D1Database, opts: ListOptions = {}): Promise<Post[]> {
-  const { category, tag, limit = 50, offset = 0, includeDrafts = false } = opts;
+  const { category, tag, limit = 50, offset = 0, includeDrafts = false, withBody = false } = opts;
 
   const where: string[] = [];
   const binds: unknown[] = [];
@@ -123,7 +145,7 @@ export async function listPosts(db: D1Database, opts: ListOptions = {}): Promise
     binds.push(`%"${tag}"%`);
   }
 
-  const sql = `SELECT ${POST_COLUMNS} FROM posts
+  const sql = `SELECT ${withBody ? POST_COLUMNS : LIST_COLUMNS} FROM posts
     ${where.length ? `WHERE ${where.join(' AND ')}` : ''}
     ORDER BY pub_date DESC LIMIT ? OFFSET ?`;
 
@@ -191,7 +213,7 @@ export async function getRelatedPosts(
 export async function getPostsWithLocation(db: D1Database): Promise<Post[]> {
   const { results } = await db
     .prepare(
-      `SELECT ${POST_COLUMNS} FROM posts
+      `SELECT ${LIST_COLUMNS} FROM posts
        WHERE draft = 0 AND loc_lat IS NOT NULL AND loc_lon IS NOT NULL
        ORDER BY pub_date ASC`
     )

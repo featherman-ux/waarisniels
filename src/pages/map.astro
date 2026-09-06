@@ -3,6 +3,11 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
 const pageTitle = "Kaart";
 const pageDescription = "Eenvoudige, snelle kaart met mijn route en stops (bus, auto, motor, vlucht).";
+
+Astro.response.headers.set(
+  'Cache-Control',
+  'public, max-age=0, s-maxage=3600, stale-while-revalidate=86400'
+);
 ---
 
 <link
