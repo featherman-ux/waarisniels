@@ -9,6 +9,7 @@ import { getPostBySlug } from '../../../lib/db';
 import { mediaUrl } from '../../../lib/media';
 import {
   listConfirmed,
+  listNotifications,
   markNotified,
   wasNotified,
   countByStatus,
@@ -30,13 +31,14 @@ export async function OPTIONS() {
   });
 }
 
-/** Handig om te zien hoeveel mensen er op de lijst staan voor je op verzenden drukt. */
+/** Aantallen + wat er al gemaild is. Voedt de knop in /beheer. */
 export async function GET(context: APIContext) {
   const denied = requireAccess(context);
   if (denied) return denied;
 
   const db = context.locals.runtime.env.DB;
-  return jsonResponse(await countByStatus(db));
+  const [counts, notified] = await Promise.all([countByStatus(db), listNotifications(db)]);
+  return jsonResponse({ counts, notified });
 }
 
 export async function POST(context: APIContext) {

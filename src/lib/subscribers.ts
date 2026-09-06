@@ -194,3 +194,21 @@ export async function markNotified(
     .bind(slug, new Date().toISOString(), recipients)
     .run();
 }
+
+export interface PostNotification {
+  slug: string;
+  sentAt: string;
+  recipients: number;
+}
+
+/** Welke posts al gemaild zijn, voor de knop in /beheer. */
+export async function listNotifications(db: D1Database): Promise<PostNotification[]> {
+  const { results } = await db
+    .prepare('SELECT slug, sent_at, recipients FROM post_notifications ORDER BY sent_at DESC')
+    .all<{ slug: string; sent_at: string; recipients: number }>();
+  return (results ?? []).map((r) => ({
+    slug: r.slug,
+    sentAt: r.sent_at,
+    recipients: r.recipients,
+  }));
+}

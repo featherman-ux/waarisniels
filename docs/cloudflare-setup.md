@@ -232,8 +232,26 @@ Zonder deze twee blijft het formulier staan, maar geeft `/api/subscribe` een
 
 ### 7.4 Een post versturen
 
-`/api/admin/notify` zit achter dezelfde Cloudflare Access-regel als `/beheer`
-(zie §5), dus dit werkt alleen als je zelf bent ingelogd.
+**Normale weg: de knop in `/beheer`.** Bij elke gepubliceerde post staat *Test*
+en *Verstuur*. Je browser is via Access ingelogd, dus die stuurt de
+`Cf-Access-Jwt-Assertion`-header vanzelf mee — geen tokens nodig, werkt ook op je
+telefoon. *Verstuur* vraagt twee klikken. Bovenaan staat hoeveel mensen er op de
+lijst staan, en per post of hij al gemaild is.
+
+**Vanaf de terminal** werkt `curl` níet zomaar: Access laat een browsersessie
+door, geen kaal HTTP-verzoek, dus je krijgt een 403 van `requireAccess()`. Wil je
+het toch scripten, maak dan een **service token** (Zero Trust → Access → Service
+Auth) en voeg die toe aan de policy van de `api/admin`-applicatie:
+
+```bash
+curl -X POST https://waarisniels.nl/api/admin/notify \
+  -H "CF-Access-Client-Id: <id>" \
+  -H "CF-Access-Client-Secret: <secret>" \
+  -H 'content-type: application/json' \
+  -d '{"slug":"brasil"}'
+```
+
+Zonder service token, ter referentie (geeft 403):
 
 ```bash
 # hoeveel mensen staan er op de lijst?
@@ -254,7 +272,21 @@ Een post die al gemaild is wordt geweigerd met een 409; `"force": true` gaat er
 alsnog overheen. Verzenden gebeurt in blokken van honderd, en een mislukt blok
 houdt de rest niet tegen.
 
-### 7.5 Wat er in de mail staat
+### 7.5 DNS-records
+
+Resend geeft er drie (SPF, DKIM, MX op `send.`). Alle drie op **DNS only**
+(grijze wolk) zetten, anders proxyt Cloudflare ze kapot.
+
+Aanrader daarnaast: een DMARC-record. Gmail en Outlook kijken ernaar en het
+scheelt in de spamscore.
+
+| Naam | Type | Waarde |
+| --- | --- | --- |
+| `_dmarc` | TXT | `v=DMARC1; p=none; rua=mailto:veerman.niels@gmail.com` |
+
+`p=none` betekent alleen rapporteren, nog niets weigeren.
+
+### 7.6 Wat er in de mail staat
 
 Elke mail krijgt een persoonlijke afmeldlink, in de voettekst én in de
 `List-Unsubscribe`-header — daardoor tonen Gmail en Apple Mail hun eigen

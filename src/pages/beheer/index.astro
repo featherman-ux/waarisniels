@@ -1,28 +1,70 @@
 ---
-import { requireAccess } from '../../pages/api/_utils';
-
-// Zelfde reden als in de admin-API: Access dekt waarisniels.nl, niet de
-// pages.dev-preview-URL's, en die praten met dezelfde productiedatabase.
-const denied = requireAccess({ request: Astro.request, url: Astro.url });
-if (denied) return denied;
 // Beveiliging loopt via Cloudflare Access op het pad /beheer (zie
-// docs/cloudflare-setup.md §5) — deze pagina doet zelf geen auth-check.
+// docs/cloudflare-setup.md §5). requireAccess() is het tweede slot: Access dekt
+// waarisniels.nl, niet de pages.dev-preview-URL's, en die praten met dezelfde
+// productiedatabase.
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { listPosts } from '../../lib/db';
+import { countByStatus, listNotifications } from '../../lib/subscribers';
+import { requireAccess } from '../api/_utils';
+
+const denied = requireAccess({ request: Astro.request, url: Astro.url });
+if (denied) return denied;
 
 const db = Astro.locals.runtime.env.DB;
-const posts = await listPosts(db, { limit: 200, includeDrafts: true });
+
+// De subscribers-tabel bestaat pas na migrations/0002. Faalt die query, dan moet
+// de beheerpagina gewoon blijven werken zonder het mailgedeelte.
+let counts = { pending: 0, confirmed: 0, unsubscribed: 0 };
+let notifications: { slug: string; sentAt: string; recipients: number }[] = [];
+let mailReady = true;
+
+const [posts] = await Promise.all([listPosts(db, { limit: 200, includeDrafts: true })]);
+
+try {
+  [counts, notifications] = await Promise.all([countByStatus(db), listNotifications(db)]);
+} catch (error) {
+  console.warn('[beheer] mailtabellen niet gevonden — draai npm run db:migrate:subs', error);
+  mailReady = false;
+}
+
+const sentBySlug = new Map(notifications.map((n) => [n.slug, n]));
+const DEFAULT_TEST_ADDRESS = 'veerman.niels@gmail.com';
 
 Astro.response.headers.set('Cache-Control', 'private, no-store');
 ---
 <BaseLayout title="Beheer" description="Posts beheren" noindex>
   <div class="max-w-4xl mx-auto">
-    <div class="flex items-center justify-between mb-6">
+    <div class="flex items-center justify-between mb-6 gap-4 flex-wrap">
       <h1 class="text-3xl font-bold">Beheer</h1>
       <a href="/beheer/nieuw/" class="min-h-[44px] inline-flex items-center rounded bg-ink text-white px-4 py-2 font-semibold hover:opacity-90">
         + Nieuwe post
       </a>
     </div>
+
+    {mailReady ? (
+      <section class="mailbar">
+        <div>
+          <p class="mailbar-label">Mailinglijst</p>
+          <p class="mailbar-counts">
+            <strong>{counts.confirmed}</strong> bevestigd
+            <span>· {counts.pending} wacht op bevestiging</span>
+            <span>· {counts.unsubscribed} afgemeld</span>
+          </p>
+        </div>
+        <label class="mailbar-test">
+          <span>Testadres</span>
+          <input id="test-address" type="email" value={DEFAULT_TEST_ADDRESS} autocomplete="email" />
+        </label>
+      </section>
+    ) : (
+      <section class="mailbar mailbar--warn">
+        <p>
+          De tabel <code>subscribers</code> bestaat nog niet. Draai
+          <code>npm run db:migrate:subs</code> om het mailgedeelte aan te zetten.
+        </p>
+      </section>
+    )}
 
     <table class="w-full text-left border-collapse">
       <thead>
@@ -30,29 +72,244 @@ Astro.response.headers.set('Cache-Control', 'private, no-store');
           <th class="py-2">Titel</th>
           <th class="py-2">Datum</th>
           <th class="py-2">Status</th>
+          {mailReady && <th class="py-2">Mail</th>}
           <th class="py-2"></th>
         </tr>
       </thead>
       <tbody>
-        {posts.map((p) => (
-          <tr class="border-b border-line">
-            <td class="py-3">{p.title}</td>
-            <td class="py-3 text-sm text-text-subtle">{p.pubDate.toLocaleDateString('nl-NL')}</td>
-            <td class="py-3">
-              {p.draft ? (
-                <span class="text-xs rounded-full bg-amber/20 text-orange-ink px-2 py-1">Concept</span>
-              ) : (
-                <span class="text-xs rounded-full bg-mid/20 text-deep px-2 py-1">Live</span>
+        {posts.map((p) => {
+          const sent = sentBySlug.get(p.slug);
+          return (
+            <tr class="border-b border-line">
+              <td class="py-3">{p.title}</td>
+              <td class="py-3 text-sm text-text-subtle">{p.pubDate.toLocaleDateString('nl-NL')}</td>
+              <td class="py-3">
+                {p.draft ? (
+                  <span class="text-xs rounded-full bg-amber/20 text-orange-ink px-2 py-1">Concept</span>
+                ) : (
+                  <span class="text-xs rounded-full bg-mid/20 text-deep px-2 py-1">Live</span>
+                )}
+              </td>
+
+              {mailReady && (
+                <td class="py-3">
+                  {p.draft ? (
+                    <span class="mail-note">—</span>
+                  ) : (
+                    <div class="mail-cell" data-slug={p.slug} data-sent={sent ? 'true' : 'false'}>
+                      <div class="mail-actions">
+                        <button type="button" class="mail-btn" data-action="test">Test</button>
+                        <button type="button" class="mail-btn mail-btn--send" data-action="send">
+                          {sent ? 'Opnieuw' : 'Verstuur'}
+                        </button>
+                      </div>
+                      <p class="mail-note">
+                        {sent
+                          ? `Gemaild ${new Date(sent.sentAt).toLocaleDateString('nl-NL')} · ${sent.recipients} ontvangers`
+                          : 'Nog niet gemaild'}
+                      </p>
+                    </div>
+                  )}
+                </td>
               )}
-            </td>
-            <td class="py-3 text-right">
-              <a href={`/beheer/post/${p.id}/`} class="inline-flex min-h-[44px] items-center underline text-sm">Bewerken</a>
-            </td>
-          </tr>
-        ))}
+
+              <td class="py-3 text-right">
+                <a href={`/beheer/post/${p.id}/`} class="inline-flex min-h-[44px] items-center underline text-sm">Bewerken</a>
+              </td>
+            </tr>
+          );
+        })}
       </tbody>
     </table>
 
     {posts.length === 0 && <p class="text-text-subtle mt-6">Nog geen posts.</p>}
   </div>
 </BaseLayout>
+
+<style>
+  .mailbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    background: var(--paper-alt);
+    border-radius: var(--radius-lg);
+    padding: 1rem 1.25rem;
+    margin-bottom: 2rem;
+  }
+  .mailbar--warn {
+    border: 1px solid var(--amber);
+  }
+  .mailbar code {
+    background: var(--card);
+    padding: 0.1rem 0.35rem;
+    border-radius: 4px;
+    font-size: 0.85em;
+  }
+  .mailbar-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-subtle);
+    margin-bottom: 0.2rem;
+  }
+  .mailbar-counts {
+    color: var(--ink);
+  }
+  .mailbar-counts span {
+    color: var(--text-subtle);
+    font-size: 0.9rem;
+  }
+  .mailbar-test {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-subtle);
+  }
+  .mailbar-test input {
+    text-transform: none;
+    letter-spacing: normal;
+    font-size: 0.9rem;
+    padding: 0.45rem 0.7rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    background: var(--card);
+    color: var(--ink);
+    min-width: 15rem;
+  }
+
+  .mail-cell {
+    min-width: 11rem;
+  }
+  .mail-actions {
+    display: flex;
+    gap: 0.4rem;
+  }
+  .mail-btn {
+    min-height: 36px;
+    padding: 0.3rem 0.7rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-full);
+    background: var(--card);
+    color: var(--ink);
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .mail-btn:hover:not([disabled]) {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+  .mail-btn--send[data-armed='true'] {
+    background: var(--danger);
+    border-color: var(--danger);
+    color: #fff;
+  }
+  .mail-btn[disabled] {
+    opacity: 0.5;
+    cursor: progress;
+  }
+  .mail-note {
+    margin-top: 0.35rem;
+    font-size: 0.75rem;
+    color: var(--text-subtle);
+  }
+  .mail-note[data-state='error'] {
+    color: var(--danger);
+  }
+</style>
+
+<script>
+  // Waarom dit hier zit en niet in een curl-commando: Cloudflare Access laat een
+  // ingelogde browser door en zet dan de Cf-Access-Jwt-Assertion-header die
+  // requireAccess() eist. curl heeft die sessie niet en krijgt een 403. Vanuit
+  // deze pagina werkt het dus zonder tokens — ook op je telefoon.
+  function initMailButtons() {
+    const cells = document.querySelectorAll<HTMLElement>('.mail-cell');
+    if (!cells.length) return;
+
+    for (const cell of cells) {
+      if (cell.dataset.bound) continue;
+      cell.dataset.bound = 'true';
+
+      const slug = cell.dataset.slug!;
+      const note = cell.querySelector<HTMLElement>('.mail-note')!;
+      const sendBtn = cell.querySelector<HTMLButtonElement>('[data-action="send"]')!;
+      const testBtn = cell.querySelector<HTMLButtonElement>('[data-action="test"]')!;
+      let armTimer: number | undefined;
+
+      function setNote(text: string, state: '' | 'error' = '') {
+        note.textContent = text;
+        note.dataset.state = state;
+      }
+
+      function disarm() {
+        sendBtn.dataset.armed = 'false';
+        sendBtn.textContent = cell.dataset.sent === 'true' ? 'Opnieuw' : 'Verstuur';
+        window.clearTimeout(armTimer);
+      }
+
+      async function post(body: Record<string, unknown>) {
+        const res = await fetch('/api/admin/notify', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify(body),
+        });
+        const data = (await res.json().catch(() => ({}))) as Record<string, any>;
+        return { res, data };
+      }
+
+      testBtn.addEventListener('click', async () => {
+        const input = document.getElementById('test-address') as HTMLInputElement | null;
+        const testTo = input?.value.trim();
+        if (!testTo) return setNote('Vul eerst een testadres in.', 'error');
+
+        testBtn.disabled = true;
+        setNote('Testmail versturen…');
+        try {
+          const { res, data } = await post({ slug, testTo });
+          setNote(res.ok ? `Testmail naar ${testTo}` : data.error ?? 'Mislukt', res.ok ? '' : 'error');
+        } catch {
+          setNote('Geen verbinding.', 'error');
+        } finally {
+          testBtn.disabled = false;
+        }
+      });
+
+      // Twee klikken, want dit gaat naar iedereen tegelijk en is niet terug te halen.
+      sendBtn.addEventListener('click', async () => {
+        if (sendBtn.dataset.armed !== 'true') {
+          sendBtn.dataset.armed = 'true';
+          sendBtn.textContent = 'Zeker weten?';
+          setNote('Klik nogmaals om naar de hele lijst te sturen.');
+          armTimer = window.setTimeout(disarm, 5000);
+          return;
+        }
+
+        disarm();
+        sendBtn.disabled = true;
+        setNote('Versturen…');
+        try {
+          const { res, data } = await post({ slug, force: cell.dataset.sent === 'true' });
+          if (res.ok) {
+            cell.dataset.sent = 'true';
+            sendBtn.textContent = 'Opnieuw';
+            setNote(`Verstuurd naar ${data.sent} ontvangers`);
+          } else {
+            setNote(data.error ?? 'Mislukt', 'error');
+          }
+        } catch {
+          setNote('Geen verbinding.', 'error');
+        } finally {
+          sendBtn.disabled = false;
+        }
+      });
+    }
+  }
+
+  document.addEventListener('astro:page-load', initMailButtons);
+</script>
