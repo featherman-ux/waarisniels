@@ -1,0 +1,13 @@
+# waarisniels.nl
+# Zonder dit bestand serveert Cloudflare zijn eigen content-signals-robots.txt,
+# en die verwijst nergens naar de sitemap. Deze wint.
+
+User-agent: *
+Allow: /
+
+# Beheer, API en dashboards horen niet in de index.
+Disallow: /beheer
+Disallow: /api/
+Disallow: /analytics-dashboard
+
+Sitemap: https://waarisniels.nl/sitemap.xml

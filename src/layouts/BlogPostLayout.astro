@@ -6,6 +6,7 @@ import { mediaUrl, mediaSrcSet } from '../lib/media';
 import BaseLayout from './BaseLayout.astro';
 import { Comments, ViewCounter, LikeButton } from '../components/EnhancedComponents.jsx';
 import Chip from '../components/Chip.astro';
+import { tagHref } from '../lib/taxonomy';
 
 export interface Props {
   post: Post;
@@ -28,20 +29,29 @@ const dateStr = pubDate.toLocaleDateString('nl-NL', {
 const currentPath = Astro.url.pathname;
 const siteUrl = import.meta.env.SITE ?? Astro.url.origin ?? 'https://waarisniels.nl';
 
+const canonicalUrl = `${siteUrl.replace(/\/$/, '')}/blog/${post.slug}/`;
+
+// Deelafbeelding: de cover op 1200px (og-formaat), absoluut gemaakt zodat
+// WhatsApp/Slack/Facebook 'm kunnen ophalen.
+const ogImage = mediaUrl(coverKey, { width: 1200 }) ?? undefined;
+
 // --- Schema.org Structured Data ---
 const schema = {
   '@context': 'https://schema.org',
   '@type': 'BlogPosting',
   headline: title,
   description: description ?? title,
-  image: heroSrc,
+  image: ogImage ?? heroSrc,
+  inLanguage: 'nl-NL',
+  keywords: tags?.length ? tags.join(', ') : undefined,
   author: {
     '@type': 'Person',
     name: 'Niels Veerman',
+    url: `${siteUrl.replace(/\/$/, '')}/about/`,
   },
   publisher: {
     '@type': 'Organization',
-    name: 'Your Travel Blog',
+    name: 'WaarIsNiels',
     logo: {
       '@type': 'ImageObject',
       url: new URL('/favicon.svg', siteUrl).href,
@@ -51,14 +61,49 @@ const schema = {
   dateModified: post.updatedAt,
   mainEntityOfPage: {
     '@type': 'WebPage',
-    '@id': Astro.url.href,
+    '@id': canonicalUrl,
   },
 };
 
+// Kruimelpad als data: één bron voor zowel de zichtbare nav als het schema.
+const crumbs = [
+  { name: 'Home', href: '/' },
+  { name: 'Blog', href: '/blog/' },
+  { name: title, href: `/blog/${post.slug}/` },
+];
+
+const breadcrumbSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: crumbs.map((c, i) => ({
+    '@type': 'ListItem',
+    position: i + 1,
+    name: c.name,
+    item: `${siteUrl.replace(/\/$/, '')}${c.href}`,
+  })),
+};
+
 const readNextPosts = await getRelatedPosts(db, post, 2);
+
+// Publieke post: kort in de browser, langer op de Cloudflare-edge, en tijdens het
+// verversen mag de oude versie nog even geserveerd worden. Zonder dit doet elke
+// pageview een verse D1-query.
+Astro.response.headers.set(
+  'Cache-Control',
+  'public, max-age=0, s-maxage=300, stale-while-revalidate=86400'
+);
 ---
 <script type="application/ld+json" is:inline set:html={JSON.stringify(schema)} />
-<BaseLayout title={title} description={description ?? title}>
+<script type="application/ld+json" is:inline set:html={JSON.stringify(breadcrumbSchema)} />
+<BaseLayout
+  title={title}
+  description={description ?? title}
+  image={ogImage}
+  imageAlt={heroAlt}
+  type="article"
+  publishedTime={pubDate.toISOString()}
+  modifiedTime={post.updatedAt}
+>
   <div id="reading-progress" class="fixed top-0 left-0 w-full h-[2px] bg-amber z-[60] origin-left"></div>
 
   <article class="prose prose-lg dark:prose-invert max-w-none">
@@ -84,12 +129,20 @@ const readNextPosts = await getRelatedPosts(db, post, 2);
     )}
 
     <div class="reading-col">
+      <nav class="breadcrumbs" aria-label="Kruimelpad">
+        <a href="/">Home</a>
+        <span aria-hidden="true">/</span>
+        <a href="/blog/">Blog</a>
+        <span aria-hidden="true">/</span>
+        <span aria-current="page">{title}</span>
+      </nav>
+
       {!heroSrc && <h1 class="font-display font-bold text-step-3 text-ink mb-2">{title}</h1>}
       <header class="mb-6">
         {tags?.length && (
           <div class="flex flex-wrap gap-2 mb-6">
             {tags.map((t) => (
-              <Chip text={t} />
+              <Chip text={t} href={tagHref(t)} />
             ))}
           </div>
         )}
@@ -156,6 +209,30 @@ const readNextPosts = await getRelatedPosts(db, post, 2);
 </BaseLayout>
 
 <style>
+  .breadcrumbs {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.875rem;
+    color: var(--text-subtle);
+    margin-bottom: 1.25rem;
+  }
+  .breadcrumbs a {
+    color: var(--text-subtle);
+    text-decoration: none;
+  }
+  .breadcrumbs a:hover {
+    color: var(--accent);
+  }
+  .breadcrumbs [aria-current='page'] {
+    color: var(--ink);
+    max-width: 32ch;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
   .reading-col {
     max-width: 68ch;
     margin-inline: auto;

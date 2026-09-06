@@ -6,9 +6,42 @@ import { ClientRouter } from 'astro:transitions';
 export interface Props {
   title: string;
   description?: string;
+  /** Site-relatieve of absolute URL van de deelafbeelding (og:image). */
+  image?: string;
+  imageAlt?: string;
+  /** 'article' op blogposts, 'website' op de rest. */
+  type?: 'website' | 'article';
+  publishedTime?: string;
+  modifiedTime?: string;
+  /** Zet noindex — voor /beheer en het analytics-dashboard. */
+  noindex?: boolean;
 }
 
-const { title, description = 'WaarIsNiels – reisblog & kaart' } = Astro.props;
+const {
+  title,
+  description = 'WaarIsNiels – reisblog & kaart',
+  image,
+  imageAlt,
+  type = 'website',
+  publishedTime,
+  modifiedTime,
+  noindex = false,
+} = Astro.props;
+
+// Canonical: altijd dezelfde vorm (origin + pad + trailing slash, zonder query),
+// zodat /blog/x, /blog/x/ en /blog/x?ref=whatsapp naar één URL wijzen.
+const siteOrigin = (import.meta.env.SITE ?? Astro.url.origin).replace(/\/$/, '');
+const canonicalPath = Astro.url.pathname.replace(/\/+$/, '');
+const canonicalUrl = canonicalPath ? `${siteOrigin}${canonicalPath}/` : `${siteOrigin}/`;
+
+// og:image moet absoluut zijn — WhatsApp, Slack en Facebook lossen een relatief
+// pad niet op. Zonder eigen beeld valt alles terug op de homepagefoto.
+const DEFAULT_OG_IMAGE = '/images/homepage.jpeg';
+const rawImage = image ?? DEFAULT_OG_IMAGE;
+const ogImage = /^https?:\/\//i.test(rawImage)
+  ? rawImage
+  : `${siteOrigin}${rawImage.startsWith('/') ? '' : '/'}${rawImage}`;
+const ogImageAlt = imageAlt ?? title;
 
 const path = Astro.url.pathname;
 const isActive = (p: string) => path === p || path.startsWith(p + '/');
@@ -36,16 +69,41 @@ const currentYear = new Date().getFullYear();
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <meta name="generator" content={Astro.generator} />
 
-    <title>{`${title} | WaarIsNiels`}</title>
+    {/* Homepage heet gewoon "WaarIsNiels" i.p.v. "Waar is Niels? | WaarIsNiels". */}
+    <title>{isHomepage ? 'WaarIsNiels – reisblog & kaart' : `${title} | WaarIsNiels`}</title>
     <meta name="description" content={description} />
+    <link rel="canonical" href={canonicalUrl} />
+    {noindex && <meta name="robots" content="noindex, nofollow" />}
 
     <meta property="og:title" content={`${title} | WaarIsNiels`} />
     <meta property="og:description" content={description} />
-    <meta property="og:type" content="website" />
-    <meta property="og:url" content={Astro.url.href} />
+    <meta property="og:type" content={type} />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:site_name" content="WaarIsNiels" />
+    <meta property="og:locale" content="nl_NL" />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:alt" content={ogImageAlt} />
+    {type === 'article' && publishedTime && (
+      <meta property="article:published_time" content={publishedTime} />
+    )}
+    {type === 'article' && modifiedTime && (
+      <meta property="article:modified_time" content={modifiedTime} />
+    )}
+    {type === 'article' && <meta property="article:author" content="Niels Veerman" />}
+
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={`${title} | WaarIsNiels`} />
     <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
+    <meta name="twitter:image:alt" content={ogImageAlt} />
+
+    <link rel="sitemap" type="application/xml" href="/sitemap.xml" />
+    <link
+      rel="alternate"
+      type="application/rss+xml"
+      title="WaarIsNiels – nieuwe posts"
+      href="/rss.xml"
+    />
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
