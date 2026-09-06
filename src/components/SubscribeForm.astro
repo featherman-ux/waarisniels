@@ -130,12 +130,18 @@ const formId = `subscribe-${Math.random().toString(36).slice(2, 8)}`;
     color: var(--danger);
   }
 
+  /* left:-9999px rekt het document op sommige mobiele browsers op. clip-path houdt
+     het veld op zijn plek en toch onzichtbaar en onbereikbaar. */
   .hp {
     position: absolute;
-    left: -9999px;
     width: 1px;
     height: 1px;
+    padding: 0;
+    margin: -1px;
     overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
   }
   .sr-only {
     position: absolute;

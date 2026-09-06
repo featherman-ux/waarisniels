@@ -103,7 +103,7 @@ Astro.response.headers.set(
           srcset={heroSrcSet}
           sizes="100vw"
           alt={heroAlt}
-          class="w-full h-[min(70vh,640px)] object-cover"
+          class="hero-img w-full object-cover"
           loading="eager"
           fetchpriority="high"
           decoding="async"
@@ -111,7 +111,7 @@ Astro.response.headers.set(
         />
         <div class="hero-grad absolute inset-0"></div>
         <div class="hero-title-overlay">
-          <h1 class="font-display font-bold text-step-4 text-white mb-2">{title}</h1>
+          <h1 class="hero-title font-display font-bold text-white mb-2">{title}</h1>
           <p class="text-white/85">{dateStr}</p>
         </div>
       </figure>
@@ -228,9 +228,38 @@ Astro.response.headers.set(
   .hero-figure {
     overflow: hidden;
   }
+  /* Was min(70vh, 640px): op een telefoon vult dat vrijwel het hele scherm en moet
+     je scrollen voor je bij de eerste zin bent. */
+  .hero-img {
+    height: min(52vh, 420px);
+  }
+  @media (min-width: 640px) {
+    .hero-img {
+      height: min(70vh, 640px);
+    }
+  }
   .hero-grad {
-    background: linear-gradient(to top, rgba(0, 0, 0, 0.75) 0%, rgba(0, 0, 0, 0.1) 45%, transparent 70%);
+    /* Was 0.75 tot 45%: op mobiel staat de titel veel hoger in het beeld en liep
+       hij over lichte delen van de foto — wit op wit. Sterker en hoger doorlopend. */
+    background: linear-gradient(
+      to top,
+      rgba(0, 0, 0, 0.85) 0%,
+      rgba(0, 0, 0, 0.55) 35%,
+      rgba(0, 0, 0, 0.2) 65%,
+      transparent 90%
+    );
     pointer-events: none;
+  }
+
+  /* --step-4 is de hero-schaal van de homepage (tot 6rem). Voor een posttitel van
+     dertig tekens werd dat op een telefoon 50px, vier regels hoog, dwars over het
+     onderwerp van de foto heen. Deze schaal loopt van 28px tot 64px. */
+  .hero-title {
+    font-size: clamp(1.75rem, 1.1rem + 3.2vw, 4rem);
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+    text-shadow: 0 2px 24px rgba(0, 0, 0, 0.35);
   }
   .hero-title-overlay {
     position: absolute;
@@ -238,7 +267,7 @@ Astro.response.headers.set(
     display: flex;
     flex-direction: column;
     justify-content: flex-end;
-    padding: 1.5rem;
+    padding: 1.25rem 1.25rem 1.75rem;
     max-width: 68ch;
     margin-inline: auto;
   }

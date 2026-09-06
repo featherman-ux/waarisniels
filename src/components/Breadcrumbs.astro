@@ -63,4 +63,14 @@ const schema = {
     text-overflow: ellipsis;
     white-space: nowrap;
   }
+
+  /* Op een telefoon staat de posttitel al metershoog in de hero erboven; die
+     eronder nog eens over twee regels herhalen is ruis. Het kruimelpad blijft
+     compleet voor Google — dat leest het schema, niet deze weergave. */
+  @media (max-width: 599px) {
+    .breadcrumbs [aria-current='page'],
+    .breadcrumbs > span[aria-hidden='true']:last-of-type {
+      display: none;
+    }
+  }
 </style>

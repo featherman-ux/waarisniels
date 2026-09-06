@@ -478,6 +478,15 @@ const currentYear = new Date().getFullYear();
       document.addEventListener('load', function (e) {
         if (e.target && e.target.tagName === 'IMG') e.target.classList.add('loaded');
       }, true);
+      // Een foto die 404't vuurt nooit 'load', en bleef daardoor op opacity:0
+      // staan — een onzichtbaar gat in de pagina i.p.v. een zichtbaar kapot
+      // plaatje. Nu wordt hij alsnog getoond, zodat je meteen ziet dát het mis is.
+      document.addEventListener('error', function (e) {
+        if (e.target && e.target.tagName === 'IMG') {
+          e.target.classList.add('loaded');
+          e.target.dataset.failed = 'true';
+        }
+      }, true);
     </script>
 
     <!-- data-astro-rerun: laat Astro dit script bij élke view-transition-navigatie
