@@ -22,6 +22,9 @@ pnpm-debug.log*
 # environment variables
 .env
 .env.production
+# lokale secrets voor `wrangler pages dev` — hier staat de Resend-key in
+.dev.vars
+.dev.vars.*
 
 # macOS-specific files
 .DS_Store
