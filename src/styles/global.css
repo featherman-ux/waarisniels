@@ -314,6 +314,13 @@ time, .tabular-nums {
     grid-column: 1 / -1;
     aspect-ratio: 21 / 9;
   }
+
+  /* Precies drie foto's vullen in drie kolommen al een hele rij. Een openingsfoto
+     erboven laat dan juist een lege cel achter — dus die vervalt hier. */
+  .photo-grid:has(img:nth-child(3)):not(:has(img:nth-child(4))) img:first-child {
+    grid-column: auto;
+    aspect-ratio: 4 / 5;
+  }
 }
 
 /* Een grid van precies één foto hoort geen halve rij te zijn. */
