@@ -12,7 +12,9 @@
     "db:migrate": "wrangler d1 execute waarisniels-db --remote --file=migrations/0001_init.sql",
     "db:migrate:local": "wrangler d1 execute waarisniels-db --local --file=migrations/0001_init.sql",
     "db:query": "wrangler d1 execute waarisniels-db --remote --command",
-    "migrate:content": "node scripts/migrate-content.mjs"
+    "migrate:content": "node scripts/migrate-content.mjs",
+    "db:migrate:subs": "wrangler d1 execute waarisniels-db --remote --file=migrations/0002_subscribers.sql",
+    "db:migrate:subs:local": "wrangler d1 execute waarisniels-db --local --file=migrations/0002_subscribers.sql"
   },
   "dependencies": {
     "@astrojs/react": "^4.3.1",

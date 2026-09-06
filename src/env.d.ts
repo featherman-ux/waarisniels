@@ -14,8 +14,12 @@ type ENV = {
   AI: {
     run(model: string, options: Record<string, unknown>): Promise<any>;
   };
-  /** KV: view- en like-analytics */
+  /** KV: view- en like-analytics, plus rate limiting op /api/subscribe */
   ANALYTICS_KV: KVNamespace;
+  /** Resend API-key voor de mailnotificatie. Secret, niet in wrangler.toml. */
+  RESEND_API_KEY?: string;
+  /** Afzender, bv. "Niels <post@waarisniels.nl>". Domein geverifieerd bij Resend. */
+  MAIL_FROM?: string;
 };
 
 type Runtime = import('@astrojs/cloudflare').Runtime<ENV>;

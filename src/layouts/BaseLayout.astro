@@ -2,6 +2,7 @@
 // src/layouts/BaseLayout.astro
 import '../styles/global.css';
 import { ClientRouter } from 'astro:transitions';
+import SubscribeForm from '../components/SubscribeForm.astro';
 
 export interface Props {
   title: string;
@@ -268,6 +269,10 @@ const currentYear = new Date().getFullYear();
     </script>
 
     <footer class="site-footer">
+      <div class="footer-subscribe">
+        <SubscribeForm compact />
+      </div>
+
       <div class="footer-inner">
         <div class="footer-brand">
           <p class="footer-wordmark">WaarIsNiels?</p>
@@ -307,6 +312,12 @@ const currentYear = new Date().getFullYear();
         border-top: 1px solid var(--line);
         margin-top: 5rem;
         padding: 3rem 1.5rem 2rem;
+      }
+      .footer-subscribe {
+        max-width: 1152px;
+        margin: 0 auto 3rem;
+        padding-bottom: 2.5rem;
+        border-bottom: 1px solid var(--line);
       }
       .footer-inner {
         max-width: 1152px;

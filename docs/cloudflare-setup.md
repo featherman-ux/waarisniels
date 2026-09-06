@@ -174,6 +174,73 @@ En dan het `[[vectorize]]`-blok uit `wrangler.toml` halen.
 
 ---
 
+## 7. Mailnotificatie bij een nieuwe post — Resend
+
+De site kan een mailtje sturen zodra er een post live staat. Dubbele opt-in:
+zonder klik in de bevestigingsmail staat niemand op de lijst.
+
+### 7.1 Tabellen aanmaken
+
+```bash
+npm run db:migrate:subs        # remote
+npm run db:migrate:subs:local  # lokaal
+```
+
+> Draai **nooit** `npm run db:migrate` op productie: dat is `0001_init.sql`, en
+> die begint met `DROP TABLE posts`. `0002_subscribers.sql` is puur additief
+> (`CREATE TABLE IF NOT EXISTS`) en kun je zo vaak draaien als je wilt.
+
+### 7.2 Resend instellen
+
+1. Account op resend.com, domein `waarisniels.nl` toevoegen.
+2. De DKIM/SPF-records die Resend geeft in Cloudflare DNS zetten. Zet ze op
+   **DNS only** (grijze wolk), niet geproxyd.
+3. Wachten tot Resend het domein als geverifieerd toont.
+4. API-key aanmaken met alleen *sending*-rechten.
+
+### 7.3 Secrets in Cloudflare
+
+Workers & Pages → het project → Settings → Variables and Secrets. Beide als
+**secret**, niet als plain text, en niet in `wrangler.toml`:
+
+| Naam | Waarde |
+| --- | --- |
+| `RESEND_API_KEY` | `re_...` |
+| `MAIL_FROM` | `Niels <post@waarisniels.nl>` |
+
+Zonder deze twee blijft het formulier staan, maar geeft `/api/subscribe` een
+503 met een nette melding. De rest van de site draait gewoon door.
+
+### 7.4 Een post versturen
+
+`/api/admin/notify` zit achter dezelfde Cloudflare Access-regel als `/beheer`
+(zie §5), dus dit werkt alleen als je zelf bent ingelogd.
+
+```bash
+# hoeveel mensen staan er op de lijst?
+curl https://waarisniels.nl/api/admin/notify
+
+# eerst naar jezelf, telt niet als verzonden
+curl -X POST https://waarisniels.nl/api/admin/notify \
+  -H 'content-type: application/json' \
+  -d '{"slug":"brasil","testTo":"veerman.niels@gmail.com"}'
+
+# en dan echt
+curl -X POST https://waarisniels.nl/api/admin/notify \
+  -H 'content-type: application/json' \
+  -d '{"slug":"brasil"}'
+```
+
+Een post die al gemaild is wordt geweigerd met een 409; `"force": true` gaat er
+alsnog overheen. Verzenden gebeurt in blokken van honderd, en een mislukt blok
+houdt de rest niet tegen.
+
+### 7.5 Wat er in de mail staat
+
+Elke mail krijgt een persoonlijke afmeldlink, in de voettekst én in de
+`List-Unsubscribe`-header — daardoor tonen Gmail en Apple Mail hun eigen
+afmeldknop, wat de kans op een spamklacht flink verkleint.
+
 ## Snelle checklist
 
 | # | Wat | Waar | Klaar? |

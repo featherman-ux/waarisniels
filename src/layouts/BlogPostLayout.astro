@@ -8,6 +8,7 @@ import { Comments, ViewCounter, LikeButton } from '../components/EnhancedCompone
 import Chip from '../components/Chip.astro';
 import { tagHref } from '../lib/taxonomy';
 import Breadcrumbs from '../components/Breadcrumbs.astro';
+import SubscribeForm from '../components/SubscribeForm.astro';
 
 export interface Props {
   post: Post;
@@ -182,6 +183,13 @@ Astro.response.headers.set(
           </div>
         </section>
       )}
+
+      <section class="mb-12">
+        <SubscribeForm
+          title="Volgende post ook lezen?"
+          blurb="Laat je mailadres achter en je krijgt een berichtje zodra er een nieuwe post staat. Verder stuur ik je niks."
+        />
+      </section>
 
       <footer>
         <Comments client:load slug={post.slug} apiUrl={siteUrl} />

@@ -1,0 +1,94 @@
+---
+// Landingspagina van de link in de bevestigingsmail. Dat dit een pagina is en
+// geen API-endpoint is met opzet: je klikt in je mailprogramma en wilt iets zien.
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { confirmByToken } from '../../lib/subscribers';
+
+const token = Astro.url.searchParams.get('token')?.trim() ?? '';
+const db = Astro.locals.runtime.env.DB;
+
+const subscriber = token ? await confirmByToken(db, token) : null;
+const ok = subscriber?.status === 'confirmed';
+
+Astro.response.headers.set('Cache-Control', 'private, no-store');
+---
+
+<BaseLayout
+  title={ok ? 'Je staat op de lijst' : 'Link werkt niet'}
+  description="Bevestiging van je aanmelding voor WaarIsNiels."
+  noindex
+>
+  <section class="melding">
+    {ok ? (
+      <>
+        <h1>Gelukt</h1>
+        <p>
+          Je krijgt voortaan een mailtje zodra er een nieuwe post op waarisniels.nl
+          staat. Niet vaker dan dat — geen nieuwsbrief, geen reclame.
+        </p>
+        <p class="acties">
+          <a class="knop" href="/blog/">Naar de blog</a>
+          <a href="/map/">Of bekijk de kaart</a>
+        </p>
+        <p class="klein">
+          Onderaan elke mail staat een afmeldlink. Die werkt meteen, zonder gedoe.
+        </p>
+      </>
+    ) : (
+      <>
+        <h1>Deze link werkt niet</h1>
+        <p>
+          Waarschijnlijk is de link verlopen doordat je je daarna nog een keer hebt
+          aangemeld — in dat geval geldt alleen de nieuwste mail. Kijk of er een
+          recenter bericht in je inbox staat, of meld je opnieuw aan.
+        </p>
+        <p class="acties">
+          <a class="knop" href="/blog/">Naar de blog</a>
+        </p>
+      </>
+    )}
+  </section>
+</BaseLayout>
+
+<style>
+  .melding {
+    max-width: 46ch;
+    margin: 4rem auto;
+    padding-inline: 1.5rem;
+    text-align: center;
+  }
+  .melding h1 {
+    font-size: var(--step-2);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin-bottom: 1rem;
+  }
+  .melding p {
+    color: var(--text-subtle);
+    line-height: 1.7;
+    margin-bottom: 1rem;
+    text-wrap: pretty;
+  }
+  .acties {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    margin: 2rem 0 1.5rem;
+  }
+  .knop {
+    display: inline-block;
+    background: var(--ink);
+    color: var(--paper);
+    text-decoration: none;
+    padding: 0.7rem 1.4rem;
+    border-radius: var(--radius-full);
+    font-weight: 600;
+  }
+  .acties a:not(.knop) {
+    color: var(--accent);
+  }
+  .klein {
+    font-size: 0.875rem;
+  }
+</style>
