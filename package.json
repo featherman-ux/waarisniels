@@ -9,12 +9,12 @@
     "preview": "astro preview",
     "astro": "astro",
     "route": "node scripts/build-route.mjs",
-    "db:migrate": "wrangler d1 execute waarisniels-db --remote --file=migrations/0001_init.sql",
-    "db:migrate:local": "wrangler d1 execute waarisniels-db --local --file=migrations/0001_init.sql",
     "db:query": "wrangler d1 execute waarisniels-db --remote --command",
     "migrate:content": "node scripts/migrate-content.mjs",
-    "db:migrate:subs": "wrangler d1 execute waarisniels-db --remote --file=migrations/0002_subscribers.sql",
-    "db:migrate:subs:local": "wrangler d1 execute waarisniels-db --local --file=migrations/0002_subscribers.sql"
+    "db:migrate:subs": "npx --yes wrangler@4.129.0 d1 execute waarisniels-db --remote --file=migrations/0002_subscribers.sql",
+    "db:migrate:subs:local": "npx --yes wrangler@4.129.0 d1 execute waarisniels-db --local --file=migrations/0002_subscribers.sql",
+    "db:init:local": "npx --yes wrangler@4.129.0 d1 execute waarisniels-db --local --file=migrations/0001_init.sql",
+    "db:init:DANGER-wist-alle-posts": "npx --yes wrangler@4.129.0 d1 execute waarisniels-db --remote --file=migrations/0001_init.sql"
   },
   "dependencies": {
     "@astrojs/react": "^4.3.1",

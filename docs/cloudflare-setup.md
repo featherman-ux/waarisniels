@@ -45,8 +45,8 @@ database_id = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
 Dan het schema erin:
 
 ```bash
-npm run db:migrate                  # remote (de echte database)
-npm run db:migrate:local            # lokaal, voor wrangler dev
+npm run db:init:DANGER-wist-alle-posts   # remote — LEEST DE NAAM. Dit dropt posts.
+npm run db:init:local                    # lokaal, voor wrangler dev
 ```
 
 Controle:
@@ -186,9 +186,17 @@ npm run db:migrate:subs        # remote
 npm run db:migrate:subs:local  # lokaal
 ```
 
-> Draai **nooit** `npm run db:migrate` op productie: dat is `0001_init.sql`, en
-> die begint met `DROP TABLE posts`. `0002_subscribers.sql` is puur additief
+> Draai **nooit** `db:init:DANGER-wist-alle-posts` op productie tenzij je precies
+> dat wilt: dat is `0001_init.sql`, en die begint met `DROP TABLE posts`. De naam is
+> met opzet onhandig. `0002_subscribers.sql` is puur additief
 > (`CREATE TABLE IF NOT EXISTS`) en kun je zo vaak draaien als je wilt.
+>
+> Alle `--file`-scripts draaien via `npx wrangler@4.129.0` in plaats van de wrangler
+> uit node_modules. Die is door `@astrojs/cloudflare` gepind op 4.33, en versies onder
+> ~4.4x geven op het D1-import-endpoint een `Authentication error [code: 10000]`,
+> ook met een token dat `d1:write` én Super Administrator heeft. Los van de scopes dus.
+> `npm i -D wrangler@latest` lost dat *niet* op: dat botst op
+> `@cloudflare/workers-types` v4 vs v5.
 
 ### 7.2 Resend instellen
 
@@ -246,7 +254,7 @@ afmeldknop, wat de kans op een spamklacht flink verkleint.
 | # | Wat | Waar | Klaar? |
 |---|---|---|---|
 | 1 | `wrangler d1 create` + `database_id` in wrangler.toml | terminal | ✅ |
-| 2 | `npm run db:migrate` | terminal | ✅ |
+| 2 | `npm run db:init:DANGER-wist-alle-posts` | terminal | ✅ |
 | 3 | `wrangler r2 bucket create --location weur` | terminal | ✅ |
 | 4 | `media.waarisniels.nl` aan bucket koppelen | dashboard | ✅ |
 | 5 | ~~`DB` + `MEDIA` binding in Pages-project~~ | — | vervallen, zie §4 |
