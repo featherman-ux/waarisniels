@@ -10,11 +10,11 @@
   position: relative;
   height: min(78vh, 720px);
   overflow: hidden;
-  /* -2rem trekt 'm onder BaseLayout's main-padding uit, de overige -4rem onder de
-     sticky header (py-4 + text-2xl-inhoud ≈ 64px) — anders staat de header alleen
-     ín de flow vóór de hero i.p.v. ergover, en is "transparant over de foto" in
-     werkelijkheid gewoon witte tekst op de witte paginabackground. */
-  margin-top: -6rem;
+  /* -2rem haalt de main-padding weg, --header-h de header zelf. Dat stond hier als
+     een vaste -6rem met "header ≈ 64px" erbij, maar de header is 65px en de marge
+     dus 1px te klein: er bleef een streepje witte pagina boven de foto staan. De
+     hoogte wordt nu gemeten in BaseLayout en als custom property doorgegeven. */
+  margin-top: calc(-2rem - var(--header-h, 65px));
 }
 
 .home-hero img {
@@ -34,6 +34,18 @@
 }
 @keyframes home-hero-parallax {
   to { transform: translateY(12%) scale(1.08); }
+}
+
+/* Scrim onder de navigatie. De gradient hieronder loopt van onderaf omhoog en laat
+   de bovenkant van de foto onaangeraakt — bij een lichte lucht stond daar dus witte
+   nav op een wit vlak. Deze donkert alleen de strook achter de header. */
+.home-hero::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: calc(var(--header-h, 65px) + 2.5rem);
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.45), transparent);
+  pointer-events: none;
 }
 
 .home-hero::after {

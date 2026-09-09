@@ -55,7 +55,10 @@ const navLinks = [
 ];
 
 const navClasses = (match: string) => [
-  'nav-link text-sm sm:text-base px-2 py-1 rounded transition-colors',
+  // min-h-[44px] + flex: de links waren 28px hoog, ruim onder de 44px die zowel
+  // Apple als Google als ondergrens voor een tikdoel aanhouden. Op een telefoon
+  // miste je ze half.
+  'nav-link inline-flex items-center min-h-[44px] text-sm sm:text-base px-3 rounded transition-colors',
   isActive(match) ? 'text-accent' : 'text-text-subtle hover:text-accent'
 ];
 
@@ -135,7 +138,7 @@ const currentYear = new Date().getFullYear();
       ]}
     >
       <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
-        <a href="/" class="brand flex items-center gap-2 text-2xl font-display font-bold text-ink">
+        <a href="/" class="brand inline-flex items-center gap-2 min-h-[44px] text-2xl font-display font-bold text-ink">
           <svg width="20" height="20" viewBox="0 0 100 100" aria-hidden="true" class="shrink-0">
             <path d="M50 10 28 50 50 90Z" fill="currentColor" />
             <path d="M50 10 72 50 50 90Z" fill="var(--accent)" />
@@ -171,9 +174,9 @@ const currentYear = new Date().getFullYear();
         backdrop-filter: blur(20px) saturate(180%);
       }
 
-      /* Transparant over de hero op de homepage, solide zodra er voorbij gescrold is
-         (zie het script hieronder — luistert naar #hero-sentinel). Alle andere
-         pagina's krijgen meteen de vaste variant. */
+      /* Transparant over de hero op de homepage, solide zodra de onderkant van de
+         hero de header raakt (zie het script hieronder). Alle andere pagina's
+         krijgen meteen de vaste variant. */
       .header-transparent {
         background: transparent;
         border-bottom: 1px solid transparent;
@@ -219,9 +222,9 @@ const currentYear = new Date().getFullYear();
       .nav-link::after {
         content: '';
         position: absolute;
-        left: 0.5rem;
-        right: 0.5rem;
-        bottom: -2px;
+        left: 0.75rem;
+        right: 0.75rem;
+        bottom: 8px;
         height: 2px;
         background: var(--accent);
         transform: scaleX(0);
@@ -243,29 +246,84 @@ const currentYear = new Date().getFullYear();
       }
     </style>
 
-    <!-- Header-transparantie draait via astro:page-load i.p.v. DOMContentLoaded: met
-         <ClientRouter /> aan wisselt de pagina-inhoud client-side, dus dit moet na élke
-         navigatie opnieuw een observer aan de (mogelijk nieuwe) #hero-sentinel hangen. -->
+    <!-- Header-transparantie.
+         Dit liep via een IntersectionObserver op #hero-sentinel, een div van 0px hoog.
+         Gemeten op de live site: die observer vuurde NUL keer — een element zonder
+         oppervlak heeft altijd intersectionRatio 0, dus drempel 0 wordt nooit
+         overschreden en er komt nooit een callback. Gevolg: .header-solid werd nooit
+         gezet, en zodra je op de homepage voorbij de hero scrolde stond er witte
+         navigatie op een witte pagina. Onzichtbaar, en dus ook niet aan te tikken.
+         Nu op scrollpositie, want dat is deterministisch en werkt overal. -->
     <script is:inline>
-      document.addEventListener('astro:page-load', function () {
-        var header = document.getElementById('site-header');
-        var sentinel = document.getElementById('hero-sentinel');
-        if (!header) return;
-        if (!sentinel || typeof IntersectionObserver === 'undefined') {
-          header.classList.remove('header-solid');
-          return;
+      (function () {
+        var actief = null;
+        var waarnemer = null;
+
+        function opruimen() {
+          if (actief) {
+            window.removeEventListener('scroll', actief);
+            window.removeEventListener('resize', actief);
+            actief = null;
+          }
+          if (waarnemer) {
+            waarnemer.disconnect();
+            waarnemer = null;
+          }
         }
-        var observer = new IntersectionObserver(
-          function (entries) {
-            // isIntersecting alleen is niet genoeg: de sentinel is óók "niet zichtbaar"
-            // wanneer hij nog ónder de viewport hangt. De positie van zijn rand vertelt
-            // aan welke kant hij eruit is gelopen.
-            header.classList.toggle('header-solid', entries[0].boundingClientRect.top <= 64);
-          },
-          { threshold: [0, 1], rootMargin: '-64px 0px 0px 0px' }
-        );
-        observer.observe(sentinel);
-      });
+
+        document.addEventListener('astro:page-load', function () {
+          opruimen();
+
+          var header = document.getElementById('site-header');
+          if (!header) return;
+
+          // De hero wordt onder de header getrokken met een negatieve marge; die moet
+          // exact de headerhoogte zijn, anders blijft er een streepje pagina-achtergrond
+          // boven de foto staan. Meten in plaats van gokken.
+          function meetHoogte() {
+            document.documentElement.style.setProperty('--header-h', header.offsetHeight + 'px');
+          }
+          meetHoogte();
+
+          // Alleen de homepage begint transparant; elders staat de vaste variant al.
+          if (!header.classList.contains('header-transparent')) return;
+
+          var hero = document.querySelector('.home-hero');
+
+          // Eén plek waar de beslissing valt. Alle triggers hieronder roepen alleen
+          // dit aan en meten dus altijd de werkelijke stand, wat het onmogelijk maakt
+          // dat de klasse en de scrollpositie uit elkaar lopen.
+          function bijwerken() {
+            meetHoogte();
+            var voorbij = hero
+              ? hero.getBoundingClientRect().bottom <= header.offsetHeight
+              : window.scrollY > 8;
+            header.classList.toggle('header-solid', voorbij);
+          }
+
+          bijwerken();
+          actief = bijwerken;
+          window.addEventListener('scroll', bijwerken, { passive: true });
+          window.addEventListener('resize', bijwerken, { passive: true });
+
+          // Tweede trigger, met opzet naast de scroll-listener. Tijdens het testen
+          // bleken scroll-events op window niet in elke omgeving te vuren; een
+          // IntersectionObserver op de hero doet dat wel, omdat dat — anders dan de
+          // vorige sentinel — een element mét oppervlak is. De observer beslist
+          // niets, hij port bijwerken() alleen aan.
+          if (hero && typeof IntersectionObserver !== 'undefined') {
+            waarnemer = new IntersectionObserver(bijwerken, {
+              rootMargin: '-' + header.offsetHeight + 'px 0px 0px 0px',
+              threshold: [0, 0.001, 1],
+            });
+            waarnemer.observe(hero);
+          }
+        });
+
+        // Bij een view-transition-navigatie verdwijnt de oude hero; zonder opruimen
+        // blijft er per bezochte pagina een listener en een observer hangen.
+        document.addEventListener('astro:before-swap', opruimen);
+      })();
     </script>
 
     <footer class="site-footer">
