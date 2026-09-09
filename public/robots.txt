@@ -1,13 +1,92 @@
-# waarisniels.nl
+# waarisniels.nl — wie mag wat
+#
+# Let op wat dit bestand wel en niet is: een verzoek, geen slot. Nette bots
+# houden zich eraan, de rest niet. Wil je iets echt tegenhouden, dan moet dat bij
+# Cloudflare (AI Crawl Control / WAF) — zie docs/cloudflare-setup.md §8.
+#
 # Zonder dit bestand serveert Cloudflare zijn eigen content-signals-robots.txt,
 # en die verwijst nergens naar de sitemap. Deze wint.
+#
+# TWEE VALKUILEN bij het bewerken van dit bestand:
+#
+# 1. Een LEGE REGEL sluit een groep af, een commentaarregel niet. Zet dus nooit
+#    een lege regel tussen een User-agent en zijn regels: alles daaronder hoort
+#    dan bij niemand meer en wordt genegeerd.
+# 2. Zet Disallow-regels VOOR Allow: /. De officiele regel (RFC 9309) is dat de
+#    meest specifieke match wint, en dan zou de volgorde niet uitmaken — maar
+#    lang niet elke crawler doet dat; veel simpele parsers pakken gewoon de eerste
+#    regel die past. Met Allow: / bovenaan waren /beheer en /api/ voor die
+#    crawlers dus alsnog toegestaan. Precies dat stond hier eerder fout.
 
+# ----------------------------------------------------------------- iedereen
+# Content-Signal is de machineleesbare versie van "indexeren mag, mijn teksten en
+# foto's gebruiken om een model mee te trainen niet". In de EU geldt dat als een
+# uitdrukkelijk rechtenvoorbehoud onder artikel 4 van richtlijn 2019/790 — het is
+# dus niet alleen een verzoek maar ook een juridisch signaal. Zie contentsignals.org.
 User-agent: *
-Allow: /
-
-# Beheer, API en dashboards horen niet in de index.
+Content-Signal: search=yes, ai-input=no, ai-train=no
+# Beheer, API en dashboards horen niet in de index. Deze staan met opzet boven
+# Allow: / — zie valkuil 2 hierboven.
 Disallow: /beheer
 Disallow: /api/
 Disallow: /analytics-dashboard
+Allow: /
+
+# ------------------------------------------------- crawlers die modellen voeden
+# Deze halen content op om er modellen mee te trainen. Dat levert niets terug:
+# geen bezoeker, geen link, geen vermelding. Vandaar: hele site dicht.
+#
+# Google-Extended en Applebot-Extended zijn geen echte crawlers maar schakelaars:
+# Googlebot en Applebot blijven gewoon indexeren, alleen de trainingskant valt af.
+User-agent: GPTBot
+User-agent: ClaudeBot
+User-agent: anthropic-ai
+User-agent: Claude-Web
+User-agent: CCBot
+User-agent: Google-Extended
+User-agent: Applebot-Extended
+User-agent: Bytespider
+User-agent: Meta-ExternalAgent
+User-agent: Meta-ExternalFetcher
+User-agent: Amazonbot
+User-agent: Diffbot
+User-agent: Omgilibot
+User-agent: omgili
+User-agent: ImagesiftBot
+User-agent: AI2Bot
+User-agent: AI2Bot-Dolma
+User-agent: cohere-ai
+User-agent: cohere-training-data-crawler
+User-agent: PanguBot
+User-agent: Timpibot
+User-agent: Webzio-Extended
+User-agent: TikTokSpider
+User-agent: Kangaroo Bot
+User-agent: Scrapy
+Disallow: /
+
+# ------------------------------------------------------------- SEO-scrapers
+# Geen AI, maar ze trekken je hele site leeg om er linkprofielen mee te verkopen.
+# Heb je ooit een van deze tools nodig voor je eigen site, haal dit blok dan weg.
+User-agent: AhrefsBot
+User-agent: SemrushBot
+User-agent: MJ12bot
+User-agent: DotBot
+User-agent: BLEXBot
+User-agent: DataForSeoBot
+Disallow: /
+
+# ------------------------------------------------------------- wel welkom
+# Deze staan hier alleen ter documentatie: ze vallen onder User-agent: * hierboven
+# en mogen dus overal komen. Blokkeer ze niet per ongeluk.
+#
+#   Zoeken:          Googlebot, Googlebot-Image, Bingbot, DuckDuckBot, Applebot
+#   AI die citeert:  OAI-SearchBot, ChatGPT-User, PerplexityBot, Perplexity-User,
+#                    Claude-SearchBot, Claude-User
+#                    (deze sturen bezoekers terug; daarom wel toegang, en
+#                     ai-input=no hierboven zegt wat ze er niet mee mogen)
+#   Linkvoorbeelden: facebookexternalhit, Twitterbot, LinkedInBot, Slackbot,
+#                    WhatsApp, TelegramBot, Discordbot
+#                    (zonder deze toont een gedeelde link geen titel en geen foto)
 
 Sitemap: https://waarisniels.nl/sitemap.xml

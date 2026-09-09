@@ -292,6 +292,68 @@ Elke mail krijgt een persoonlijke afmeldlink, in de voettekst én in de
 `List-Unsubscribe`-header — daardoor tonen Gmail en Apple Mail hun eigen
 afmeldknop, wat de kans op een spamklacht flink verkleint.
 
+## 8. Bots en scrapers
+
+Alles op een openbare site is leesbaar. Wat je kunt regelen is (a) wat je vraagt,
+(b) wat je juridisch voorbehoudt, en (c) wat je daadwerkelijk tegenhoudt. Dat zijn
+drie verschillende dingen.
+
+### 8.1 Wat er in de code staat — a en b
+
+`public/robots.txt` doet drie dingen:
+
+- **Content-Signal** (`search=yes, ai-input=no, ai-train=no`). Machineleesbaar, en
+  in de EU een uitdrukkelijk rechtenvoorbehoud onder artikel 4 van richtlijn
+  2019/790. Dit is het onderdeel dat juridisch iets betekent.
+- **Trainingscrawlers op Disallow**: GPTBot, ClaudeBot, CCBot, Google-Extended,
+  Applebot-Extended, Bytespider, Meta-ExternalAgent en een stuk of vijftien andere.
+- **Zoekmachines en linkvoorbeelden blijven welkom.** Googlebot, Bingbot, maar ook
+  facebookexternalhit en Slackbot — zonder die laatste toont een link die je in
+  WhatsApp deelt geen titel en geen foto meer.
+
+De RSS-feed geeft alleen titels en samenvattingen (nooit de volledige tekst), staat
+op vijftien items, en draagt een `copyright`-veld plus `X-Robots-Tag: noai`.
+
+> Twee valkuilen als je `robots.txt` bewerkt, allebei stil kapot:
+>
+> 1. Een **lege regel sluit een groep af**; een commentaarregel niet. Een lege
+>    regel tussen `User-agent:` en zijn regels maakt alles daaronder weesregels.
+> 2. Zet **`Disallow` boven `Allow: /`**. Officieel (RFC 9309) wint de meest
+>    specifieke match en maakt volgorde niet uit, maar veel crawlers pakken gewoon
+>    de eerste regel die past. Met `Allow: /` bovenaan waren `/beheer` en `/api/`
+>    voor die crawlers alsnog toegestaan.
+>
+> Na elke wijziging even natesten:
+> `python3 -c "from urllib.robotparser import RobotFileParser as R; r=R(); r.parse(open('public/robots.txt').read().splitlines()); print(r.can_fetch('GPTBot','/blog/'), r.can_fetch('Googlebot','/blog/'), r.can_fetch('Googlebot','/beheer'))"`
+> — verwacht: `False True False`.
+
+### 8.2 Wat het echt tegenhoudt — c
+
+`robots.txt` is een verzoek. Een scraper die zich niet gedraagt trekt zich er niets
+van aan. Afdwingen gebeurt bij Cloudflare, en dat kan op het gratis plan:
+
+1. Dashboard → je domein → **AI Crawl Control**.
+2. Tab **Crawlers**: hier staat welke AI-bots je site daadwerkelijk hebben bezocht,
+   met aantallen. Alleen dit al is de moeite waard om een keer te bekijken.
+3. Zet de crawlers die je niet wilt op **Block**.
+
+Cloudflare maakt daar één WAF custom rule voor aan, die de bot een 403 geeft
+vóórdat hij bij je Worker komt. Blokkeer je later ook via de WAF met een eigen
+regel, zorg dan dat die niet met de AI Crawl Control-regel botst — de volgorde
+in *Security rules → Custom rules* bepaalt wie wint.
+
+Er is ook een tab **Robots.txt** die laat zien welke crawlers jouw regels
+overtreden. Dat is de lijst om vervolgens te blokkeren.
+
+### 8.3 Wat je niet moet verwachten
+
+- Een bot die zijn user-agent vervalst valt hier buiten. Daarvoor is *Bot Fight
+  Mode* (Security → Bots), maar dat raakt soms ook legitiem verkeer — aanzetten
+  als je er last van hebt, niet preventief.
+- `X-Robots-Tag: noai` is een voorkeur die vrijwel niemand opvolgt. Het staat er
+  omdat het niets kost, niet omdat het werkt.
+- Iemand die je site met de hand kopieert houd je sowieso niet tegen.
+
 ## Snelle checklist
 
 | # | Wat | Waar | Klaar? |
