@@ -29,7 +29,15 @@ Astro.response.headers.set(
 );
 ---
 
-<BaseLayout title="Waar is Niels?" description="Hallo? Wat doe jij op deze website???">
+{/*
+  Deze omschrijving staat nergens op de pagina zelf: hij is wat Google toont
+  onder de zoekresultaat-link en wat er verschijnt als iemand de site in
+  WhatsApp of Instagram deelt. Dus vertelt hij wat hier te vinden is.
+*/}
+<BaseLayout
+  title="Waar is Niels?"
+  description="Het reisblog van Niels: verhalen en foto's uit Zuid-Amerika, een kaart met de hele route, en waar ik nu zit."
+>
   <section class="home-hero full-bleed">
     <img
       src={heroImgSrc}
@@ -42,7 +50,7 @@ Astro.response.headers.set(
     <div class="hero-text">
       <div>
         <h1>Waar is <span class="hero-accent">Niels</span>?</h1>
-        <p>Van september tot maart zit ik in Athene, hopelijk volgen er nog een paar Athene-posts.</p>
+        <p>Hallo? Wat doe jij op deze website???</p>
         {heroHref && (
           <a href={heroHref} class="hero-link">Bekijk de laatste post →</a>
         )}
