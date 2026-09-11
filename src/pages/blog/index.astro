@@ -74,6 +74,20 @@ Astro.response.headers.set(
       </details>
     )}
 
+    {/*
+      Dichtklappen moet vóór de eerste paint gebeuren, niet erna. Deed ik dit pas
+      bij astro:page-load, dan tekende de browser eerst de open lijst en sprong de
+      pagina daarna ~380px omhoog: CLS ging van 0 naar 0,18. Dit script staat
+      direct achter de <details> en draait synchroon tijdens het parsen, dus de
+      open staat komt nooit in beeld.
+    */}
+    <script is:inline>
+      (function () {
+        var el = document.querySelector('.facets');
+        if (el && window.matchMedia('(max-width: 639px)').matches) el.open = false;
+      })();
+    </script>
+
     <div class="searchbar">
       <label class="sr-only" for="post-search">Zoek in posts</label>
       <input
@@ -84,6 +98,14 @@ Astro.response.headers.set(
       />
       <p id="search-status" class="search-status" role="status" aria-live="polite"></p>
     </div>
+
+    {/*
+      Onzichtbare kop, maar wel nodig: de h2's van de facetten zitten in de
+      <details> en vallen op mobiel uit de toegankelijkheidsboom zodra die
+      dichtklapt. Zonder deze h2 springt de koppenvolgorde daar van h1 naar de
+      h3 van een postkaart.
+    */}
+    <h2 class="sr-only">Alle posts</h2>
 
     {posts.length ? (
       <div id="post-grid" class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
