@@ -18,8 +18,12 @@
 /images/*
   Cache-Control: public, max-age=2592000, stale-while-revalidate=86400
 
+# Een dag i.p.v. een week: de verwijzing in BaseLayout heeft een ?v=-nummer dat
+# een nieuw icoon meteen doorzet, maar browsers die favicon.svg rechtstreeks
+# opvragen (zonder de HTML te lezen) zien dat nummer niet. Een dag houdt die
+# groep beperkt achter zonder dat het bestandje vaak opnieuw over de lijn hoeft.
 /favicon.svg
-  Cache-Control: public, max-age=604800
+  Cache-Control: public, max-age=86400
 
 /apple-touch-icon.png
-  Cache-Control: public, max-age=604800
+  Cache-Control: public, max-age=86400

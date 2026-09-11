@@ -72,8 +72,11 @@ const currentYear = new Date().getFullYear();
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    {/* ?v= bij elke nieuwe vorm ophogen. Zonder dat blijft een oud icoon dagen
+        hangen: het bestand houdt zijn naam, dus browser en CDN zien geen reden
+        om opnieuw te kijken. Met een ander adres is het meteen overal bij. */}
+    <link rel="icon" href="/favicon.svg?v=2" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=2" />
     <meta name="generator" content={Astro.generator} />
 
     {/* Homepage heet gewoon "WaarIsNiels" i.p.v. "Waar is Niels? | WaarIsNiels". */}
