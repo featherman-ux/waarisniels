@@ -1,0 +1,393 @@
+---
+// Schuifpuzzel van 5x5 met echte puzzelnokken, volledig als inline SVG.
+//
+// Alles staat in één <svg> met een viewBox. Daardoor schaalt de puzzel vanzelf
+// mee met zijn container: geen aparte mobiele layout, geen herberekening bij
+// draaien van het toestel, en stukjes mogen over elkaar heen steken zonder dat
+// een grid-cel ze afknipt.
+//
+// Bedienen gaat met tikken: eerst een stukje, dan de plek waar het heen moet.
+// Dat werkt op een telefoon net zo goed als met een muis, en het is met het
+// toetsenbord te doen — slepen zou dat alledrie moeilijker maken.
+import { assetUrl } from '../lib/media';
+
+export interface Props {
+  /** Pad binnen public/, bijvoorbeeld "images/puzzel.jpg". */
+  src: string;
+  alt: string;
+  /** Breedte/hoogte-verhouding van de foto. */
+  ratio?: number;
+}
+
+const { src, alt, ratio = 3 / 4 } = Astro.props;
+
+const COLS = 5;
+const ROWS = 5;
+const PW = 100;                     // stukbreedte in SVG-eenheden
+const PH = Math.round((PW / ratio) * 100) / 100;
+const BW = COLS * PW;
+const BH = ROWS * PH;
+const TAB = 24;                     // hoogte van een nok
+const PAD = TAB + 4;                // lucht rond het bord, anders knipt de viewBox nokken af
+
+// Vaste reeks i.p.v. Math.random(): de pagina wordt per request gerenderd, dus
+// zonder vaste reeks zou elke bezoeker een andere puzzelsnit krijgen en zouden
+// twee renders van dezelfde pagina niet gelijk zijn.
+function seeded(seed: number) {
+  let s = seed;
+  return () => {
+    s = (s * 1103515245 + 12345) % 2147483648;
+    return s / 2147483648;
+  };
+}
+const rnd = seeded(20260911);
+const flip = () => (rnd() < 0.5 ? -1 : 1);
+
+// Nokken op de binnenranden. vEdge[r][c] hoort bij de grens tussen (r,c) en
+// (r,c+1), hEdge[r][c] bij die tussen (r,c) en (r+1,c).
+const vEdge: number[][] = Array.from({ length: ROWS }, () =>
+  Array.from({ length: COLS - 1 }, flip)
+);
+const hEdge: number[][] = Array.from({ length: ROWS - 1 }, () =>
+  Array.from({ length: COLS }, flip)
+);
+
+// Eén klassieke nok, genormaliseerd: u loopt van 0 tot 1 langs de rand, v is de
+// uitstulping loodrecht erop. De vorm is symmetrisch rond u=0.5, waardoor
+// dezelfde rand andersom doorlopen (met omgekeerd teken) exact dezelfde curve
+// oplevert — precies wat nodig is om twee stukjes in elkaar te laten grijpen.
+const KNOB: number[][][] = [
+  [[0.20, 0.00], [0.35, 0.00], [0.37, 0.04]],
+  [[0.40, 0.11], [0.28, 0.13], [0.30, 0.20]],
+  [[0.32, 0.27], [0.45, 0.28], [0.50, 0.28]],
+  [[0.55, 0.28], [0.68, 0.27], [0.70, 0.20]],
+  [[0.72, 0.13], [0.60, 0.11], [0.63, 0.04]],
+  [[0.65, 0.00], [0.80, 0.00], [1.00, 0.00]],
+];
+const V_SCALE = TAB / 0.28;         // zodat v=0.28 overeenkomt met een nok van TAB hoog
+
+const r2 = (n: number) => Math.round(n * 100) / 100;
+
+/** Randstuk van A naar B. tab 0 = kaarsrecht (buitenrand), anders +1/-1. */
+function edge(ax: number, ay: number, bx: number, by: number, tab: number): string {
+  if (!tab) return `L${r2(bx)} ${r2(by)}`;
+  const dx = bx - ax;
+  const dy = by - ay;
+  const len = Math.hypot(dx, dy);
+  const ux = dx / len;
+  const uy = dy / len;
+  const nx = -uy;                   // loodrecht op de rand
+  const ny = ux;
+  const at = (u: number, v: number) => {
+    const off = v * V_SCALE * tab;
+    return `${r2(ax + ux * u * len + nx * off)} ${r2(ay + uy * u * len + ny * off)}`;
+  };
+  return KNOB.map(([c1, c2, e]) => `C${at(c1[0], c1[1])} ${at(c2[0], c2[1])} ${at(e[0], e[1])}`).join('');
+}
+
+const pieces = Array.from({ length: ROWS * COLS }, (_, i) => {
+  const r = Math.floor(i / COLS);
+  const c = i % COLS;
+  const x0 = c * PW;
+  const y0 = r * PH;
+  const x1 = x0 + PW;
+  const y1 = y0 + PH;
+
+  // Met de klok mee. Een gedeelde rand krijgt aan de overkant hetzelfde getal
+  // met omgekeerd teken, zodat bol en hol op elkaar passen.
+  const d =
+    `M${x0} ${y0}` +
+    edge(x0, y0, x1, y0, r === 0 ? 0 : -hEdge[r - 1][c]) +
+    edge(x1, y0, x1, y1, c === COLS - 1 ? 0 : vEdge[r][c]) +
+    edge(x1, y1, x0, y1, r === ROWS - 1 ? 0 : hEdge[r][c]) +
+    edge(x0, y1, x0, y0, c === 0 ? 0 : -vEdge[r][c - 1]) +
+    'Z';
+
+  return { i, d };
+});
+
+const uid = `jig-${Math.random().toString(36).slice(2, 8)}`;
+// Klein gehouden: het bord is in de praktijk hooguit ~420px breed, dus 640px
+// dekt ook een scherm met hoge pixeldichtheid ruim.
+const photo = assetUrl(src, { width: 640 });
+---
+
+<div class="puzzle" data-puzzle data-cols={COLS} data-rows={ROWS} data-pw={PW} data-ph={PH}>
+  <svg
+    viewBox={`${-PAD} ${-PAD} ${BW + PAD * 2} ${BH + PAD * 2}`}
+    class="puzzle-board"
+    role="group"
+    aria-label={`Legpuzzel van ${ROWS * COLS} stukjes: ${alt}`}
+  >
+    <defs>
+      <image
+        id={`${uid}-photo`}
+        href={photo}
+        x="0"
+        y="0"
+        width={BW}
+        height={BH}
+        preserveAspectRatio="xMidYMid slice"
+      />
+      {pieces.map((p) => (
+        <clipPath id={`${uid}-clip-${p.i}`}>
+          <path d={p.d} />
+        </clipPath>
+      ))}
+    </defs>
+
+    {pieces.map((p) => (
+      <g class="piece" data-piece={p.i} tabindex="0" role="button" aria-label={`Stukje ${p.i + 1}`}>
+        <use href={`#${uid}-photo`} clip-path={`url(#${uid}-clip-${p.i})`} />
+        <path class="piece-edge" d={p.d} />
+      </g>
+    ))}
+
+    {/* Twee stukjes die een rand delen laten na antialiasing een haarlijn zien.
+        Bij een opgeloste puzzel legt deze hele foto daar overheen, zodat het beeld
+        weer gaaf is. Blijft verborgen zolang er nog gepuzzeld wordt. */}
+    <use href={`#${uid}-photo`} class="puzzle-whole" aria-hidden="true" />
+  </svg>
+
+  <div class="puzzle-bar">
+    <p class="puzzle-status" role="status" aria-live="polite" data-status></p>
+    <button type="button" class="puzzle-shuffle" data-shuffle>Door elkaar</button>
+  </div>
+</div>
+
+<style>
+  .puzzle {
+    max-width: 26rem;
+    margin-inline: auto;
+  }
+
+  .puzzle-board {
+    display: block;
+    width: 100%;
+    height: auto;
+    /* Zonder deze ondergrond zie je bij losse stukjes de pagina erdoorheen. */
+    background: var(--paper-alt);
+    border-radius: var(--radius-lg);
+    touch-action: manipulation; /* geen dubbeltik-zoom bij snel achter elkaar tikken */
+  }
+
+  .piece {
+    cursor: pointer;
+    outline: none;
+  }
+  .piece-edge {
+    fill: none;
+    stroke: color-mix(in srgb, var(--ink) 22%, transparent);
+    stroke-width: 1;
+    vector-effect: non-scaling-stroke;
+  }
+
+  /* Geselecteerd: dikke accentrand. Niet alleen kleur, ook dikte — zo blijft het
+     zichtbaar bij kleurenblindheid en op een fel verlicht scherm buiten. */
+  .piece[data-selected] .piece-edge {
+    stroke: var(--accent);
+    stroke-width: 3;
+  }
+  .piece:focus-visible .piece-edge {
+    stroke: var(--accent);
+    stroke-width: 3;
+    stroke-dasharray: 6 4;
+  }
+  @media (hover: hover) {
+    .piece:hover .piece-edge {
+      stroke: color-mix(in srgb, var(--accent) 70%, transparent);
+      stroke-width: 2;
+    }
+  }
+
+  /* Af: randen weg en de hele foto eroverheen. */
+  .puzzle[data-solved] .piece-edge {
+    stroke: transparent;
+  }
+  .puzzle[data-solved] .piece {
+    cursor: default;
+  }
+  .puzzle-whole {
+    opacity: 0;
+    pointer-events: none;
+  }
+  .puzzle[data-solved] .puzzle-whole {
+    opacity: 1;
+    transition: opacity var(--dur-move) var(--ease);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .puzzle[data-solved] .puzzle-whole {
+      transition: none;
+    }
+  }
+
+  .puzzle-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    /* wrap + ruime gap: op een smalle kaart brak de statusregel over twee regels
+       en kwam die tegen de knop aan te staan. */
+    flex-wrap: wrap;
+    gap: 0.6rem 1rem;
+    margin-top: 0.85rem;
+  }
+  .puzzle-status {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--text-subtle);
+    min-height: 1.4em;
+    flex: 1 1 9rem;
+    text-wrap: balance;
+  }
+  .puzzle[data-solved] .puzzle-status {
+    color: var(--accent);
+    font-weight: 500;
+  }
+  .puzzle-shuffle {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 0 1.1rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-full);
+    background: var(--card);
+    color: var(--ink);
+    font: inherit;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+  }
+  .puzzle-shuffle:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+  .puzzle-shuffle:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  /* Beweging uitzetten hoort hier ook te gelden: het stukje verspringt dan
+     meteen i.p.v. te glijden. */
+  @media (prefers-reduced-motion: reduce) {
+    .piece {
+      transition: none !important;
+    }
+  }
+</style>
+
+<script>
+  function initPuzzles() {
+    document.querySelectorAll<HTMLElement>('[data-puzzle]').forEach((root) => {
+      if (root.dataset.ready === 'true') return;
+      root.dataset.ready = 'true';
+
+      const cols = Number(root.dataset.cols);
+      const rows = Number(root.dataset.rows);
+      const pw = Number(root.dataset.pw);
+      const ph = Number(root.dataset.ph);
+      const total = cols * rows;
+
+      const pieces = Array.from(root.querySelectorAll<SVGGElement>('.piece'));
+      const status = root.querySelector<HTMLElement>('[data-status]');
+      const shuffleBtn = root.querySelector<HTMLButtonElement>('[data-shuffle]');
+      if (pieces.length !== total) return;
+
+      // placement[plek] = nummer van het stukje dat daar ligt
+      let placement = pieces.map((_, i) => i);
+      let selected: number | null = null;
+
+      const homeX = (id: number) => (id % cols) * pw;
+      const homeY = (id: number) => Math.floor(id / cols) * ph;
+
+      function render() {
+        placement.forEach((pieceId, slot) => {
+          const el = pieces[pieceId];
+          const dx = (slot % cols) * pw - homeX(pieceId);
+          const dy = Math.floor(slot / cols) * ph - homeY(pieceId);
+          el.setAttribute('transform', `translate(${dx} ${dy})`);
+        });
+      }
+
+      function solved() {
+        return placement.every((pieceId, slot) => pieceId === slot);
+      }
+
+      function update() {
+        const done = solved();
+        root.toggleAttribute('data-solved', done);
+        pieces.forEach((el) => {
+          el.toggleAttribute('tabindex', !done);
+          if (done) el.removeAttribute('data-selected');
+        });
+        if (status) {
+          if (done) {
+            status.textContent = 'Compleet. Dat ben ik dus.';
+          } else {
+            const goed = placement.filter((p, s) => p === s).length;
+            status.textContent = `${goed} van ${total} goed`;
+          }
+        }
+      }
+
+      function select(slot: number | null) {
+        selected = slot;
+        pieces.forEach((el) => el.removeAttribute('data-selected'));
+        if (slot !== null) {
+          const el = pieces[placement[slot]];
+          el.setAttribute('data-selected', '');
+          // Vooraan tekenen, anders verdwijnen de nokken onder de buren.
+          el.parentElement?.appendChild(el);
+        }
+      }
+
+      function activate(slot: number) {
+        if (solved()) return;
+        if (selected === null) {
+          select(slot);
+          return;
+        }
+        if (selected === slot) {
+          select(null);
+          return;
+        }
+        [placement[selected], placement[slot]] = [placement[slot], placement[selected]];
+        select(null);
+        render();
+        update();
+      }
+
+      /** Welke plek hoort bij dit stukje op dit moment? */
+      const slotOf = (el: SVGGElement) => placement.indexOf(Number(el.dataset.piece));
+
+      pieces.forEach((el) => {
+        el.addEventListener('click', () => activate(slotOf(el)));
+        el.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            activate(slotOf(el));
+          } else if (e.key === 'Escape') {
+            select(null);
+          }
+        });
+      });
+
+      function shuffle() {
+        do {
+          for (let i = placement.length - 1; i > 0; i -= 1) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [placement[i], placement[j]] = [placement[j], placement[i]];
+          }
+        } while (solved()); // een "opgeloste" schudbeurt is geen puzzel
+        select(null);
+        render();
+        update();
+      }
+
+      shuffleBtn?.addEventListener('click', shuffle);
+      shuffle();
+    });
+  }
+
+  document.addEventListener('astro:page-load', initPuzzles);
+</script>

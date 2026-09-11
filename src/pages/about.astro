@@ -1,9 +1,9 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import { assetUrl, assetSrcSet } from '../lib/media';
+import JigsawPuzzle from '../components/JigsawPuzzle.astro';
 
-const pageTitle = "Over Niels";
-const pageDescription = "Lees meer over mij en het verhaal achter Waar is Niels?";
+const pageTitle = "Niels";
+const pageDescription = "Oke, Oke, Oke, Oke, Oke, Oke";
 
 Astro.response.headers.set(
   'Cache-Control',
@@ -68,12 +68,9 @@ Astro.response.headers.set(
       color: var(--text);
     }
 
-    .hero-img {
-      width: 60%;
-      max-width: 300px;
-      border-radius: var(--radius-lg);
-      margin: 1rem auto;
-      display: block;
+    .puzzle-intro {
+      color: var(--text-subtle);
+      margin-bottom: 1.25rem;
     }
 
     .btn-row {
@@ -97,34 +94,14 @@ Astro.response.headers.set(
 
   <header class="hero">
     <h1>{pageTitle}</h1>
-    <p>Vul ik nog een keer aan — ik weet eigenlijk nog niet zo goed wie ik ben.</p>
+    <p></p>
   </header>
 
   <div class="about-grid">
     <article class="card">
-      <h2>Wie ben ik?</h2>
-      <p>Hi, ik ben Niels – data- en code enthousiasteling, reiziger en verhalenverteller. Deze site documenteert mijn avonturen in Zuid-Amerika en technologische projecten die ik achter de schermen bouw.</p>
-      <p>Drie redenen voor deze site:</p>
-      <ul>
-        <li>Mijn reisupdates delen op mijn eigen, gepersonaliseerde platform.</li>
-        <li>Een technisch visitekaartje creëren voor toekomstige sollicitaties in data & IT.</li>
-        <li>Creatief bezig zijn tijdens regenachtige dagen.</li>
-      </ul>
-      <img
-        src={assetUrl('images/over.JPG', { width: 600 })}
-        srcset={assetSrcSet('images/over.JPG', [300, 600, 900])}
-        sizes="min(60vw, 300px)"
-        alt="Niels onderweg"
-        class="hero-img"
-        width="300"
-        height="400"
-        loading="lazy"
-        decoding="async"
-      />
-      <div class="btn-row">
-        <a href="/blog/">Laatste blogposts</a>
-        <a href="/map/">Live kaart</a>
-      </div>
+      <h2>Leg mij bij elkaar</h2>
+      <p class="puzzle-intro">Tik een stukje aan en daarna de plek waar het heen moet.</p>
+      <JigsawPuzzle src="images/puzzel.jpg" alt="Niels onder de druivenrank" />
     </article>
 
     <section class="card">

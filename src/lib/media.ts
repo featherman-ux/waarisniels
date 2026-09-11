@@ -52,7 +52,10 @@ export function mediaSrcSet(key?: string | null, widths: number[] = [480, 960, 1
  */
 export function assetUrl(path: string, opts?: { width?: number }): string {
   const clean = `/${path.replace(/^\/+/, '')}`;
-  if (!opts?.width) return clean;
+  // /cdn-cgi/image/ bestaat alleen bij Cloudflare. Lokaal (astro dev) levert dat
+  // pad een 404 en dus een stukgeslagen afbeelding op; daar serveren we het
+  // origineel.
+  if (!opts?.width || import.meta.env.DEV) return clean;
   return `/cdn-cgi/image/width=${opts.width},format=auto,quality=80${clean}`;
 }
 
