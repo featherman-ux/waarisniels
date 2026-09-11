@@ -33,10 +33,18 @@ const DASH: Record<string, string | undefined> = {
     <svg
       class="mini-map"
       viewBox={`0 0 ${preview.width} ${preview.height}`}
-      preserveAspectRatio="xMidYMid meet"
+      preserveAspectRatio="xMidYMid slice"
       role="img"
       aria-label={`Route langs ${preview.dots.length} stops in Zuid-Amerika`}
     >
+      {/* Landmassa's als achtergrond: zonder deze zweefde de route in het niets
+          en las het blok niet als een kaart. Natural Earth 110m, publiek domein. */}
+      <g class="mini-map-land">
+        {preview.land.map((d) => (
+          <path d={d} />
+        ))}
+      </g>
+
       {Object.entries(preview.paths).map(([mode, d]) => (
         <path
           d={d}
@@ -84,8 +92,18 @@ const DASH: Record<string, string | undefined> = {
     display: block;
     width: 100%;
     height: 320px;
-    padding: 0.75rem;
-    box-sizing: border-box;
+    /* 'slice' laat de kaart het kader vullen zoals object-fit: cover; de padding
+       die hier stond zou dan toch worden weggesneden. */
+    background: var(--paper-alt);
+  }
+
+  /* Land iets lichter dan het water eromheen, met een haarlijn als kustlijn —
+     genoeg om als kaart te lezen zonder de route te overstemmen. */
+  .mini-map-land path {
+    fill: var(--card);
+    stroke: var(--line);
+    stroke-width: 1;
+    stroke-linejoin: round;
   }
 
   /* Puur decoratief: de hele kaart is al een link, dus dit is geen apart

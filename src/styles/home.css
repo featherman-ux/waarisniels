@@ -3,7 +3,10 @@
 .home-hero,
 .destination-fact,
 .posts {
-  margin-bottom: clamp(5rem, 10vw, 9rem);
+  /* Alleen de ondergrens omlaag: op een telefoon viel 10vw onder de oude 5rem,
+     dus stond er altijd 80px tussen de secties — op een scherm van 844px hoog is
+     dat veel. Boven ~900px breed wint 10vw nog steeds, dus desktop verandert niet. */
+  margin-bottom: clamp(3rem, 10vw, 9rem);
 }
 
 .home-hero {

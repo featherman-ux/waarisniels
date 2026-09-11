@@ -463,9 +463,18 @@ time, .tabular-nums {
     animation-timeline: view();
     animation-range: entry 0% entry 40%;
   }
+  /* Bewust géén opacity meer in deze keyframes.
+     Eerst ging dit van opacity:0 naar 1. Safari op iOS meldt via @supports dat het
+     animation-timeline kent, maar kan view() daarna niet oplossen: de animatie
+     blijft dan in zijn beginfase hangen. Met opacity:0 als beginwaarde betekende
+     dat onzichtbare secties — op Niels' telefoon verdween zo eerst de kaart en
+     daarna de hele postenlijst, terwijl in Chrome alles klopte. @supports kan dat
+     onderscheid niet maken, want de test slaagt gewoon.
+     Door alleen transform te animeren is de slechtste uitkomst dat een sectie 16px
+     lager staat dan bedoeld. Zichtbaar blijft ze altijd. */
   @keyframes rise {
-    from { opacity: 0; transform: translateY(24px); }
-    to { opacity: 1; transform: none; }
+    from { transform: translateY(16px); }
+    to { transform: none; }
   }
 }
 
