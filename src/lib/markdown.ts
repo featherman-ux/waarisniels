@@ -49,37 +49,66 @@ function autoGroupImages(html: string): string {
  */
 const BODY_WIDTHS = [480, 768, 1200, 1600];
 
+/**
+ * Wat een foto écht aan ruimte krijgt, zodat de browser niet standaard de
+ * 1200px-variant pakt. Zie global.css: .photo-grid is twee kolommen onder 768px
+ * en drie daarboven (container max 1100px), en de openingsfoto van een grid met
+ * drie of meer foto's loopt over de volle breedte. Een losse foto staat in de
+ * leeskolom van 68ch.
+ *
+ * Hiervoor stond op alles "100vw" voor mobiel — een cel van ~190px kreeg zo de
+ * 1200px-variant binnen: op de Santa Cruz-post ruim een megabyte aan foto's.
+ */
+const SIZES_GRID_LEAD = '(min-width: 768px) min(1100px, 100vw), 100vw';
+const SIZES_GRID_CELL = '(min-width: 768px) 360px, 50vw';
+const SIZES_SOLO = '(min-width: 768px) 680px, 92vw';
+
 function transformed(path: string, width: number): string {
   return `${MEDIA_BASE}/cdn-cgi/image/width=${width},format=auto,quality=80/${path}`;
 }
 
+const mediaSrcPattern = new RegExp(
+  `src=("|')${MEDIA_BASE.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}/([^"']+)\\1`,
+  'gi'
+);
+
+/** Eén <img> voorzien van srcset + sizes. Laat tags met rust die al klaar zijn. */
+function withSources(tag: string, sizes: string): string {
+  if (/\bsrcset\s*=/i.test(tag)) return tag;          // al geregeld
+  if (tag.includes('/cdn-cgi/image/')) return tag;      // al getransformeerd
+
+  let path: string | null = null;
+  tag.replace(mediaSrcPattern, (_m, _q, p: string) => {
+    path = p;
+    return _m;
+  });
+  if (!path) return tag;
+
+  const srcset = BODY_WIDTHS.map((w) => `${transformed(path!, w)} ${w}w`).join(', ');
+
+  return tag
+    .replace(/<img\b/i, `<img srcset="${srcset}" sizes="${sizes}"`)
+    .replace(mediaSrcPattern, `src="${transformed(path, 1200)}"`);
+}
+
 function addResponsiveSources(html: string): string {
-  const mediaSrc = new RegExp(
-    `src=(\"|')${MEDIA_BASE.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}/([^\"']+)\\1`,
-    'gi'
+  // Eerst de fotogrids: daarbinnen hangt de juiste maat af van de positie, dus
+  // die kunnen niet over één kam met de losse foto's eronder.
+  const withGrids = html.replace(
+    /(<div\b[^>]*class="[^"]*photo-grid[^"]*"[^>]*>)([\s\S]*?)(<\/div>)/gi,
+    (_whole, open: string, inner: string, close: string) => {
+      const count = (inner.match(/<img\b[^>]*>/gi) ?? []).length;
+      const leadIsFullWidth = count >= 3; // zie de :has()-regel in global.css
+      let index = 0;
+      const next = inner.replace(/<img\b[^>]*>/gi, (tag) =>
+        withSources(tag, index++ === 0 && leadIsFullWidth ? SIZES_GRID_LEAD : SIZES_GRID_CELL)
+      );
+      return open + next + close;
+    }
   );
 
-  return html.replace(/<img\b[^>]*>/gi, (tag) => {
-    if (/\bsrcset\s*=/i.test(tag)) return tag;          // al geregeld
-    if (tag.includes('/cdn-cgi/image/')) return tag;      // al getransformeerd
-
-    let path: string | null = null;
-    tag.replace(mediaSrc, (_m, _q, p: string) => {
-      path = p;
-      return _m;
-    });
-    if (!path) return tag;
-
-    const srcset = BODY_WIDTHS.map((w) => `${transformed(path!, w)} ${w}w`).join(', ');
-    // Ruim genomen: een foto die de volle breedte van een grid pakt mag nooit
-    // wazig zijn. Iets te veel ophalen is beter dan een korrelige openingsfoto.
-    const sizes = '(min-width: 768px) 50vw, 100vw';
-
-    return tag.replace(
-      /<img\b/i,
-      `<img srcset="${srcset}" sizes="${sizes}"`
-    ).replace(mediaSrc, `src="${transformed(path, 1200)}"`);
-  });
+  // Wat nu nog geen srcset heeft staat los in de leeskolom.
+  return withGrids.replace(/<img\b[^>]*>/gi, (tag) => withSources(tag, SIZES_SOLO));
 }
 
 /**

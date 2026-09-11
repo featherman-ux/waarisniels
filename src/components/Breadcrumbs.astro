@@ -52,6 +52,18 @@ const schema = {
   .breadcrumbs a {
     color: var(--text-subtle);
     text-decoration: none;
+    /* "Home" was 39x22px — te klein om te raken. De regel zelf moet dun blijven,
+       dus groeit alleen het onzichtbare tikvlak naar 44px hoog. */
+    position: relative;
+  }
+  .breadcrumbs a::after {
+    content: '';
+    position: absolute;
+    left: -0.2rem;
+    right: -0.2rem;
+    top: 50%;
+    height: 44px;
+    transform: translateY(-50%);
   }
   .breadcrumbs a:hover {
     color: var(--accent);
@@ -68,8 +80,11 @@ const schema = {
      eronder nog eens over twee regels herhalen is ruis. Het kruimelpad blijft
      compleet voor Google — dat leest het schema, niet deze weergave. */
   @media (max-width: 599px) {
+    /* De laatste <span> is de titel zelf (aria-current), niet het scheidingsteken —
+       daardoor matchte :last-of-type hier niets en bleef er een losse "/" hangen
+       ("Home / Blog /"). Het laatste scheidingsteken is de één-na-laatste span. */
     .breadcrumbs [aria-current='page'],
-    .breadcrumbs > span[aria-hidden='true']:last-of-type {
+    .breadcrumbs > span[aria-hidden='true']:nth-last-of-type(2) {
       display: none;
     }
   }

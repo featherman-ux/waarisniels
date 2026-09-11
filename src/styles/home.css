@@ -100,8 +100,12 @@
 }
 
 .hero-link {
-  display: inline-block;
-  margin-top: 1.25rem;
+  /* inline-flex + min-height i.p.v. inline-block: als losse call-to-action was
+     dit een tikdoel van 26px hoog. */
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  margin-top: 0.75rem;
   color: #fff;
   font-weight: 500;
   text-decoration: underline;
@@ -192,6 +196,10 @@
 }
 
 .destination-fact a {
+  /* Was 20px hoog — de kleinste van de site. */
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
   color: var(--accent);
   font-weight: 500;
   text-decoration: underline;

@@ -523,11 +523,16 @@ Astro.response.headers.set(
       return mk;
     });
 
-    if (postMarkers.length) {
-      group.addLayer(L.featureGroup(postMarkers));
-    }
-    if (group.getBounds().isValid()) {
-      map.fitBounds(group.getBounds().pad(0.1));
+    // De openingsuitsnede volgt de route, niet alle markers samen. Eén post buiten
+    // Zuid-Amerika (de Oslo-reünie) rekte de bounds anders over 86 breedtegraden:
+    // op een telefoon werd dat een scherm vol oceaan met de hele route als
+    // onleesbare kluit in de hoek. De postmarkers blijven gewoon op de kaart staan,
+    // je vindt ze door uit te zoomen.
+    const routeBounds = group.getBounds();
+    if (routeBounds.isValid()) {
+      map.fitBounds(routeBounds.pad(0.1));
+    } else if (postMarkers.length) {
+      map.fitBounds(L.featureGroup(postMarkers).getBounds().pad(0.1));
     }
 
     // Zie MiniMap: staat de container bij het aanmaken nog op 0px, dan blijft de

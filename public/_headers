@@ -1,0 +1,25 @@
+# Cachekoppen voor de statische bestanden die Cloudflare Pages zelf uitserveert.
+#
+# Zonder dit bestand kreeg alles de standaard van 4 uur (max-age=14400), waardoor
+# een terugkerende bezoeker het hele fotoarchief opnieuw ophaalt. Op mobiele data
+# is dat het verschil tussen een pagina die meteen staat en een die opnieuw laadt.
+#
+# LET OP: dit werkt alleen als Browser Cache TTL in het Cloudflare-dashboard op
+# "Respect Existing Headers" staat (Caching → Configuration). Staat daar een vaste
+# waarde, dan overschrijft die zone-instelling deze headers en verandert er niets.
+
+# Buildbestanden hebben een hash in hun naam: wijzigt de inhoud, dan wijzigt de
+# URL. Die mogen dus echt een jaar blijven staan.
+/_astro/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# Foto's uit public/ houden hun naam wél. Een maand, met een dag revalidatie
+# eroverheen: vervang je ooit een bestand, dan is dat binnen een dag overal weg.
+/images/*
+  Cache-Control: public, max-age=2592000, stale-while-revalidate=86400
+
+/favicon.svg
+  Cache-Control: public, max-age=604800
+
+/apple-touch-icon.png
+  Cache-Control: public, max-age=604800

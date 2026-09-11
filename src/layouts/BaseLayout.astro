@@ -58,7 +58,10 @@ const navClasses = (match: string) => [
   // min-h-[44px] + flex: de links waren 28px hoog, ruim onder de 44px die zowel
   // Apple als Google als ondergrens voor een tikdoel aanhouden. Op een telefoon
   // miste je ze half.
-  'nav-link inline-flex items-center min-h-[44px] text-sm sm:text-base px-3 rounded transition-colors',
+  // px-2 op mobiel i.p.v. px-3: samen met het kleinere woordmerk scheelt dat de
+  // ~28px die de balk op elke telefoon <430px liet overlopen. De tikhoogte
+  // (min-h-44) blijft ongemoeid.
+  'nav-link inline-flex items-center min-h-[44px] text-sm sm:text-base px-2 sm:px-3 rounded transition-colors',
   isActive(match) ? 'text-accent' : 'text-text-subtle hover:text-accent'
 ];
 
@@ -138,15 +141,15 @@ const currentYear = new Date().getFullYear();
       ]}
     >
       <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
-        <a href="/" class="brand inline-flex items-center gap-2 min-h-[44px] text-2xl font-display font-bold text-ink">
+        <a href="/" class="brand inline-flex items-center gap-2 min-h-[44px] text-lg sm:text-2xl font-display font-bold text-ink">
           <svg width="20" height="20" viewBox="0 0 100 100" aria-hidden="true" class="shrink-0">
             <path d="M50 10 28 50 50 90Z" fill="currentColor" />
             <path d="M50 10 72 50 50 90Z" fill="var(--accent)" />
           </svg>
-          WaarIsNiels?
+          <span class="brand-wordmark">WaarIsNiels?</span>
         </a>
 
-        <div class="flex items-center gap-3 sm:gap-5">
+        <div class="flex items-center gap-0.5 sm:gap-5">
           {navLinks.map(({ href, match, label }) => (
             <a
               href={href}
@@ -211,6 +214,16 @@ const currentYear = new Date().getFullYear();
       }
       .header-transparent.header-solid .nav-link[aria-current='page'] {
         color: var(--accent);
+      }
+
+      /* Laatste redmiddel op zeer smalle toestellen (iPhone SE 1e gen e.d.): daar
+         passen woordmerk én drie navlinks simpelweg niet naast elkaar, ook niet op
+         18px. Het beeldmerk blijft staan, dus de link naar huis blijft herkenbaar.
+         Vanaf 360px staat de naam er gewoon. */
+      @media (max-width: 359px) {
+        .brand-wordmark {
+          display: none;
+        }
       }
 
       /* Animerende underline i.p.v. platte kleurverandering: groeit vanaf links bij
@@ -409,10 +422,13 @@ const currentYear = new Date().getFullYear();
         margin-bottom: 0.75rem;
       }
       .footer-col a {
-        display: block;
+        /* Waren 34px hoog. Het zijn rijen over de volle kolombreedte, dus hier kan
+           het tikvlak gewoon echt 44px worden zonder dat het log oogt. */
+        display: flex;
+        align-items: center;
+        min-height: 44px;
         color: var(--ink);
         text-decoration: none;
-        padding: 0.3rem 0;
         font-size: 0.95rem;
       }
       .footer-col a:hover {

@@ -40,26 +40,38 @@ Astro.response.headers.set(
       Ik doe dit vooral voor mezelf omdat ik het leuk vind — en soms stuur ik het door naar anderen.
     </p>
 
-    {countries.length > 0 && (
-      <nav class="facet" aria-label="Posts per land">
-        <h2 class="facet-label">Per land</h2>
-        <div class="chip-row">
-          {countries.map((c) => (
-            <Chip text={`${c.name} (${c.count})`} href={`/blog/land/${c.slug}/`} />
-          ))}
-        </div>
-      </nav>
-    )}
+    {/*
+      Staat bewust open in de HTML: zo ziet desktop precies wat het altijd zag, en
+      blijft de hele taxonomie zichtbaar zonder JavaScript. Het scriptje onderaan
+      klapt 'm alleen op een telefoon dicht — daar duwden deze twintig chips de
+      eerste post ruim een schermlengte naar beneden.
+    */}
+    {(countries.length > 0 || tags.length > 0) && (
+      <details class="facets" open>
+        <summary class="facets-summary">Filter op land of onderwerp</summary>
 
-    {tags.length > 0 && (
-      <nav class="facet" aria-label="Posts per onderwerp">
-        <h2 class="facet-label">Per onderwerp</h2>
-        <div class="chip-row">
-          {tags.map((t) => (
-            <Chip text={`${t.label} (${t.count})`} href={`/blog/tag/${t.slug}/`} />
-          ))}
-        </div>
-      </nav>
+        {countries.length > 0 && (
+          <nav class="facet" aria-label="Posts per land">
+            <h2 class="facet-label">Per land</h2>
+            <div class="chip-row">
+              {countries.map((c) => (
+                <Chip text={`${c.name} (${c.count})`} href={`/blog/land/${c.slug}/`} />
+              ))}
+            </div>
+          </nav>
+        )}
+
+        {tags.length > 0 && (
+          <nav class="facet" aria-label="Posts per onderwerp">
+            <h2 class="facet-label">Per onderwerp</h2>
+            <div class="chip-row">
+              {tags.map((t) => (
+                <Chip text={`${t.label} (${t.count})`} href={`/blog/tag/${t.slug}/`} />
+              ))}
+            </div>
+          </nav>
+        )}
+      </details>
     )}
 
     <div class="searchbar">
@@ -92,6 +104,58 @@ Astro.response.headers.set(
 </BaseLayout>
 
 <style>
+  /* Op desktop mag je niets van de <details> merken: geen driehoekje, geen
+     samenvattingsregel, gewoon de twee chiprijen zoals altijd. */
+  .facets-summary {
+    display: none;
+  }
+  @media (max-width: 639px) {
+    .facets {
+      border: 1px solid var(--line);
+      border-radius: var(--radius-sm);
+      margin-bottom: 1.5rem;
+    }
+    .facets-summary {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      min-height: 44px;
+      padding: 0 1rem;
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: var(--ink);
+      cursor: pointer;
+      list-style: none;
+    }
+    .facets-summary::-webkit-details-marker {
+      display: none;
+    }
+    /* Eigen chevron die meedraait, zodat open/dicht ook zonder het UA-driehoekje
+       afleesbaar blijft. */
+    .facets-summary::after {
+      content: '';
+      width: 0.5rem;
+      height: 0.5rem;
+      margin-left: auto;
+      border-right: 2px solid var(--text-subtle);
+      border-bottom: 2px solid var(--text-subtle);
+      transform: rotate(45deg) translate(-2px, -2px);
+      transition: transform var(--dur-fast) var(--ease);
+    }
+    .facets[open] .facets-summary::after {
+      transform: rotate(-135deg);
+    }
+    .facets[open] .facets-summary {
+      border-bottom: 1px solid var(--line);
+    }
+    .facets .facet {
+      padding-inline: 1rem;
+    }
+    .facets .facet:first-of-type {
+      padding-top: 1rem;
+    }
+  }
+
   .facet {
     margin-bottom: 1.5rem;
   }
@@ -187,5 +251,19 @@ Astro.response.headers.set(
     apply();
   }
 
-  document.addEventListener('astro:page-load', initPostSearch);
+  // De facetten staan open in de HTML (zie de opmerking daar), zodat desktop en
+  // bezoekers zonder JavaScript de volledige taxonomie zien. Op een telefoon
+  // klappen we ze bij binnenkomst dicht; daarna bepaalt de bezoeker zelf. Elke
+  // navigatie levert een verse <details>, dus dit hoeft niets te onthouden.
+  function collapseFacetsOnPhone() {
+    const facets = document.querySelector<HTMLDetailsElement>('.facets');
+    if (facets && window.matchMedia('(max-width: 639px)').matches) {
+      facets.open = false;
+    }
+  }
+
+  document.addEventListener('astro:page-load', () => {
+    initPostSearch();
+    collapseFacetsOnPhone();
+  });
 </script>

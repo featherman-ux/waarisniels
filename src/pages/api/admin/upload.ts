@@ -39,7 +39,13 @@ export async function POST(context: APIContext) {
 
   const key = newUploadKey(file.name);
   await media.put(key, await file.arrayBuffer(), {
-    httpMetadata: { contentType: file.type || undefined },
+    httpMetadata: {
+      contentType: file.type || undefined,
+      // Elke upload krijgt een eigen UUID in zijn key (zie newUploadKey), dus een
+      // bestaande URL wijst altijd naar exact dezelfde bytes. Die mag dan ook een
+      // jaar in de browsercache blijven i.p.v. de standaard vier uur.
+      cacheControl: 'public, max-age=31536000, immutable',
+    },
   });
 
   return jsonResponse({ key, url: mediaUrl(key), type });

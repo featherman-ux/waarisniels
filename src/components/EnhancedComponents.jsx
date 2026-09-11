@@ -17,6 +17,18 @@ const safeStorageSet = (storage, key, value) => {
   }
 };
 
+/**
+ * Aantallen met een Nederlandse duizendtalscheiding (1234 -> "1.234").
+ *
+ * Stond hier niet, terwijl ViewCounter 'm op vier plekken aanriep — waaronder in
+ * de render zelf. Zodra het aantal views binnenkwam gooide de component dus een
+ * ReferenceError tijdens het renderen en verdween de teller van elke post.
+ */
+const formatNumber = (value) => {
+  if (typeof value !== 'number' || !Number.isFinite(value)) return '—';
+  return value.toLocaleString('nl-NL');
+};
+
 export function ViewCounter({ path, apiUrl }) {
   const [views, setViews] = useState(null);
   const [uniqueVisitors, setUniqueVisitors] = useState(null);

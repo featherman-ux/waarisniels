@@ -45,6 +45,23 @@ export function mediaSrcSet(key?: string | null, widths: number[] = [480, 960, 1
 }
 
 /**
+ * Zelfde truc als mediaUrl(), maar voor bestanden uit public/ die níét op R2 staan
+ * (over.JPG, homepage.jpeg). Die werden rauw uitgeserveerd — over.JPG was 964KB
+ * voor een plaatje van 300px breed. Image Transformations draaien ook op de
+ * hoofdzone, dus dit pad hoeft alleen langs /cdn-cgi/image/.
+ */
+export function assetUrl(path: string, opts?: { width?: number }): string {
+  const clean = `/${path.replace(/^\/+/, '')}`;
+  if (!opts?.width) return clean;
+  return `/cdn-cgi/image/width=${opts.width},format=auto,quality=80${clean}`;
+}
+
+/** srcset-string voor een public/-bestand op de gegeven breedtes. */
+export function assetSrcSet(path: string, widths: number[]): string {
+  return widths.map((w) => `${assetUrl(path, { width: w })} ${w}w`).join(', ');
+}
+
+/**
  * Veiligheidsnet voor gemigreerde bodies: als er ergens nog een oud
  * /images/...-pad in de HTML staat, wordt die alsnog naar R2 gewezen.
  */

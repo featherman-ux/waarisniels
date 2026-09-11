@@ -36,4 +36,23 @@ const { text, href, class: className = '' } = Astro.props;
     border-color: var(--accent);
     color: var(--accent);
   }
+
+  /* Een chip is ~32px hoog; als link is dat te klein om betrouwbaar te raken (44px
+     is de ondergrens van zowel Apple als Google). In een wolk van twintig chips
+     zou 44px hoge pillen het beeld flink opblazen, dus groeit alleen het
+     tikvlak: een onzichtbaar vlak van 44px, verticaal gecentreerd. De verticale
+     tussenruimte in .chip-row is 8px, dus de vlakken van twee rijen raken elkaar
+     net niet. Niet-klikbare chips (losse <span>) blijven zoals ze waren. */
+  a.chip {
+    position: relative;
+  }
+  a.chip::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    height: 44px;
+    transform: translateY(-50%);
+  }
 </style>

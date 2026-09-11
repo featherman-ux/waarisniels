@@ -1,5 +1,6 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import { assetUrl, assetSrcSet } from '../lib/media';
 
 const pageTitle = "Over Niels";
 const pageDescription = "Lees meer over mij en het verhaal achter Waar is Niels?";
@@ -109,7 +110,17 @@ Astro.response.headers.set(
         <li>Een technisch visitekaartje creëren voor toekomstige sollicitaties in data & IT.</li>
         <li>Creatief bezig zijn tijdens regenachtige dagen.</li>
       </ul>
-      <img src="/images/over.JPG" alt="Niels onderweg" class="hero-img" loading="lazy" />
+      <img
+        src={assetUrl('images/over.JPG', { width: 600 })}
+        srcset={assetSrcSet('images/over.JPG', [300, 600, 900])}
+        sizes="min(60vw, 300px)"
+        alt="Niels onderweg"
+        class="hero-img"
+        width="300"
+        height="400"
+        loading="lazy"
+        decoding="async"
+      />
       <div class="btn-row">
         <a href="/blog/">Laatste blogposts</a>
         <a href="/map/">Live kaart</a>
