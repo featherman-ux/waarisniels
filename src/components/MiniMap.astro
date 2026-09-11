@@ -1,137 +1,127 @@
+---
+// Mini-kaart op de homepage: een voorvertoning van de route, volledig als inline
+// SVG. Geen Leaflet, geen externe CDN, geen client-side JavaScript.
+//
+// Waarom niet meer met Leaflet: dit blok was altijd al een plaatje achter één
+// grote link naar /map/ — je kon er niet in slepen of zoomen. Toch laadde het
+// leaflet.js en leaflet.css van jsdelivr, wachtte het tot window.L bestond, en
+// initialiseerde het een volledige kaart met tegels van Esri. Dat is veel
+// beweegbare delen voor iets statisch, en precies daar ging het op de telefoon
+// mis: op Niels' toestel bleef de kaart onzichtbaar, terwijl er in Chrome niets
+// aan de hand leek.
+//
+// De route zelf komt voorgeprojecteerd uit src/data/route-preview.json (13KB,
+// gegenereerd door scripts/build-route-preview.mjs uit public/data/route.geojson).
+// Wijzigt de route, draai dan dat script opnieuw.
+import preview from '../data/route-preview.json';
+
+// Streeppatroon per vervoerswijze, gelijk aan /map: één accentkleur voor alles,
+// het patroon doet het onderscheid.
+const DASH: Record<string, string | undefined> = {
+  bus: undefined,
+  car: '7 4',
+  motor: '2 7',
+  flight: '6 6',
+  boat: '1 6',
+};
+---
+
+<div class="mini-map-wrap">
+  <a class="mini-map-link" href="/map/">
+    <span class="sr-only">Bekijk de interactieve kaart</span>
+
+    <svg
+      class="mini-map"
+      viewBox={`0 0 ${preview.width} ${preview.height}`}
+      preserveAspectRatio="xMidYMid meet"
+      role="img"
+      aria-label={`Route langs ${preview.dots.length} stops in Zuid-Amerika`}
+    >
+      {Object.entries(preview.paths).map(([mode, d]) => (
+        <path
+          d={d}
+          fill="none"
+          stroke="var(--accent)"
+          stroke-width="2.5"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-dasharray={DASH[mode]}
+          opacity="0.9"
+        />
+      ))}
+
+      {preview.dots.map((p) => (
+        <circle cx={p.x} cy={p.y} r="3.6" fill="var(--accent)" stroke="var(--card)" stroke-width="1.6" />
+      ))}
+    </svg>
+  </a>
+
+  <span class="mini-map-cta" aria-hidden="true">Open kaart →</span>
+</div>
+
 <style>
   .mini-map-wrap {
     position: relative;
   }
-  .mini-map {
-    height: 320px;
+
+  /* De link is het hele blok: zo is er maar één tikdoel en kan er niets
+     overheen vallen. */
+  .mini-map-link {
+    display: block;
+    position: relative;
+    background: var(--paper-alt);
+    border: 1px solid var(--line);
     border-radius: var(--radius-lg);
     overflow: hidden;
-    border: 1px solid var(--line);
+    text-decoration: none;
   }
-  .mini-map-link {
-    position: absolute;
-    inset: 0;
-    z-index: 20;
-    text-indent: -9999px;
+  .mini-map-link:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
   }
+
+  .mini-map {
+    display: block;
+    width: 100%;
+    height: 320px;
+    padding: 0.75rem;
+    box-sizing: border-box;
+  }
+
+  /* Puur decoratief: de hele kaart is al een link, dus dit is geen apart
+     tikdoel meer — vandaar een <span> en aria-hidden. */
   .mini-map-cta {
     position: absolute;
     right: 10px;
     bottom: 10px;
-    z-index: 25;
-    /* Was 36px hoog; met flex + min-height precies op de 44px-ondergrens. */
     display: inline-flex;
     align-items: center;
-    min-height: 44px;
+    min-height: 36px;
+    padding: 0 0.9rem;
     background: var(--card);
     border: 1px solid var(--line);
-    border-radius: 9999px;
-    padding: 0 1rem;
-    font-size: .9rem;
+    border-radius: var(--radius-full);
+    font-size: 0.9rem;
     font-weight: 500;
     color: var(--ink);
-    text-decoration: none;
+    pointer-events: none;
+  }
+
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  @media (max-width: 640px) {
+    .mini-map {
+      height: 260px;
+    }
   }
 </style>
-
-<div class="mini-map-wrap">
-  <a class="mini-map-link" href="/map/">Bekijk interactieve kaart</a>
-  <div id="mini-map" class="mini-map" role="img" aria-label="Mini kaart van mijn route"></div>
-  <a href="/map/" class="mini-map-cta" aria-label="Bekijk de interactieve kaart">Open kaart →</a>
-</div>
-
-<link
-  rel="stylesheet"
-  href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css"
-/>
-<script defer src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
-
-<script type="module" is:inline>
-  // Zelfde valkuil als op /map: leaflet.js staat op defer, en bij een
-  // view-transition-navigatie (of gewoon een trage mobiele verbinding) is
-  // window.L er nog niet wanneer astro:page-load vuurt. De oude code stopte dan
-  // en probeerde het nooit meer — de homepage toonde een leeg kaartvlak. Nu
-  // wachten we tot Leaflet er is.
-  function whenLeaflet(callback, tries) {
-    tries = tries || 0;
-    if (window.L) return callback();
-    if (tries > 100) return console.warn("[MiniMap] Leaflet is niet geladen");
-    setTimeout(function () { whenLeaflet(callback, tries + 1); }, 100);
-  }
-
-  document.addEventListener("astro:page-load", () => whenLeaflet(initMiniMap));
-
-  async function initMiniMap() {
-    const container = document.getElementById("mini-map");
-    if (!container || container.dataset.ready) return;
-    container.dataset.ready = "true";
-
-    const map = L.map("mini-map", {
-      scrollWheelZoom: false,
-      dragging: true,
-      zoomControl: false
-    });
-
-    // CARTO's gratis anonieme tegels zijn gestopt (tonen nu een "API key required"-
-    // watermerk) — Esri's Gray Canvas basemaps zijn het dichtstbijzijnde monochrome
-    // alternatief zonder account/key. Base + Reference (labels) als twee lagen,
-    // zoals Esri's eigen Leaflet-voorbeelden dat opzetten.
-    const isDark = document.documentElement.classList.contains('dark');
-    const esriTheme = isDark ? 'Dark_Gray' : 'Light_Gray';
-    const tileOpts = { maxZoom: 16, attribution: 'Tiles &copy; Esri' };
-    L.tileLayer(`https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_${esriTheme}_Base/MapServer/tile/{z}/{y}/{x}`, tileOpts).addTo(map);
-    L.tileLayer(`https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_${esriTheme}_Reference/MapServer/tile/{z}/{y}/{x}`, tileOpts).addTo(map);
-
-    map.setView([-2.17, -79.922], 6);
-
-    let bounds = null;
-    const rootStyles = getComputedStyle(document.documentElement);
-    const accent = rootStyles.getPropertyValue('--accent').trim();
-
-    try {
-      const res = await fetch('/data/route.geojson');
-      const geo = await res.json();
-      // Monochroom: één accentkleur voor de hele route, vervoerswijze via
-      // streeppatroon i.p.v. een aparte kleur per modus.
-      const layer = L.geoJSON(geo, {
-        style: f => {
-          const dashByMode = { bus: null, car: '8 4', motor: '2 8', flight: '6 6' };
-          return { color: accent, weight: 3, opacity: 0.85, dashArray: dashByMode[f?.properties?.mode] ?? null };
-        }
-      }).addTo(map);
-      bounds = layer.getBounds();
-    } catch (e) {
-      console.warn("[MiniMap] Kon route niet laden:", e);
-    }
-
-    try {
-      const res = await fetch('/data/places.json');
-      const places = await res.json();
-      const markers = places
-        .filter(p => typeof p.lat === "number" && typeof p.lon === "number")
-        .map(p => {
-          const m = L.circleMarker([p.lat, p.lon], { radius: 4, color: '#fff', weight: 1.5, fillColor: accent, fillOpacity: 1 }).addTo(map);
-          m.bindTooltip(p.name || "Stop", { direction: "top", offset: [0, -6] });
-          return m;
-        });
-      if (!bounds && markers.length) {
-        bounds = L.featureGroup(markers).getBounds();
-      }
-    } catch (e) {
-      console.warn("[MiniMap] Kon places niet laden:", e);
-    }
-
-    if (bounds && bounds.isValid()) {
-      map.fitBounds(bounds.pad(0.25));
-    }
-
-    // Leaflet meet de container bij het aanmaken. Staat die op dat moment nog op
-    // 0px (fonts/layout nog niet klaar op een telefoon), dan blijft de kaart een
-    // grijs vlak tot er iets anders een resize triggert. Deze observer vertelt
-    // Leaflet alsnog dat hij opnieuw moet meten.
-    if (typeof ResizeObserver !== "undefined") {
-      const ro = new ResizeObserver(() => map.invalidateSize());
-      ro.observe(container);
-    }
-  }
-</script>

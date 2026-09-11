@@ -71,7 +71,12 @@ Astro.response.headers.set(
     )}
   </section>
 
-  <section class="map-section rise">
+  {/*
+    Bewust zonder .rise: die klasse animeert vanaf opacity:0 via een
+    scroll-tijdlijn, en juist deze sectie was op de telefoon onzichtbaar. De
+    animatie is het risico hier niet waard.
+  */}
+  <section class="map-section">
     <h2>De route tot nu toe</h2>
     <MiniMap />
   </section>
