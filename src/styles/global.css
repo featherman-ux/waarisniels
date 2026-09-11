@@ -445,17 +445,28 @@ time, .tabular-nums {
 
 /* Scroll-driven reveal (TRANSFORMATIE_PLAN.md §5.1): opdoemen + minimaal omhoog,
    zodra een element in beeld komt. Geen IntersectionObserver-JS meer nodig — draait
-   op de compositor-thread, dus geen jank. In browsers zonder ondersteuning (Firefox,
-   Safari <17) blijft de content gewoon zichtbaar op zijn plek: geen fallback nodig
-   zolang de begintoestand van .rise zelf zichtbaar is en de animatie alleen *toevoegt*. */
-.rise {
-  animation: rise linear both;
-  animation-timeline: view();
-  animation-range: entry 0% entry 40%;
-}
-@keyframes rise {
-  from { opacity: 0; transform: translateY(24px); }
-  to { opacity: 1; transform: none; }
+   op de compositor-thread, dus geen jank.
+
+   De @supports-test is geen nettigheid maar noodzaak. De animatie begint op
+   opacity:0 en heeft fill-mode 'both'. Een browser die animation-timeline wél
+   parseert maar view() niet kan resolven (Safari op iOS voor versie 26) houdt die
+   begintoestand dan vast: het element staat er, maar is onzichtbaar. Zo verdween
+   de kaartsectie op de homepage compleet op de telefoon, terwijl alles in Chrome
+   goed leek. De oude opmerking hier ging ervan uit dat niet-ondersteunende
+   browsers de regel simpelweg negeren — dat geldt alleen bij volledig gebrek aan
+   ondersteuning, niet bij gedeeltelijke.
+
+   Zonder ondersteuning valt .rise nu terug op gewone, zichtbare inhoud. */
+@supports (animation-timeline: view()) {
+  .rise {
+    animation: rise linear both;
+    animation-timeline: view();
+    animation-range: entry 0% entry 40%;
+  }
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: none; }
+  }
 }
 
 /* Beeld dat landt i.p.v. verschijnt (TRANSFORMATIE_PLAN.md §5.2): zachte fade+ontwaas
